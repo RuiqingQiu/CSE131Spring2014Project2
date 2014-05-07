@@ -312,7 +312,7 @@ public class AssemblyCodeGenerator {
    	  else if(sto.getType().isFloat()){
    	    writeData();
    	    flush(writeAlignment(4));
-   	    String label = functionName + "_f_" + level;
+   	    String label = functionName + "_f_c_" + level;
    	    flush(label + ":\t" + ".single " + "0r" + sto.getFloatValue() + "\n");
    	    //Go back to text segment
    	    writeText();

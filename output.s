@@ -1,5 +1,5 @@
 /*
- * Generated Tue May 06 20:52:51 PDT 2014
+ * Generated Tue May 06 21:01:04 PDT 2014
  */
 
 	.section ".rodata"
@@ -124,11 +124,11 @@ main:
 
 	.section ".data"
 	.align 4
-main_f_2:	.single 0r0.11
+main_f_c_2:	.single 0r0.11
 	.section ".text"
 	.align 4
 ! Const local
-	set	main_f_2, %l1
+	set	main_f_c_2, %l1
 	set	-16, %l0
 	add	%fp, %l0, %l0
 	ld	[%l1], %l1
