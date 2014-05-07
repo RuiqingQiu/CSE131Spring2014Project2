@@ -375,6 +375,25 @@ public class AssemblyCodeGenerator {
       }
       flush(template);
     }
+    
+    public void writeConstIntTol0(int x){
+      String template = indentString() + "set\t" + x + ", %l0\n";
+      flush(template);
+    }
+    public void writeConstFloatTol0(float y, int globalCounter){
+      writeData();
+      flush(writeAlignment(4));
+      String label =  "const_f_" + globalCounter;
+      flush(label + ":\t" + ".single " + "0r" + y + "\n");
+      writeText();
+      flush(writeAlignment(4));
+      String template = indentString() + "set\t" + label + ", %l0\n";
+      template += indentString() + "ld\t[%l0], %f0\n";
+      flush(template);
+    }
+    /**
+     * This method is for cout << a << endl; where a is an int, it will load the value from %l0
+     */
     public void writeCoutInt(){
       String template = indentString() + "set\t_intFmt, %o0\n";
       template += indentString() + "mov\t%l0, %o1\n";
@@ -387,8 +406,22 @@ public class AssemblyCodeGenerator {
       template += indentString() + "nop\n";
       flush(template);
     }
-    public void writeCoutBool(){
+    public void writeCoutBool(int globalCounter){
+      String template = indentString() + "cmp\t%l0, 0\n";
+      template += indentString() + "be\tsetFalse"+globalCounter + "\n";
+      template += indentString() + "nop\n";
+      template += indentString() + "set\t_boolT, %o0\n";
+      template += indentString() + "call\tprintf\n";
+      template += indentString() + "nop\n";
+      template += indentString() + "ba\tdone" + globalCounter + "\n";
+      template += indentString() + "nop\n";
       
+      template += "setFalse"+globalCounter+":\n";
+      template += indentString() + "set\t_boolF, %o0\n";
+      template += indentString() + "call\tprintf\n";
+      template += indentString() + "nop\n";
+      template += "done" + globalCounter + ":\n";
+      flush(template);
     }
     
     public void flush(String str){
@@ -428,8 +461,7 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     public void writeRetRestore(){
-      String template = "";
-      template += indentString() + "ret\n";
+      String template = indentString() + "ret\n";
       template += indentString() + "restore\n";
       flush(template);
     }
@@ -441,8 +473,15 @@ public class AssemblyCodeGenerator {
       template += indentString() + "set\t" + funcName + (x-1) + ", %o1\n";
       template += indentString() + "call\tprintf\n";
       template += indentString() + "nop\n\n";
+      
+      template += indentString() + ".section \".rodata\"\n";
+      template += writeAlignment(4);
+      template += funcName + (x-1) + ":\t" + ".asciz " + "\"" + str + "\"\n\n";
       flush(template);
+      writeText();
+      flush(writeAlignment(4));
     }
+    
     public void writeEndl(){
       String template = "";
       template += indentString() + "set\t_endl, %o0\n";

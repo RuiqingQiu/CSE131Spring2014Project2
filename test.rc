@@ -38,6 +38,10 @@ function : void main(){
   cout << 1.1 << endl;
   cout << 2.2 << endl;
   float localfloat = 1.1;
+  bool localbool = true;
+  bool localbool2 = false;
+  cout << localbool << endl;
+  cout << localbool2 << endl;
 }
 function : void foo(){
   cout << "hello1" << endl;

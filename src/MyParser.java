@@ -908,9 +908,9 @@ class MyParser extends parser
 	  myAsWriter.writeRetRestore();
 	  myAsWriter.writeSaveSpace(m_symtab.getFunc(), m_symtab.getBytes());
 	  m_symtab.clearBytes();
-	  myAsWriter.writeStrings(m_symtab.getFunc().getName(), this.coutStrings);
+	  //myAsWriter.writeStrings(m_symtab.getFunc().getName(), this.coutStrings);
 	  //Clear the strings
-	  this.coutStrings.removeAllElements();
+	  //this.coutStrings.removeAllElements();
 	  m_symtab.setFunc (null);//Say we are back in outer scope
 	}
 
@@ -1102,10 +1102,17 @@ class MyParser extends parser
 		    myAsWriter.writeEndl();
 		  }
 		  else if(s.getType() != null && s.getType().isInt()){
-			 
+			myAsWriter.writeConstIntTol0(((ConstSTO)s).getIntValue());
+			myAsWriter.writeCoutInt();
 		  }
 		  else if(s.getType() != null && s.getType().isFloat()){
-			  
+			myAsWriter.writeConstFloatTol0(((ConstSTO)s).getFloatValue(), this.globalCounter);
+			globalCounter++;
+			myAsWriter.writeCoutFloat();
+		  }
+		  else if(s.getType() != null && s.getType().isBool()){
+			this.coutStrings.addElement(new ConstSTO(str));
+			myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	 
 		  }
 		  else{
 		    this.coutStrings.addElement(new ConstSTO(str));
@@ -1114,11 +1121,13 @@ class MyParser extends parser
 	  }
 	  //Generate code for variable
 	  else if (s.isVar()){
+		//These assumes do des put the correct value into %l0
 		if(s.getType().isInt()){
 		  myAsWriter.writeCoutInt();
 		}
 		else if(s.getType().isBool()){
-			
+		  myAsWriter.writeCoutBool(this.globalCounter);
+		  globalCounter++;
 		}
 		else if(s.getType().isFloat()){
 		  myAsWriter.writeCoutFloat();
@@ -1746,7 +1755,9 @@ class MyParser extends parser
 	private String			m_strLastLexeme;
 	private boolean			m_bSyntaxError = true;
 	private int			m_nSavedLineNum;
-        private AssemblyCodeGenerator myAsWriter;
+    private AssemblyCodeGenerator myAsWriter;
 	private SymbolTable		m_symtab;
 	private Vector<ConstSTO> coutStrings = new Vector<ConstSTO>();
+	
+	private int globalCounter = 0;
 }
