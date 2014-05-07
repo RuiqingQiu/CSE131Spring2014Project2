@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
- * Generated Tue May 06 19:53:56 PDT 2014
-=======
- * Generated Tue May 06 20:42:56 PDT 2014
->>>>>>> d3b6456d9b194deef7cfff9e766daaf2915573a3
+ * Generated Tue May 06 20:52:51 PDT 2014
  */
 
 	.section ".rodata"
@@ -159,26 +155,11 @@ main_f_2:	.single 0r0.11
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
-	set	_strFmt, %o0
-	set	main0, %o1
-	call	printf
-	nop
-
 	set	_endl, %o0
 	call	printf
 	nop
 
-	set	_strFmt, %o0
-	set	main1, %o1
-	call	printf
-	nop
-
 	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main2, %o1
 	call	printf
 	nop
 
@@ -190,26 +171,11 @@ main_f_2:	.single 0r0.11
 	call	printf
 	nop
 
-	set	_strFmt, %o0
-	set	main3, %o1
-	call	printf
-	nop
-
 	set	_endl, %o0
 	call	printf
 	nop
 
-	set	_strFmt, %o0
-	set	main4, %o1
-	call	printf
-	nop
-
 	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main5, %o1
 	call	printf
 	nop
 
@@ -233,12 +199,6 @@ main_f_2:	.single 0r1.1
 ! from DoFuncDecl2
 	SAVE.main = (-92 + 40) & -8
 	.section ".rodata"
-main0:	.asciz "hello"
-main1:	.asciz "hi"
-main2:	.asciz "1"
-main3:	.asciz "true"
-main4:	.asciz "1.1"
-main5:	.asciz "2.2"
 
 	.section ".text"
 	.align 4
@@ -246,11 +206,6 @@ main5:	.asciz "2.2"
 foo:
 	set	SAVE.foo, %g1
 	save	%sp, %g1, %sp
-	set	_strFmt, %o0
-	set	foo0, %o1
-	call	printf
-	nop
-
 	set	_endl, %o0
 	call	printf
 	nop
@@ -260,5 +215,4 @@ foo:
 ! from DoFuncDecl2
 	SAVE.foo = -92 & -8
 	.section ".rodata"
-foo0:	.asciz "hello1"
 

@@ -945,12 +945,13 @@ WritePairList ::=   WritePair:_1
 WritePair ::=    
          Expr:_1
 		 {:
-		   ((MyParser)parser).DoCoutStmt(_1);
+		   //((MyParser)parser).DoCoutStmt(_1);
 		   //TODO, cout << a << endl
 		 :}
     |  T_ENDL
        {:
-		  ((MyParser)parser).DoCoutStmt(new ConstSTO("\n"));
+          STO tmp = new ConstSTO("\n");
+		  ((MyParser)parser).DoCoutStmt(tmp);
 	    :}
     ;
 
