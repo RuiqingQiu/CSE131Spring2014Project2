@@ -1108,7 +1108,15 @@ class MyParser extends parser
 	  }
 	  //Generate code for variable
 	  else if (s.isVar()){
-		  
+		if(s.getType().isInt()){
+		  myAsWriter.writeCoutInt();
+		}
+		else if(s.getType().isBool()){
+			
+		}
+		else if(s.getType().isFloat()){
+		  myAsWriter.writeCoutFloat();
+		}
 	  }
 	}
 	
@@ -1678,6 +1686,8 @@ class MyParser extends parser
 		 	m_errors.print (Formatter.toString(ErrorMsg.undeclared_id, strID));	
 			sto = new ErrorSTO (strID);
 		}
+		if(sto.getType().isInt() || sto.getType().isFloat() || sto.getType().isBool())
+			myAsWriter.writeDoDesID(sto);
 		return (sto);
 	}
 	

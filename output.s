@@ -1,5 +1,5 @@
 /*
- * Generated Tue May 06 21:26:31 PDT 2014
+ * Generated Tue May 06 22:23:50 PDT 2014
  */
 
 	.section ".rodata"
@@ -9,232 +9,25 @@ _strFmt:	.asciz "%s"
 _boolT:		.asciz "true"
 _boolF:		.asciz "false"
 
-	.section ".bss"
-	.global	a
-	.align 4
-a:	.skip 4
-
-	.section ".bss"
-	.global	b
-	.align 4
-b:	.skip 4
-
-	.section ".data"
-	.global	c
-	.align 4
-c:	.word 10
-
-	.section ".bss"
-	.global	b1
-	.align 4
-b1:	.skip 4
-
-	.section ".bss"
-	.global	b2
-	.align 4
-b2:	.skip 4
-
-	.section ".bss"
-	.global	f1
-	.align 4
-f1:	.skip 4
-
-	.section ".bss"
-	.global	f2
-	.align 4
-f2:	.skip 4
-
-	.section ".bss"
-	.global	f3
-	.align 4
-f3:	.skip 4
-
-	.section ".bss"
-	.align 4
-si1:	.skip 4
-
-	.section ".bss"
-	.align 4
-sf1:	.skip 4
-
-	.section ".bss"
-	.align 4
-sb1:	.skip 4
-
-	.section ".data"
-	.align 4
-si2:	.word 1
-
-	.section ".data"
-	.align 4
-sf2:	.single 0r1.11
-
-	.section ".data"
-	.align 4
-sb2:	.word 1
-
-	.global	ci1
-	.align 4
-	.section ".data"
-ci1:	.word 10
-
-	.global	cf1
-	.align 4
-	.section ".data"
-cf1:	.single 0r10.01
-
-	.global	cb1
-	.align 4
-	.section ".data"
-cb1:	.word 1
-
-	.section ".data"
-	.global	i1
-	.align 4
-i1:	.word 1
-
-	.section ".data"
-	.global	b3
-	.align 4
-b3:	.word 1
-
-	.section ".data"
-	.global	f4
-	.align 4
-f4:	.single 0r1.0
-
 	.section ".text"
 	.align 4
 	.global main
 main:
 	set	SAVE.main, %g1
 	save	%sp, %g1, %sp
-! local variable:   a    without init, just add offset
-! init variable: c
-	set	100, %l1
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-! Const local
+! init variable: a
 	set	1, %l1
-	set	-12, %l0
+	set	-4, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
-! Const local
-	set	1, %l1
-	set	-16, %l0
+	set	-4, %l0
 	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-	.section ".data"
-	.align 4
-main_f_c_2:	.single 0r0.11
-	.section ".text"
-	.align 4
-! Const local
-	set	main_f_c_2, %l1
-	set	-20, %l0
-	add	%fp, %l0, %l0
-	ld	[%l1], %l1
-	st	%l1, [%l0]
-
-! local variable:   local1    without init, just add offset
-! init variable: local2
-	set	1, %l1
-	set	-28, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-! init variable: local3
-	set	2, %l1
-	set	-32, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-! init variable: local6
-	set	c, %l0
-	add	%g0, %l0, %l0
-	ld	[%l0], %l1
-	set	-36, %l0
-	add	%fp,%l0, %l0
-	st	%l1, [%l0]
-
-! init variable: local7
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l1
-	set	-40, %l0
-	add	%fp,%l0, %l0
-	st	%l1, [%l0]
-
-! init variable: local4
-	set	1, %l1
-	set	-44, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-! init variable: local5
-	set	0, %l1
-	set	-48, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-	set	_strFmt, %o0
-	set	main0, %o1
+	ld	[%l0], %l0
+	set	_intFmt, %o0
+	ld	[%l0], %o1
 	call	printf
 	nop
-
-	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main1, %o1
-	call	printf
-	nop
-
-	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main2, %o1
-	call	printf
-	nop
-
-	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main3, %o1
-	call	printf
-	nop
-
-	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main4, %o1
-	call	printf
-	nop
-
-	set	_endl, %o0
-	call	printf
-	nop
-
-	set	_strFmt, %o0
-	set	main5, %o1
-	call	printf
-	nop
-
 	set	_endl, %o0
 	call	printf
 	nop
@@ -244,36 +37,31 @@ main_f_c_2:	.single 0r0.11
 main_f_2:	.single 0r1.1
 	.section ".text"
 	.align 4
-! init variable: localfloat
+! init variable: b
 	set	main_f_2, %l1
-	set	-52, %l0
+	set	-8, %l0
 	add	%fp, %l0, %l0
 	ld	[%l1], %l1
 	st	%l1, [%l0]
 
-	ret
-	restore
-! from DoFuncDecl2
-	SAVE.main = (-92 + 52) & -8
-	.section ".rodata"
-main0:	.asciz "hello"
-main1:	.asciz "hi"
-main2:	.asciz "1"
-main3:	.asciz "true"
-main4:	.asciz "1.1"
-main5:	.asciz "2.2"
-
-	.section ".text"
-	.align 4
-	.global foo
-foo:
-	set	SAVE.foo, %g1
-	save	%sp, %g1, %sp
-	set	_strFmt, %o0
-	set	foo0, %o1
+	set	-8, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %f0
+	call	printFloat
+	nop
+	set	_endl, %o0
 	call	printf
 	nop
 
+! init variable: c
+	set	1, %l1
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	st	%l1, [%l0]
+
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
 	set	_endl, %o0
 	call	printf
 	nop
@@ -281,7 +69,6 @@ foo:
 	ret
 	restore
 ! from DoFuncDecl2
-	SAVE.foo = -92 & -8
+	SAVE.main = -(92 + 12) & -8
 	.section ".rodata"
-foo0:	.asciz "hello1"
 

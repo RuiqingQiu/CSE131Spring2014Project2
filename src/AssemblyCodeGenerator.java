@@ -348,7 +348,37 @@ public class AssemblyCodeGenerator {
    	  }
       flush(template);
     }
-
+    public void writeDoDesID(STO sto){
+      String template = "";
+      if(sto.isVar()){
+    	  if(sto.getType().isFloat()){
+    		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+  		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+  		    template += indentString() + "ld\t" + "[%l0], %f0" + "\n";
+    	  }else{
+    	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n";
+    	  }
+      }
+      flush(template);
+    }
+    public void writeCoutInt(){
+      String template = indentString() + "set\t_intFmt, %o0\n";
+      template += indentString() + "mov\t%l0, %o1\n";
+      template += indentString() + "call\tprintf\n";
+      template += indentString() + "nop\n";
+      flush(template);
+    }
+    public void writeCoutFloat(){
+      String template = indentString() + "call\tprintFloat\n";
+      template += indentString() + "nop\n";
+      flush(template);
+    }
+    public void writeCoutBool(){
+      
+    }
+    
     public void flush(String str){
       try{
         fileWriter.write(str);
