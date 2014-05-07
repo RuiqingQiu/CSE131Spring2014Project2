@@ -541,7 +541,7 @@ class MyParser extends parser
 			  //Local variables negative offsets
 			  sto.setOffset("-" + m_symtab.getBytes());
 			  sto.setBase("%fp");
-			  myAsWriter.writeLocal(sto);
+			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), m_symtab.getLevel(), sto);
 			}
 		}
 		//Global scope
@@ -613,7 +613,10 @@ class MyParser extends parser
 			m_symtab.insert (sto);
 
 			//Global const
-			if(m_symtab.getLevel() == 1){
+			if(m_symtab.getLevel() == 1)
+			{
+		      sto.setOffset(sto.getName());
+			  sto.setBase("%g0");	
 			  if(STOlst.elementAt(i).isStatic()){
 			    myAsWriter.writeStatic(sto);
 			  }
@@ -623,7 +626,11 @@ class MyParser extends parser
 			}
 			//Local const
 			else {
-			  //myAsWriter.writeConstLocal(sto);
+		      m_symtab.addBytes(sto.getType().getSize());
+		      //Local variables negative offsets
+		      sto.setOffset("-" + m_symtab.getBytes());
+		      sto.setBase("%fp");	 
+			  myAsWriter.writeConstLocal(m_symtab.getFunc().getName(), m_symtab.getLevel(), sto);
 			}
 		}
 	}
@@ -1088,12 +1095,19 @@ class MyParser extends parser
 	}
 
 	void
-	DoCoutStmt(String str){
-	  if(str.equals("\n"))
-	    myAsWriter.writeEndl();
-	  else{
-	    this.coutStrings.addElement(new ConstSTO(str));
-	    myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	    
+	DoCoutStmt(STO s){
+	  if(s.isConst()){
+		  String str = s.getName();
+		  if(str.equals("\n"))
+		    myAsWriter.writeEndl();
+		  else{
+		    this.coutStrings.addElement(new ConstSTO(str));
+		    myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	    
+		  }
+	  }
+	  //Generate code for variable
+	  else if (s.isVar()){
+		  
 	  }
 	}
 	

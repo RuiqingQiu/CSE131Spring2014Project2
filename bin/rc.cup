@@ -905,13 +905,6 @@ ReturnStmt ::=   T_RETURN T_SEMI
 ReadStmt ::=        T_CIN T_ISTREAM Designator T_SEMI
     ;
 
-
-WriteStmt ::=       T_COUT T_OSTREAM WritePairList:_1 T_SEMI
- 		    {:
-		      //((MyParser)parser).DoCoutStmt(_1);
-		    :}
-    ;
-
 //Phase 0
 NewStmt  ::= 	T_NEW Designator:_1 T_SEMI
                 {: 
@@ -928,34 +921,37 @@ DeleteStmt ::=  T_DELETE Designator:_1 T_SEMI
                 :}
 	;
 
+WriteStmt ::=       
+            T_COUT T_OSTREAM WritePairList:_1 T_SEMI
+ 		    {:
+		      //((MyParser)parser).DoCoutStmt(_1);
+		    :}
+    ;
 
 WritePairList ::=   WritePair:_1
 		    {:
-		      String tmp = "";
+		      /*String tmp = "";
 		      tmp += _1;
-		      RESULT = tmp;
+		      RESULT = tmp;*/
 		    :}
-    |               WritePairList:_1 T_OSTREAM WritePair:_2
-    		    {:
-		      _1 += _2;
-		      RESULT = _1;
+    |       WritePairList:_1 T_OSTREAM WritePair:_2
+    		{:
+		      /*_1 += _2;
+		      RESULT = _1;*/
 		    :}
     ;
 
 
-WritePair ::=    Expr:_1
+WritePair ::=    
+         Expr:_1
 		 {:
-		   if(_1.isConst()){
-		     ((MyParser)parser).DoCoutStmt(_1.getName());
-		     RESULT = _1.getName();
-		   }
+		   ((MyParser)parser).DoCoutStmt(_1);
 		   //TODO, cout << a << endl
 		 :}
-    |            T_ENDL
-    		 {:
-		   ((MyParser)parser).DoCoutStmt("\n");
-		   RESULT = "\n";
-		 :}
+    |  T_ENDL
+       {:
+		  ((MyParser)parser).DoCoutStmt(new ConstSTO("\n"));
+	    :}
     ;
 
 

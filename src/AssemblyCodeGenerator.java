@@ -149,26 +149,19 @@ public class AssemblyCodeGenerator {
       String template = "";
       template += indentString();
       template += ".section \".data\"\n";
-      try{
-	fileWriter.write(template);
-      }
-      catch(IOException e){
-        System.err.println(ERROR_IO_WRITE);
-	e.printStackTrace();
-      }
+      flush(template);
     }
 
+    public void writeText(){
+      String template = "";
+      template += indentString() + ".section \".text\"\n";
+      flush(template);
+    }
     public void writeBss(){
       String template = "";
       template += indentString();
       template += ".section \".bss\"\n";
-      try{
-	fileWriter.write(template);
-      }
-      catch(IOException e){
-        System.err.println(ERROR_IO_WRITE);
-	e.printStackTrace();
-      }
+      flush(template);
     }
 
     public String writeAlignment(int size){
@@ -181,35 +174,35 @@ public class AssemblyCodeGenerator {
       String template = "";
       //if variable is a VarSTO
       if(variable.isVar()){
-	VarSTO tmp = (VarSTO)variable;
+	    VarSTO tmp = (VarSTO)variable;
         if(tmp.getInit() != null){
-	  template += indentString() + ".section \".data\"\n";
-	  if(tmp.getType().isInt() || tmp.getType().isBool()){
+	      writeData();
+	      if(tmp.getType().isInt() || tmp.getType().isBool()){
             template += tmp.getName() + ":" + SEPARATOR + ".word ";
-	    template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
-      	  }
-	  else if(tmp.getType().isFloat()){
-	    template += tmp.getName() + ":" + SEPARATOR + ".single ";
-	    template += "0r" + ((ConstSTO)tmp.getInit()).getFloatValue() +"\n\n";
-	  }
+	        template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
+          }
+	      else if(tmp.getType().isFloat()){
+	        template += tmp.getName() + ":" + SEPARATOR + ".single ";
+	        template += "0r" + ((ConstSTO)tmp.getInit()).getFloatValue() +"\n\n";
+	      }
         }
         //No init
         else{
-	  template += indentString() + ".section \".bss\"\n";
+	      writeBss();
           template += variable.getName() + ":" + SEPARATOR + ".skip " + variable.getType().getSize() + "\n\n";
         }
       }
       else if(variable.isConst()){
-	ConstSTO tmp = (ConstSTO)variable;
-	template += indentString() + ".section \".data\"\n";
-	if(tmp.getType().isInt() || tmp.getType().isBool()){
+	    ConstSTO tmp = (ConstSTO)variable;
+	    template += indentString() + ".section \".data\"\n";
+	    if(tmp.getType().isInt() || tmp.getType().isBool()){
           template += tmp.getName() + ":" + SEPARATOR + ".word ";
-	  template += tmp.getIntValue() + "\n\n"; 
+	      template += tmp.getIntValue() + "\n\n"; 
       	}
-	else if(tmp.getType().isFloat()){
-	  template += tmp.getName() + ":" + SEPARATOR + ".single ";
-	  template += "0r" + tmp.getFloatValue() +"\n\n";
-	}
+	    else if(tmp.getType().isFloat()){
+	      template += tmp.getName() + ":" + SEPARATOR + ".single ";
+	      template += "0r" + tmp.getFloatValue() +"\n\n";
+	    }
       }
       return template;
     }
@@ -237,7 +230,7 @@ public class AssemblyCodeGenerator {
       String template = "";
       if(sto.isVar()){
         sto = (VarSTO)sto;
-	template += indentString();
+	    template += indentString();
         template += ".global\t";
         template += sto.getName() + "\n";
         template += writeAlignment(sto.getType().getSize());
@@ -246,11 +239,11 @@ public class AssemblyCodeGenerator {
       }
       else if(sto.isConst()){
         template += indentString();
-	template += ".global\t";
-	template += sto.getName() + "\n";
-	template += writeAlignment(sto.getType().getSize());
-	template += writeGlobalLabel(sto);
-	flush(template);
+	    template += ".global\t";
+	    template += sto.getName() + "\n";
+	    template += writeAlignment(sto.getType().getSize());
+	    template += writeGlobalLabel(sto);
+	    flush(template);
       }
     }
     public void writeStatic(STO sto){
@@ -260,23 +253,76 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
 
-    public void writeLocal(VarSTO sto){
+    public void writeLocal(String functionName, int level, VarSTO sto){
       String template = "";
       if(sto.getInit() == null){
-	template += "! local variable without init, just add offset\n";
+	    template += "! local variable without init, just add offset\n";
       }
       else{
-	if(sto.getInit().isConst()){
-	  if(sto.getType().isInt() || sto.getType().isBool()){
-	    template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
-	  }
-	  else if(sto.getType().isFloat()){
-	  }
-	}
-        template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
-        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-	template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	    if(sto.getInit().isConst()){
+	      if(sto.getType().isInt()){
+	        template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
+	        template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+	        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	      }
+	      else if(sto.getType().isBool()){
+	    	template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
+		    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+			template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	      }
+	      //If it's a float, put the value in the data segment.
+	      else if(sto.getType().isFloat()){
+	    	writeData();
+	        flush(writeAlignment(4));
+	        String label = functionName + "_f_" + level;
+	        flush(label + ":\t" + ".single " + "0r" + ((ConstSTO)sto.getInit()).getFloatValue() + "\n");
+	        //Go back to text segment
+	        writeText();
+	        flush(writeAlignment(4));
+	    	template += indentString() + "set\t" + label + ", " + "%l1\n";
+	    	template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+	    	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	    	template += indentString() + "ld\t" + "[%l1], %l1\n";
+	    	template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      }
+	    }
       }
+      flush(template);
+    }
+    
+    public void writeConstLocal(String functionName, int level, ConstSTO sto){
+      String template = "";
+      template += "! Const local\n";   
+   	  
+   	  if(sto.getType().isInt()){
+   	    template += indentString() + "set\t" + sto.getIntValue() + ", " + "%l1\n";
+   	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+   	    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+   		template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+   	  }
+   	  else if(sto.getType().isBool()){
+   	    template += indentString() + "set\t" + sto.getIntValue() + ", " + "%l1\n";
+   		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+   		template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+   	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+   	  }
+   	  //If it's a float, put the value in the data segment.
+   	  else if(sto.getType().isFloat()){
+   	    writeData();
+   	    flush(writeAlignment(4));
+   	    String label = functionName + "_f_" + level;
+   	    flush(label + ":\t" + ".single " + "0r" + sto.getFloatValue() + "\n");
+   	    //Go back to text segment
+   	    writeText();
+   	    flush(writeAlignment(4));
+   	    template += indentString() + "set\t" + label + ", " + "%l1\n";
+   	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+   	    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+   	    template += indentString() + "ld\t" + "[%l1], %l1\n";
+   	    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+   	  }
       flush(template);
     }
 
@@ -286,7 +332,7 @@ public class AssemblyCodeGenerator {
       }
       catch(IOException e){
         System.err.println(ERROR_IO_WRITE);
-	e.printStackTrace();
+	    e.printStackTrace();
       }
 
     }
@@ -339,6 +385,7 @@ public class AssemblyCodeGenerator {
       template += indentString() + "nop\n\n";
       flush(template);
     }
+    
     public void writeStrings(String funcName, Vector<ConstSTO> lst){
       String template = "";
       template += indentString() + ".section \".rodata\"\n";
@@ -373,6 +420,7 @@ public class AssemblyCodeGenerator {
     }
     
     // 12
+    /*
     public static void main(String args[]) {
         AssemblyCodeGenerator myAsWriter = new AssemblyCodeGenerator("output.s");
 
@@ -387,5 +435,6 @@ public class AssemblyCodeGenerator {
         myAsWriter.decreaseIndent();
         myAsWriter.dispose();
     }
+    */
 }
 
