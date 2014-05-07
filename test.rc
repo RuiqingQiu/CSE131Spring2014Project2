@@ -20,7 +20,7 @@ float f4 = 1.0;
 function : void main(){
   int a;
   int c = 100;
-  const int clocal = 1;
+  const int clocal = 200;
   const bool clocalb = true;
   const float clocalf = 0.11;
   int local1;

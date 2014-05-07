@@ -381,7 +381,7 @@ public class AssemblyCodeGenerator {
         template += " = -92 & -8\n";
       }
       else{
-	template += " = (-92 + " + bytes +") & -8\n";
+	template += " = -(92 + " + bytes +") & -8\n";
       }
       flush(template);
     }
