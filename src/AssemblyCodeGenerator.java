@@ -253,6 +253,18 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
 
+    public void writeConstFolding(STO sto){
+    	String template = "";
+    	if(sto.getType().isInt()){
+    		template += indentString() + "set\t" + ((ConstSTO)sto).getIntValue() + ", " + "%l0\n";
+    	}
+    	else if (sto.getType().isFloat()){
+    		writeData();
+	        flush(writeAlignment(4));
+    	}
+    		
+    	flush(template);
+    }
     public void writeLocal(String functionName, int level, VarSTO sto){
       String template = "";
       if(sto.getInit() == null){

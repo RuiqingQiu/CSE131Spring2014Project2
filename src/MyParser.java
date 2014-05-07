@@ -1101,6 +1101,12 @@ class MyParser extends parser
 		  if(str.equals("\n")){
 		    myAsWriter.writeEndl();
 		  }
+		  else if(s.getType().isInt()){
+			 
+		  }
+		  else if(s.getType().isFloat()){
+			  
+		  }
 		  else{
 		    this.coutStrings.addElement(new ConstSTO(str));
 		    myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	    
