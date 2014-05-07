@@ -1098,8 +1098,9 @@ class MyParser extends parser
 	DoCoutStmt(STO s){
 	  if(s.isConst()){
 		  String str = s.getName();
-		  if(str.equals("\n"))
+		  if(str.equals("\n")){
 		    myAsWriter.writeEndl();
+		  }
 		  else{
 		    this.coutStrings.addElement(new ConstSTO(str));
 		    myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	    
