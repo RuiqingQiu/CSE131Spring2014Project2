@@ -1,0 +1,391 @@
+import java.util.Vector;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
+
+/**
+ * An Assembly Code Generator example emphasizing well thought design and
+ * the use of java 1.5 constructs.
+ * 
+ * Disclaimer : This is not code meant for you to use directly but rather
+ * an example from which I hope you can learn useful constructs and
+ * conventions.
+ * 
+ * Topics of importance (Corrosponding to the inline comment numbers below)
+ * 
+ * 1) We will use this variable to denote the current level of indentation.
+ *    For assembly there is usually only one or two levels of nesting.
+ * 
+ * 2) A collection of static final error messages.  This isn't so important in
+ *    your project but is useful.  The static keyword means we only make 3 
+ *    strings, shared across potentially multiple AssemblyCodeGenerator(s).
+ *    It is Java convention to spell constant variables with upper casing.
+ *    
+ * 3) FileWriter is a basic IO class which can write basic types such as
+ *    Strings to a file.  For performance you may want to look into the
+ *    BufferedWriter class.
+ *    
+ * 4) This is a template for our file header.  It is very basic consisting only
+ *    of a time stamp.
+ *    
+ * 5) This is the string we will use as an indentation seperator.  We are 
+ *    encapsulating this seperator into one variable so we only need to change
+ *    the initialization if we want to change our spacing to say 4 spaces for
+ *    example.  Imagine if you simply used the literal "\t" in 500 places and
+ *    then you decide you want to change it to 4 spaces!  Aside from regular 
+ *    expressions you have a lot of work ahead of you.
+ *    
+ * 6) These are constant String templates that will be used for code
+ *    generation.  It is nice to isolate these in one place or even in another
+ *    file so that we can quickly make universal changes if needed.  You will
+ *    notice that we could generate an entirely different language by simply
+ *    changing the construct definitions.  I recommend defining all operations
+ *    as well as formats.  Operations are things like add, mul, set, etc.
+ *    Formats are like {OPERATION} {REG_1}, {REG_2}, {REG_3} etc.
+ *    
+ * 7) Here we are making a call to writeAssembly to write our header with the
+ *    current time.  writeAssembly explained later.
+ *    
+ * 8) These methods are used to increase or decrease our current indentation
+ *    level.  You might ask why make a method for a simple inc/dec?  We are
+ *    encapsulating the notion of adjusting indentation.  It just so happens
+ *    that this current implementation is just a variable increment or 
+ *    decrement, but who is to say that the operation won't be more advanced
+ *    in the future.  Maybe we want to log a message everytime we increment
+ *    or decrement indentation.  We wouldn't want to add the logging code
+ *    everywhere we were incrementing the variable (if we didn't have the
+ *    methods).
+ *    
+ * 9) This signature may look foreign to you.  What is says is that we have 
+ *    public method named writeAssembly which takes as parameters a String
+ *    followed by 1 or more strings.  This construct is called "VarArgs" and
+ *    is a Java 1.5 feature.  This allows you to write one method which can
+ *    be applied to any number of parameters.  This method simply takes in 
+ *    a template and all the strings that will be substituted into the 
+ *    template.  When you are actually in the method, the parameter 
+ *    String ... params will be an array of strings.
+ *    
+ * 10) This is where we use our indent_level.  We will indent indent_level levels
+ *     of indentation.  That is an awkward sentence isn't it!  StringBuilder is
+ *     an efficient class to build strings from concatentations.  If your 
+ *     concatenations span multiple lines of code, using a StringBuilder can
+ *     offer signifigant performance when compared to using the + operator.
+ *     This topic can get fairly detailed, send me an email or come talk to me
+ *     in the lab for more details.
+ * 
+ * 11) Here we are writing the message to file, notice we are using the 
+ *     String.format method which takes a printf like format string followed
+ *     by an array of Objects which are the parameters to the format string.
+ *     
+ * 12) Main is just a small demo that will create a tiny assembly file in the
+ *     current directory called "output.s".  This file doesn't compile and is
+ *     not meant to.
+ * 
+ * @author Evan Worley
+ */
+
+public class AssemblyCodeGenerator {
+    // 1
+    private int indent_level = 0;
+    
+    // 2
+    private static final String ERROR_IO_CLOSE = 
+        "Unable to close fileWriter";
+    private static final String ERROR_IO_CONSTRUCT = 
+        "Unable to construct FileWriter for file %s";
+    private static final String ERROR_IO_WRITE = 
+        "Unable to write to fileWriter";
+
+    // 3
+    private FileWriter fileWriter;
+    
+    // 4
+    private static final String FILE_HEADER = 
+        "/*\n" +
+        " * Generated %s\n" + 
+        " */\n\n";
+        
+    // 5
+    public static final String SEPARATOR = "\t";
+    
+    // 6
+    public static final String SET_OP = "set";
+    public static final String TWO_PARAM = "%s" + SEPARATOR + "%s, %s\n";
+
+    public AssemblyCodeGenerator(String fileToWrite) {
+        try {
+            fileWriter = new FileWriter(fileToWrite);
+            
+            // 7
+            writeAssembly(FILE_HEADER, (new Date()).toString());
+        } catch (IOException e) {
+            System.err.printf(ERROR_IO_CONSTRUCT, fileToWrite);
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    
+
+    // 8
+    public void decreaseIndent() {
+        indent_level--;
+    }
+    
+    public void dispose() {
+        try {
+            fileWriter.close();
+        } catch (IOException e) {
+            System.err.println(ERROR_IO_CLOSE);
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    
+    public void increaseIndent() {
+        indent_level++;
+    }
+    
+    public void writeData(){
+      String template = "";
+      template += indentString();
+      template += ".section \".data\"\n";
+      try{
+	fileWriter.write(template);
+      }
+      catch(IOException e){
+        System.err.println(ERROR_IO_WRITE);
+	e.printStackTrace();
+      }
+    }
+
+    public void writeBss(){
+      String template = "";
+      template += indentString();
+      template += ".section \".bss\"\n";
+      try{
+	fileWriter.write(template);
+      }
+      catch(IOException e){
+        System.err.println(ERROR_IO_WRITE);
+	e.printStackTrace();
+      }
+    }
+
+    public String writeAlignment(int size){
+      String template = "";
+      template += indentString();
+      template += ".align " + size + "\n";
+      return template;
+    }
+    public String writeGlobalLabel(STO variable){
+      String template = "";
+      //if variable is a VarSTO
+      if(variable.isVar()){
+	VarSTO tmp = (VarSTO)variable;
+        if(tmp.getInit() != null){
+	  template += indentString() + ".section \".data\"\n";
+	  if(tmp.getType().isInt() || tmp.getType().isBool()){
+            template += tmp.getName() + ":" + SEPARATOR + ".word ";
+	    template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
+      	  }
+	  else if(tmp.getType().isFloat()){
+	    template += tmp.getName() + ":" + SEPARATOR + ".single ";
+	    template += "0r" + ((ConstSTO)tmp.getInit()).getFloatValue() +"\n\n";
+	  }
+        }
+        //No init
+        else{
+	  template += indentString() + ".section \".bss\"\n";
+          template += variable.getName() + ":" + SEPARATOR + ".skip " + variable.getType().getSize() + "\n\n";
+        }
+      }
+      else if(variable.isConst()){
+	ConstSTO tmp = (ConstSTO)variable;
+	template += indentString() + ".section \".data\"\n";
+	if(tmp.getType().isInt() || tmp.getType().isBool()){
+          template += tmp.getName() + ":" + SEPARATOR + ".word ";
+	  template += tmp.getIntValue() + "\n\n"; 
+      	}
+	else if(tmp.getType().isFloat()){
+	  template += tmp.getName() + ":" + SEPARATOR + ".single ";
+	  template += "0r" + tmp.getFloatValue() +"\n\n";
+	}
+      }
+      return template;
+    }
+    
+    public void writeStringFormat(){
+      String template = "";
+      template += indentString();
+      template += ".section \".rodata\"\n";
+      template += "_endl:\t\t.asciz \"\\n\"\n";
+      template += "_intFmt:\t.asciz \"%d\"\n";
+      template += "_strFmt:\t.asciz \"%s\"\n";
+      template += "_boolT:\t\t.asciz \"true\"\n";
+      template += "_boolF:\t\t.asciz \"false\"\n\n";
+      flush(template);
+    }
+
+    public String indentString(){
+      String ret = "";
+      for(int i = 0; i < indent_level; i++){
+        ret += SEPARATOR;
+      }
+      return ret;
+    }
+    public void writeGlobal(STO sto){
+      String template = "";
+      if(sto.isVar()){
+        sto = (VarSTO)sto;
+	template += indentString();
+        template += ".global\t";
+        template += sto.getName() + "\n";
+        template += writeAlignment(sto.getType().getSize());
+        template += writeGlobalLabel(sto);
+        flush(template);
+      }
+      else if(sto.isConst()){
+        template += indentString();
+	template += ".global\t";
+	template += sto.getName() + "\n";
+	template += writeAlignment(sto.getType().getSize());
+	template += writeGlobalLabel(sto);
+	flush(template);
+      }
+    }
+    public void writeStatic(STO sto){
+      String template = "";
+      template += writeAlignment(sto.getType().getSize());
+      template += writeGlobalLabel(sto);
+      flush(template);
+    }
+
+    public void writeLocal(VarSTO sto){
+      String template = "";
+      if(sto.getInit() == null){
+	template += "! local variable without init, just add offset\n";
+      }
+      else{
+	if(sto.getInit().isConst()){
+	  if(sto.getType().isInt() || sto.getType().isBool()){
+	    template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
+	  }
+	  else if(sto.getType().isFloat()){
+	  }
+	}
+        template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+      }
+      flush(template);
+    }
+
+    public void flush(String str){
+      try{
+        fileWriter.write(str);
+      }
+      catch(IOException e){
+        System.err.println(ERROR_IO_WRITE);
+	e.printStackTrace();
+      }
+
+    }
+    public void writeFunc(FuncSTO sto){
+      String template = "";
+      //Function label
+      template += indentString() + ".section \".text\"\n";
+      template += indentString() + ".align 4\n";
+      template += indentString() + ".global " + sto.getName() + "\n";
+      template += sto.getName() + ":\n";
+      //Indent the string
+      template += indentString();
+      template += "set\t" + "SAVE." + sto.getName() + ", " + "%g1\n";
+      template += indentString();
+      template += "save\t" + "%sp, " + "%g1, " + "%sp\n";
+      flush(template);
+    }
+    public void writeSaveSpace(FuncSTO sto, int bytes){
+      String template = "";
+      template += "! from DoFuncDecl2\n";
+      template += indentString() + "SAVE." + sto.getName();
+      if(bytes == 0){
+        template += " = -92 & -8\n";
+      }
+      else{
+	template += " = (-92 + " + bytes +") & -8\n";
+      }
+      flush(template);
+    }
+    public void writeRetRestore(){
+      String template = "";
+      template += indentString() + "ret\n";
+      template += indentString() + "restore\n";
+      flush(template);
+    }
+    public void writeCout(String funcName, int x, String str){
+      String template = "";
+      template += indentString() + "set\t_strFmt, %o0\n";
+      //x represent the number of string it is in the list, which we will put in
+      //the .rodata later
+      template += indentString() + "set\t" + funcName + (x-1) + ", %o1\n";
+      template += indentString() + "call\tprintf\n";
+      template += indentString() + "nop\n\n";
+      flush(template);
+    }
+    public void writeEndl(){
+      String template = "";
+      template += indentString() + "set\t_endl, %o0\n";
+      template += indentString() + "call\tprintf\n";
+      template += indentString() + "nop\n\n";
+      flush(template);
+    }
+    public void writeStrings(String funcName, Vector<ConstSTO> lst){
+      String template = "";
+      template += indentString() + ".section \".rodata\"\n";
+      for(int i = 0; i < lst.size(); i++){
+        template += funcName + i + ":\t" + ".asciz ";
+	String tmp = "\"" + lst.elementAt(i).getName() + "\"";
+	template += tmp + "\n";
+      }
+      template += "\n";
+      flush(template);
+    }
+
+
+    // 9
+    public void writeAssembly(String template, String ... params) {
+        StringBuilder asStmt = new StringBuilder();
+        
+        // 10
+        for (int i=0; i < indent_level; i++) {
+            asStmt.append(SEPARATOR);
+        }
+        
+        // 11
+        asStmt.append(String.format(template, (Object[])params));
+        
+        try {
+            fileWriter.write(asStmt.toString());
+        } catch (IOException e) {
+            System.err.println(ERROR_IO_WRITE);
+            e.printStackTrace();
+        }
+    }
+    
+    // 12
+    public static void main(String args[]) {
+        AssemblyCodeGenerator myAsWriter = new AssemblyCodeGenerator("output.s");
+
+        myAsWriter.increaseIndent();
+        myAsWriter.writeAssembly(TWO_PARAM, SET_OP, String.valueOf(4095), "%l1");
+        myAsWriter.increaseIndent();
+        myAsWriter.writeAssembly(TWO_PARAM, SET_OP, String.valueOf(1024), "%l1");
+        myAsWriter.decreaseIndent();
+        
+        myAsWriter.writeAssembly(TWO_PARAM, SET_OP, String.valueOf(512), "%l2");
+        
+        myAsWriter.decreaseIndent();
+        myAsWriter.dispose();
+    }
+}
+
