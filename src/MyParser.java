@@ -1101,10 +1101,10 @@ class MyParser extends parser
 		  if(str.equals("\n")){
 		    myAsWriter.writeEndl();
 		  }
-		  else if(s.getType().isInt()){
+		  else if(s.getType() != null && s.getType().isInt()){
 			 
 		  }
-		  else if(s.getType().isFloat()){
+		  else if(s.getType() != null && s.getType().isFloat()){
 			  
 		  }
 		  else{
