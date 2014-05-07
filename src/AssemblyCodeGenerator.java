@@ -256,9 +256,10 @@ public class AssemblyCodeGenerator {
     public void writeLocal(String functionName, int level, VarSTO sto){
       String template = "";
       if(sto.getInit() == null){
-	    template += "! local variable without init, just add offset\n";
+	    template += "! local variable:   " + sto.getName() + "    without init, just add offset\n";
       }
       else{
+    	template += "! init variable: " + sto.getName() + "\n";
 	    if(sto.getInit().isConst()){
 	      if(sto.getType().isInt()){
 	        template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
@@ -286,6 +287,28 @@ public class AssemblyCodeGenerator {
 	    	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
 	    	template += indentString() + "ld\t" + "[%l1], %l1\n";
 	    	template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      }
+	    }//Check if init is const
+	    //Enter here if init is not const
+	    else if(sto.getInit().isVar()){
+	      if(sto.getInit().getIsGlobal() == true){
+	    	STO init = sto.getInit();
+	    	template += indentString() + "set\t" + init.getOffset() + ", " + "%l0\n";
+		    template += indentString() + "add\t" + init.getBase() + ", %l0, %l0\n";
+		    template += indentString() + "ld\t" + "[%l0], %l1" + "\n";
+	        template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+	        template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+	        template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      }
+	      //Not a global
+	      else{
+	    	STO init = sto.getInit();
+		    template += indentString() + "set\t" + init.getOffset() + ", " + "%l0\n";
+			template += indentString() + "add\t" + init.getBase() + ", %l0, %l0\n";
+			template += indentString() + "ld\t" + "[%l0], %l1" + "\n";
+		    template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+		    template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	      }
 	    }
       }

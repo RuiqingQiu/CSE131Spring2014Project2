@@ -943,11 +943,11 @@ WritePairList ::=   WritePair:_1
 
 
 WritePair ::=    
-         Expr:_1
-		 {:
-		   ((MyParser)parser).DoCoutStmt(_1);
-		   //TODO, cout << a << endl
-		 :}
+       Expr:_1
+	   {:
+		 ((MyParser)parser).DoCoutStmt(_1);
+		 //TODO, cout << a << endl
+	   :}
     |  T_ENDL
        {:
           STO tmp = new ConstSTO("\n");

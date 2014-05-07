@@ -1692,6 +1692,7 @@ class MyParser extends parser
 		 	m_errors.print (Formatter.toString(ErrorMsg.error0g_Scope, strID));	
 			sto = new ErrorSTO (strID);
 		}
+		sto.setIsGlobal(true);
 		return (sto);
 	}
 
