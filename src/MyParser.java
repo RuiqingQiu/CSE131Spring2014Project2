@@ -1242,7 +1242,10 @@ class MyParser extends parser
 		        break;
 		      case "MinusOp":
 		    	myAsWriter.writeMinusOp(m_symtab.getBytes(), a, b);
-		    	break;  
+		    	break;
+		      case "MulOp":
+		    	myAsWriter.writeMulOp(m_symtab.getBytes(), a, b);
+		    	break;
 		    }
 		    result.setOffset("-" + m_symtab.getBytes());
 		    result.setBase("%fp");

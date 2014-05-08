@@ -1230,8 +1230,10 @@ Designator ::= T_STAR Designator:_1
 			}
 			else{
 			  if(_1.isConst()){
-			    ((ConstSTO)_1).setValue(-(((ConstSTO)_1).getValue()));
-			    RESULT = _1;
+			    ConstSTO ret = new ConstSTO(_1.getName());
+			    ret.setType(_1.getType());
+			    ret.setValue(-(((ConstSTO)_1).getValue()));
+			    RESULT = ret;
 			  }
 			  /*else if(_1.isVar()){
 			    ((VarSTO)_1).setNegative(true);

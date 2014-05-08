@@ -542,33 +542,72 @@ public class AssemblyCodeGenerator {
       }
     
     public void writeAddOp(int offset, STO a, STO b){
-      if(a.isVar())
-        writeDoDesID(a);
-      else if (a.isConst())
-    	flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
-      else if(a.isExpr())
-    	writeDoDesID(a);
-      
-      String template = "! adding first operand:" + a.getName() + " to %l1\n";
-      template += indentString() + "mov\t%l0, %l1\n\n";
-      flush(template);
-      
-      if(b.isVar())
-        writeDoDesID(b);
-      else if (b.isConst())
-    	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
-      else if(b.isExpr())
-    	writeDoDesID(b);
-      template = "! adding second operand:" + b.getName() + " to %l2\n";
-      template += indentString() + "mov\t%l0, %l2\n\n";
-      flush(template);
-      //Do the addop part
-      template = indentString() + "add\t%l1, %l2, %l0\n";
-      template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
-      flush(template);
+    	if(a.getType().isInt() && b.getType().isInt()){
+	      if(a.isVar())
+	        writeDoDesID(a);
+	      else if (a.isConst())
+	    	flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0\n");
+	      else if(a.isExpr())
+	    	writeDoDesID(a);
+	      
+	      String template = "! adding first operand:" + a.getName() + " to %l1\n";
+	      template += indentString() + "mov\t%l0, %l1\n\n";
+	      flush(template);
+	      
+	      if(b.isVar())
+	        writeDoDesID(b);
+	      else if (b.isConst())
+	    	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+	      else if(b.isExpr())
+	    	writeDoDesID(b);
+	      template = "! adding second operand:" + b.getName() + " to %l2\n";
+	      template += indentString() + "mov\t%l0, %l2\n\n";
+	      flush(template);
+	      //Do the addop part
+	      template = indentString() + "add\t%l1, %l2, %l0\n";
+	      template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+	      flush(template);
+      }
+      //If one of the operand is float
+  	  else{
+  		
+      }
     }
     
     public void writeMinusOp(int offset, STO a, STO b){
+    	if(a.getType().isInt() && b.getType().isInt()){
+	        if(a.isVar())
+	          writeDoDesID(a);
+	        else if (a.isConst())
+	        	flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0\n");
+	        else if(a.isExpr())
+	        	writeDoDesID(a);
+	        
+	        String template = "! minusOP first operand:" + a.getName() + " to %l1\n";
+	        template += indentString() + "mov\t%l0, %l1\n\n";
+	        flush(template);
+	        
+	        if(b.isVar())
+	          writeDoDesID(b);
+	        else if (b.isConst())
+	      	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+	        else if(b.isExpr())
+	      	writeDoDesID(b);
+	        template = "! minusOP second operand:" + b.getName() + " to %l2\n";
+	        template += indentString() + "mov\t%l0, %l2\n\n";
+	        flush(template);
+	        //Do the addop part
+	        template = indentString() + "sub\t%l1, %l2, %l0\n";
+	        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+	        flush(template);
+    	}
+    	//If one of the operand is float
+    	else{
+    		
+    	}
+    }
+    //1.2 mul
+    public void writeMulOp(int offset, STO a, STO b){
         if(a.isVar())
           writeDoDesID(a);
         else if (a.isConst())
@@ -576,8 +615,8 @@ public class AssemblyCodeGenerator {
         else if(a.isExpr())
       	writeDoDesID(a);
         
-        String template = "! minusOP first operand:" + a.getName() + " to %l1\n";
-        template += indentString() + "mov\t%l0, %l1\n\n";
+        String template = "! mulOP first operand:" + a.getName() + " to %o0\n";
+        template += indentString() + "mov\t%l0, %o0\n\n";
         flush(template);
         
         if(b.isVar())
@@ -586,12 +625,13 @@ public class AssemblyCodeGenerator {
       	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
         else if(b.isExpr())
       	writeDoDesID(b);
-        template = "! minusOP second operand:" + b.getName() + " to %l2\n";
-        template += indentString() + "mov\t%l0, %l2\n\n";
+        template = "! mulOP second operand:" + b.getName() + " to %o1\n";
+        template += indentString() + "mov\t%l0, %o1\n\n";
         flush(template);
         //Do the addop part
-        template = indentString() + "sub\t%l1, %l2, %l0\n";
-        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        template += indentString() + "call\t.mul\n";
+        template += indentString() + "nop\n";
+        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
         flush(template);
     }
     
