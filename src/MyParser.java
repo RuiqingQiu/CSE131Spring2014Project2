@@ -1223,8 +1223,11 @@ class MyParser extends parser
 		    m_symtab.addBytes(4);
 		    switch(result.getName()){
 		      case "AddOp":
-		    	  myAsWriter.writeAddOp(m_symtab.getBytes(), a, b);
+		    	myAsWriter.writeAddOp(m_symtab.getBytes(), a, b);
 		        break;
+		      case "MinusOp":
+		    	myAsWriter.writeMinusOp(m_symtab.getBytes(), a, b);
+		    	break;  
 		    }
 		    result.setOffset("-" + m_symtab.getBytes());
 		    result.setBase("%fp");
