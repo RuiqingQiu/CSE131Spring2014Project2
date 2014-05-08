@@ -1144,6 +1144,21 @@ class MyParser extends parser
 		  myAsWriter.writeCoutFloat();
 		}
 	  }
+	  //If the cout is an expression
+	  else if(s.isExpr()){
+		myAsWriter.writeDoDesID(s);
+		//These assumes do des put the correct value into %l0
+		if(s.getType().isInt()){
+		  myAsWriter.writeCoutInt();
+		}
+		else if(s.getType().isBool()){
+		  myAsWriter.writeCoutBool(this.globalCounter);
+		  globalCounter++;
+		}
+		else if(s.getType().isFloat()){
+		  myAsWriter.writeCoutFloat();
+		}
+	  }
 	}
 	
 	void

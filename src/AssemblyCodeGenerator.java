@@ -470,6 +470,7 @@ public class AssemblyCodeGenerator {
       template += "save\t" + "%sp, " + "%g1, " + "%sp\n";
       flush(template);
     }
+    
     public void writeSaveSpace(FuncSTO sto, int bytes){
       String template = "";
       template += "! from DoFuncDecl2\n";
@@ -482,11 +483,13 @@ public class AssemblyCodeGenerator {
       }
       flush(template);
     }
+    
     public void writeRetRestore(){
       String template = indentString() + "ret\n";
       template += indentString() + "restore\n";
       flush(template);
     }
+    
     public void writeCout(String funcName, int x, String str){
       String template = "";
       template += indentString() + "set\t_strFmt, %o0\n";
