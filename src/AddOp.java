@@ -19,7 +19,8 @@ public class AddOp extends ArithmeticOp  {
 				return c;
 			}
 			//Calculate the value of two Ints
-			return new ExprSTO("AddOp", aType);
+			STO result = new ExprSTO("AddOp", aType);
+			return result;
 		} else {
 			if(a.isConst()&& b.isConst()){
 				float x =  ((ConstSTO)a).getFloatValue() + ((ConstSTO)b).getFloatValue();

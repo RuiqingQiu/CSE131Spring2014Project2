@@ -323,6 +323,17 @@ public class AssemblyCodeGenerator {
 		    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	      }
 	    }
+	    else if(sto.getInit().isExpr()){
+	      flush("! init is an expression\n");
+	      STO init = sto.getInit();
+	      template += indentString() + "set\t" + init.getOffset() + ", " + "%l0\n";
+	      template += indentString() + "add\t" + init.getBase() + ", %l0, %l0\n";
+		  template += indentString() + "ld\t" + "[%l0], %l1" + "\n";
+		  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+		  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+		  template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      
+	    }
       }
       flush(template);
     }
@@ -361,17 +372,28 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     public void writeDoDesID(STO sto){
-      String template = "";
+      String template = "! indodesID\n";
       if(sto.isVar()){
     	  if(sto.getType().isFloat()){
     		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
   		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-  		    template += indentString() + "ld\t" + "[%l0], %f0" + "\n";
+  		    template += indentString() + "ld\t" + "[%l0], %f0" + "\n\n";
     	  }else{
     	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
 		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n";
+		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
     	  }
+      }
+      else if(sto.isExpr()){
+    	  if(sto.getType().isFloat()){
+      		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+    		template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+    		template += indentString() + "ld\t" + "[%l0], %f0" + "\n\n";
+      	  }else{
+      	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+  		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+  		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
+      	  }
       }
       flush(template);
     }
@@ -501,7 +523,41 @@ public class AssemblyCodeGenerator {
       template += "\n";
       flush(template);
     }
-
+    
+    public void writeNegative(int offset, STO s){
+        flush("! convert to negative and store\n");
+        writeDoDesID(s);
+        String template = indentString() + "mov\t%l0, %o0\n";
+        template += indentString() + "set\t-1, %o1\n";
+        template += indentString() + "call\t.mul\n";
+        template += indentString() + "nop\n";
+        template += indentString() + "st\t%o0, [%fp-" + offset + "]\n";
+        template += indentString() + "ld\t[%fp-" + offset +"], %l0\n";
+        flush(template);
+      }
+    
+    public void writeAddOp(int offset, STO a, STO b){
+      if(a.isVar())
+        writeDoDesID(a);
+      else if (a.isConst())
+    	flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+      else if(a.isExpr())
+    	writeDoDesID(a);
+      String template = "! adding first operand:" + a.getName() + " to %l1\n";
+      template += indentString() + "mov\t%l0, %l1\n\n";
+      flush(template);
+      if(b.isVar())
+        writeDoDesID(b);
+      else if (b.isConst())
+    	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+      template = "! adding second operand:" + b.getName() + " to %l2\n";
+      template += indentString() + "mov\t%l0, %l2\n\n";
+      flush(template);
+      //Do the addop part
+      template = indentString() + "add\t%l1, %l2, %l0\n";
+      template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+      flush(template);
+    }
 
     // 9
     public void writeAssembly(String template, String ... params) {

@@ -1212,24 +1212,30 @@ Designator ::= T_STAR Designator:_1
               RESULT = _1;
             }
             else if(_2.equals("+")){
-              if(_1.isConst())
+              if(_1.isConst()){
+                ((ConstSTO)_1).setValue(+(((ConstSTO)_1).getValue()));
                 RESULT = _1;
+              }
               else{
                 ExprSTO ret = new ExprSTO(_1.getName(), _1.getType());
+                ret.setBase(_1.getBase());
+                ret.setOffset(_1.getOffset());
                 RESULT = ret;
               }  
 			}
 			else{
 			  if(_1.isConst()){
-			    ((ConstSTO)_1).setValue(-(((ConstSTO)_1).getFloatValue()));
+			    ((ConstSTO)_1).setValue(-(((ConstSTO)_1).getValue()));
 			    RESULT = _1;
-			  }else if(_1.isVar()){
+			  }
+			  /*else if(_1.isVar()){
 			    ((VarSTO)_1).setNegative(true);
 			    ExprSTO ret = new ExprSTO("-" + _1.getName(), _1.getType());
 			    RESULT = ret;
-			  }else{
+			  }*/
+			  else{
 			    ExprSTO ret = new ExprSTO("-" + _1.getName(), _1.getType());
-			    RESULT = ret;
+			    RESULT = ((MyParser) parser).doMinusUnary(_1);
 			  }
 			}
         :}

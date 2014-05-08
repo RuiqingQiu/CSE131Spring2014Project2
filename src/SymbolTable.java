@@ -141,14 +141,14 @@ class SymbolTable
 		return scope.getLocals();
 	}
     
-    	public void addBytes(int bytes){
-	  this.bytesOfTmp += bytes;
+    public void addBytes(int bytes){
+	 bytesOfTmp += bytes;
 	}
 	public int getBytes(){
-	  return this.bytesOfTmp;
+	  return bytesOfTmp;
 	}
 	public void clearBytes(){
-	  this.bytesOfTmp = 0;
+	  bytesOfTmp = 0;
 	}
 
 	//----------------------------------------------------------------
@@ -175,5 +175,5 @@ class SymbolTable
 	private boolean inWhile;
 
 
-	private int bytesOfTmp;
+	public static int bytesOfTmp;
 }

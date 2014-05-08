@@ -569,7 +569,15 @@ class MyParser extends parser
 		}
 	}
 
-
+    STO
+    doMinusUnary(STO s){
+      myAsWriter.writeNegative(m_symtab.getBytes() + 4, s);
+      ExprSTO expr = new ExprSTO(s.getName(), s.getType());
+      m_symtab.addBytes(4);
+      expr.setBase(s.getBase());
+      expr.setOffset("-" + m_symtab.getBytes()); 
+      return expr;
+    }
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -615,6 +623,7 @@ class MyParser extends parser
 			//Global const
 			if(m_symtab.getLevel() == 1)
 			{
+			  //Global variable, offset is its name label
 		      sto.setOffset(sto.getName());
 			  sto.setBase("%g0");	
 			  if(STOlst.elementAt(i).isStatic()){
@@ -1210,6 +1219,15 @@ class MyParser extends parser
 		    	m_nNumErrors++;
 				m_errors.print (result.getName());
 		    }
+		    //Generate code for getting both operand
+		    m_symtab.addBytes(4);
+		    switch(result.getName()){
+		      case "AddOp":
+		    	  myAsWriter.writeAddOp(m_symtab.getBytes(), a, b);
+		        break;
+		    }
+		    result.setOffset("-" + m_symtab.getBytes());
+		    result.setBase("%fp");
 		    return result;
 		}
 	}
