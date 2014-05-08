@@ -537,7 +537,7 @@ public class AssemblyCodeGenerator {
         template += indentString() + "call\t.mul\n";
         template += indentString() + "nop\n";
         template += indentString() + "st\t%o0, [%fp-" + offset + "]\n";
-        template += indentString() + "ld\t[%fp-" + offset +"], %l0\n";
+        template += indentString() + "ld\t[%fp-" + offset +"], %l0\n\n";
         flush(template);
       }
     
@@ -557,7 +557,7 @@ public class AssemblyCodeGenerator {
 	      if(b.isVar())
 	        writeDoDesID(b);
 	      else if (b.isConst())
-	    	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+	    	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0\n");
 	      else if(b.isExpr())
 	    	writeDoDesID(b);
 	      template = "! adding second operand:" + b.getName() + " to %l2\n";
@@ -590,9 +590,9 @@ public class AssemblyCodeGenerator {
 	        if(b.isVar())
 	          writeDoDesID(b);
 	        else if (b.isConst())
-	      	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+	      	  flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0\n");
 	        else if(b.isExpr())
-	      	writeDoDesID(b);
+	      	  writeDoDesID(b);
 	        template = "! minusOP second operand:" + b.getName() + " to %l2\n";
 	        template += indentString() + "mov\t%l0, %l2\n\n";
 	        flush(template);
@@ -608,31 +608,100 @@ public class AssemblyCodeGenerator {
     }
     //1.2 mul
     public void writeMulOp(int offset, STO a, STO b){
-        if(a.isVar())
-          writeDoDesID(a);
-        else if (a.isConst())
-      	flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
-        else if(a.isExpr())
-      	writeDoDesID(a);
-        
-        String template = "! mulOP first operand:" + a.getName() + " to %o0\n";
-        template += indentString() + "mov\t%l0, %o0\n\n";
-        flush(template);
-        
-        if(b.isVar())
-          writeDoDesID(b);
-        else if (b.isConst())
-      	flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
-        else if(b.isExpr())
-      	writeDoDesID(b);
-        template = "! mulOP second operand:" + b.getName() + " to %o1\n";
-        template += indentString() + "mov\t%l0, %o1\n\n";
-        flush(template);
-        //Do the addop part
-        template += indentString() + "call\t.mul\n";
-        template += indentString() + "nop\n";
-        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
-        flush(template);
+    	if(a.getType().isInt() && b.getType().isInt()){
+	        if(a.isVar())
+	          writeDoDesID(a);
+	        else if (a.isConst())
+	      	  flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0\n");
+	        else if(a.isExpr())
+	      	  writeDoDesID(a);
+	        
+	        String template = "! mulOP first operand:" + a.getName() + " to %o0\n";
+	        template += indentString() + "mov\t%l0, %o0\n\n";
+	        flush(template);
+	        
+	        if(b.isVar())
+	          writeDoDesID(b);
+	        else if (b.isConst())
+	      	  flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0\n");
+	        else if(b.isExpr())
+	      	  writeDoDesID(b);
+	        template = "! mulOP second operand:" + b.getName() + " to %o1\n";
+	        template += indentString() + "mov\t%l0, %o1\n\n";
+	        flush(template);
+	        //Do the addop part
+	        template += indentString() + "call\t.mul\n";
+	        template += indentString() + "nop\n";
+	        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
+	        flush(template);
+    	}
+    	else
+    	{
+    		
+    	}
+    }
+    
+    //1.2 div
+    public void writeDivOp(int offset, STO a, STO b){
+    	if(a.getType().isInt() && b.getType().isInt()){
+	        if(a.isVar())
+	          writeDoDesID(a);
+	        else if (a.isConst())
+	      	  flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0\n");
+	        else if(a.isExpr())
+	      	  writeDoDesID(a);
+	        
+	        String template = "! divOP first operand:" + a.getName() + " to %o0\n";
+	        template += indentString() + "mov\t%l0, %o0\n\n";
+	        flush(template);
+	        
+	        if(b.isVar())
+	          writeDoDesID(b);
+	        else if (b.isConst())
+	      	  flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0\n");
+	        else if(b.isExpr())
+	      	  writeDoDesID(b);
+	        template = "! divOP second operand:" + b.getName() + " to %o1\n";
+	        template += indentString() + "mov\t%l0, %o1\n\n";
+	        flush(template);
+	        //Do the addop part
+	        template += indentString() + "call\t.div\n";
+	        template += indentString() + "nop\n";
+	        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
+	        flush(template);
+    	}
+    	else
+    	{
+    		
+    	}
+    }
+    public void writeModOp(int offset, STO a, STO b){
+    	
+	  if(a.isVar())
+	    writeDoDesID(a);
+	  else if (a.isConst())
+	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+	  else if(a.isExpr())
+	    writeDoDesID(a);
+	        
+	  String template = "! modOP first operand:" + a.getName() + " to %o0\n";
+	  template += indentString() + "mov\t%l0, %o0\n\n";
+	  flush(template);
+	        
+	  if(b.isVar())
+	    writeDoDesID(b);
+	  else if (b.isConst())
+	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+	  else if(b.isExpr())
+	    writeDoDesID(b);
+	  template = "! modOP second operand:" + b.getName() + " to %o1\n";
+	  template += indentString() + "mov\t%l0, %o1\n\n";
+	  flush(template);
+	  //Do the addop part
+	  template += indentString() + "call\t.rem\n";
+	  template += indentString() + "nop\n";
+	  template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
+	  flush(template);
     }
     
     public void writeDecltype(int globalCounter){

@@ -1246,6 +1246,12 @@ class MyParser extends parser
 		      case "MulOp":
 		    	myAsWriter.writeMulOp(m_symtab.getBytes(), a, b);
 		    	break;
+		      case "DivOp":
+		    	myAsWriter.writeDivOp(m_symtab.getBytes(), a, b);
+		    	break;
+		      case "ModOp":
+		    	myAsWriter.writeModOp(m_symtab.getBytes(), a, b);
+		    	break;
 		    }
 		    result.setOffset("-" + m_symtab.getBytes());
 		    result.setBase("%fp");
