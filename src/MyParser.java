@@ -1111,8 +1111,10 @@ class MyParser extends parser
 			myAsWriter.writeCoutFloat();
 		  }
 		  else if(s.getType() != null && s.getType().isBool()){
-			this.coutStrings.addElement(new ConstSTO(str));
-			myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	 
+			
+			String value = "" + ((ConstSTO)s).getBoolValue();
+			this.coutStrings.addElement(new ConstSTO(value));
+			myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(), value);	 
 		  }
 		  else{
 		    this.coutStrings.addElement(new ConstSTO(str));

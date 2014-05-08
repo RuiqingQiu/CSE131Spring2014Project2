@@ -479,7 +479,7 @@ public class AssemblyCodeGenerator {
       template += funcName + (x-1) + ":\t" + ".asciz " + "\"" + str + "\"\n\n";
       flush(template);
       writeText();
-      flush(writeAlignment(4));
+      flush(writeAlignment(4)+"\n");
     }
     
     public void writeEndl(){
