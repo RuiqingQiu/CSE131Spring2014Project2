@@ -574,7 +574,7 @@ class MyParser extends parser
       myAsWriter.writeNegative(m_symtab.getBytes() + 4, s);
       ExprSTO expr = new ExprSTO(s.getName(), s.getType());
       m_symtab.addBytes(4);
-      expr.setBase(s.getBase());
+      expr.setBase("%fp");
       expr.setOffset("-" + m_symtab.getBytes()); 
       return expr;
     }
@@ -1234,7 +1234,15 @@ class MyParser extends parser
 		    return result;
 		}
 	}
-	
+	void
+	doDecltype(){
+	  myAsWriter.writeDecltype(this.globalCounter);
+	  globalCounter++;
+	}
+	void 
+	doDecltypeDone(){
+	  myAsWriter.writeDecltypeDone(this.globalCounter - 1);
+	}
 	STO
 	DoUnaryExpr(STO a, UnaryOp o)
 	{

@@ -503,14 +503,19 @@ SubType ::=    QualIdent:_1
     			:}
     ;
 
-DeclareType ::=  T_DECLTYPE T_LPAREN Expr0:_1 T_RPAREN
+DeclareType ::=  T_DECLTYPE
 				 {:
+				   ((MyParser) parser).doDecltype();
+				 :}
+				 T_LPAREN Expr0:_1 T_RPAREN
+				 {:
+				   ((MyParser)parser).doDecltypeDone();
 				    if(_1.isError())
 				      RESULT = new ErrorType("decl error", 4);
 				    else{
 				      Type t = _1.getType().clone();				    
 				      t.setName(_1.getType().getName());
-				    
+				      
 				      RESULT = t;
 				    }
 				     

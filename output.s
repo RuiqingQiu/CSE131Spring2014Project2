@@ -1,5 +1,5 @@
 /*
- * Generated Wed May 07 19:06:44 PDT 2014
+ * Generated Wed May 07 20:08:58 PDT 2014
  */
 
 	.section ".rodata"
@@ -27,14 +27,17 @@ main:
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
+! indodesID
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
+! indodesID
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
+! indodesID
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
@@ -42,6 +45,7 @@ main:
 ! adding first operand:a to %l1
 	mov	%l0, %l1
 
+! indodesID
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
@@ -60,6 +64,7 @@ main:
 	add	%fp,%l0, %l0
 	st	%l1, [%l0]
 
+! indodesID
 	set	-16, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
@@ -72,20 +77,16 @@ main:
 	call	printf
 	nop
 
+! indodesID
 	set	-16, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! convert to positive and store
-	set	-20, %l0
+! indodesID
+	set	-16, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-	mov	%l0, %o0
-	set	-1, %o1
-	call	.mul
-	nop
-	st	%o0, [%fp-20]
 ! adding first operand:c to %l1
 	mov	%l0, %l1
 
@@ -93,17 +94,18 @@ main:
 	mov	%l0, %l2
 
 	add	%l1, %l2, %l0
-	st	%l0, [%fp-24]
+	st	%l0, [%fp-20]
 ! init is an expression
 ! init variable: z
-	set	-24, %l0
+	set	-20, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l1
-	set	-28, %l0
+	set	-24, %l0
 	add	%fp,%l0, %l0
 	st	%l1, [%l0]
 
-	set	-28, %l0
+! indodesID
+	set	-24, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
@@ -118,4 +120,4 @@ main:
 	ret
 	restore
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 28) & -8
+	SAVE.main = -(92 + 24) & -8

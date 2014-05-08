@@ -271,7 +271,7 @@ public class AssemblyCodeGenerator {
 	    template += "! local variable:   " + sto.getName() + "    without init, just add offset\n";
       }
       else{
-    	template += "! init variable: " + sto.getName() + "\n";
+    	flush("! init variable: " + sto.getName() + "\n");
 	    if(sto.getInit().isConst()){
 	      if(sto.getType().isInt()){
 	        template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
@@ -524,6 +524,8 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
+    
+    
     public void writeNegative(int offset, STO s){
         flush("! convert to negative and store\n");
         writeDoDesID(s);
@@ -588,8 +590,15 @@ public class AssemblyCodeGenerator {
         template = indentString() + "sub\t%l1, %l2, %l0\n";
         template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
         flush(template);
-      }
-
+    }
+    
+    public void writeDecltype(int globalCounter){
+      String template = indentString() + "ba\tdelctype" + globalCounter + "\n";
+      template += indentString() + "nop\n";
+    }
+    public void writeDecltypeDone(int count){
+      String template = "decltype" + count + ": \n";
+    }
     // 9
     public void writeAssembly(String template, String ... params) {
         StringBuilder asStmt = new StringBuilder();
