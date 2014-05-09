@@ -1033,8 +1033,6 @@ class MyParser extends parser
 		}
 		m_symtab.getFunc().getType().setName(((FunctionPointerType)(m_symtab.getFunc().getType())).getErrorName());
 
-		//the number of space need to be saved for local tmp
-		myAsWriter.writeSaveSpace(m_symtab.getFunc(), m_symtab.getBytes());
 	}
 	
 	void
@@ -1262,6 +1260,10 @@ class MyParser extends parser
 		    	break;
 		      case "BwXorOp":
 		    	myAsWriter.writeBwXorOp(m_symtab.getBytes(), a, b);
+		    	break;
+		      case "GreaterThanOp":
+		    	myAsWriter.writeGreaterThanOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	this.globalCounter++;
 		    	break;
 		    }
 		    result.setOffset("-" + m_symtab.getBytes());

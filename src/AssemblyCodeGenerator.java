@@ -835,6 +835,30 @@ public class AssemblyCodeGenerator {
         flush(template);
     }
     
+    public void writeGreaterThanOp(int offset, STO a, STO b, int globalCounter){
+    	if (a.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! GreaterThanOP first operand:" + a.getName() + " to %l1\n";
+   	  	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+    	
+    	if (b.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(b);
+    	template = "! GreaterThanOP first operand:" + b.getName() + " to %l2\n";
+   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+   	  	flush(template);
+   	  	
+   	  	template = indentString() + "cmp\t%l1, %l2\n";
+   	  	template += indentString() + "bg\t";
+   	  	
+    }
+    
     public void writeDecltype(int globalCounter){
       String template = indentString() + "ba\tdelctype" + globalCounter + "\n";
       template += indentString() + "nop\n";
