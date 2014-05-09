@@ -1,5 +1,5 @@
 /*
- * Generated Thu May 08 21:18:06 PDT 2014
+ * Generated Thu May 08 21:50:19 PDT 2014
  */
 
 	.section ".rodata"
@@ -36,6 +36,38 @@ main:
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
+
+! indodesID
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! GreaterThanOP first operand:x to %l1
+	mov	%l0, %l1
+
+! indodesID
+	set	-8, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! GreaterThanOP first operand:y to %l2
+	mov	%l0, %l2
+
+	cmp	%l1, %l2
+	bg	greaterThan0
+	nop
+
+! greatThanOp set false
+	set	0, %l0
+	st	%l0, [%fp-12]
+	ba	greaterThan0_done
+	nop
+
+greaterThan0:	
+! greatThanOp set true
+	set	1, %l0
+	st	%l0, [%fp-12]
+greaterThan0_done:
 
 	set	_strFmt, %o0
 	set	main0, %o1

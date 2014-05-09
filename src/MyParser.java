@@ -541,7 +541,8 @@ class MyParser extends parser
 			  //Local variables negative offsets
 			  sto.setOffset("-" + m_symtab.getBytes());
 			  sto.setBase("%fp");
-			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), m_symtab.getLevel(), sto);
+			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
+			  globalCounter++;
 			}
 		}
 		//Global scope
@@ -639,7 +640,8 @@ class MyParser extends parser
 		      //Local variables negative offsets
 		      sto.setOffset("-" + m_symtab.getBytes());
 		      sto.setBase("%fp");	 
-			  myAsWriter.writeConstLocal(m_symtab.getFunc().getName(), m_symtab.getLevel(), sto);
+			  myAsWriter.writeConstLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
+			  globalCounter++;
 			}
 		}
 	}
@@ -1413,6 +1415,22 @@ class MyParser extends parser
 		this.m_symtab.inWhileLoop(true);
 	}
 	
+	/**
+	 * For project 2, if statement
+	 * @param s
+	 */
+	void DoIfStmt(STO s){
+		this.currentIfLabel = "";
+	}
+	
+	/**
+	 * For project 2, if statement
+	 */
+	void DoIfStmtEnd(){
+		
+	}
+	 
+	
 	STO
 	DoIfWhileExpr(STO expr)
 	{
@@ -1833,6 +1851,6 @@ class MyParser extends parser
     private AssemblyCodeGenerator myAsWriter;
 	private SymbolTable		m_symtab;
 	private Vector<ConstSTO> coutStrings = new Vector<ConstSTO>();
-	
+	private String currentIfLabel;
 	private int globalCounter = 0;
 }

@@ -265,7 +265,7 @@ public class AssemblyCodeGenerator {
     		
     	flush(template);
     }
-    public void writeLocal(String functionName, int level, VarSTO sto){
+    public void writeLocal(String functionName, int globalCounter, VarSTO sto){
       String template = "";
       if(sto.getInit() == null){
 	    template += "! local variable:   " + sto.getName() + "    without init, just add offset\n";
@@ -289,7 +289,7 @@ public class AssemblyCodeGenerator {
 	      else if(sto.getType().isFloat()){
 	    	writeData();
 	        flush(writeAlignment(4));
-	        String label = functionName + "_f_" + level;
+	        String label = functionName + "_f_" + globalCounter;
 	        flush(label + ":\t" + ".single " + "0r" + ((ConstSTO)sto.getInit()).getFloatValue() + "\n");
 	        //Go back to text segment
 	        writeText();
@@ -338,7 +338,7 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
-    public void writeConstLocal(String functionName, int level, ConstSTO sto){
+    public void writeConstLocal(String functionName, int globalCounter, ConstSTO sto){
       String template = "";
       template += "! Const local\n";   
    	  
@@ -358,7 +358,7 @@ public class AssemblyCodeGenerator {
    	  else if(sto.getType().isFloat()){
    	    writeData();
    	    flush(writeAlignment(4));
-   	    String label = functionName + "_f_c_" + level;
+   	    String label = functionName + "_f_c_" + globalCounter;
    	    flush(label + ":\t" + ".single " + "0r" + sto.getFloatValue() + "\n");
    	    //Go back to text segment
    	    writeText();
@@ -855,7 +855,22 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
    	  	
    	  	template = indentString() + "cmp\t%l1, %l2\n";
-   	  	template += indentString() + "bg\t";
+   	  	String label = "greaterThan" + globalCounter;
+   	  	template += indentString() + "bg\t" + label + "\n";
+   	  	template += indentString() + "nop\n\n";
+   	  	//If not greater than, than store false value to the tmp
+   	  	template += "! greatThanOp set false\n";
+   	  	template += indentString() + "set\t0, %l0\n";
+   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+   	  	template += indentString() + "ba\t" + label + "_done\n";
+   	  	template += indentString() + "nop\n\n";
+   	  	//If greater than store true value to the tmp
+   	  	template += label + ":\t\n";
+   	  	template += "! greatThanOp set true\n";
+   	  	template += indentString() + "set\t1, %l0\n";
+   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+   	  	template += label+"_done:\n\n";
+   	  	flush(template);
    	  	
     }
     
