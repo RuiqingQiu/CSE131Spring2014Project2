@@ -881,7 +881,7 @@ public class AssemblyCodeGenerator {
 	    flush (template);
     }
     /* 1.3 */
-    public void writePreIncOp(int offset, STO a){
+    public void writePreIncOp(String offset, STO a){
     	//a must be a mod l-val
     	writeDoDesID(a);
     	
@@ -891,7 +891,7 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
    	  	storeValueBack(a);
     }
-    public void writePreDecOp(int offset, STO a){
+    public void writePreDecOp(String offset, STO a){
     	//a must be a mod l-val
     	writeDoDesID(a);
     	

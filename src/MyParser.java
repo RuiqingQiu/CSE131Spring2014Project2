@@ -1300,9 +1300,9 @@ class MyParser extends parser
 	    
 	    switch(result.getName()){
 	      case "preIncOp":
-	    	  myAsWriter.writePreIncOp(Integer.parseInt(a.getOffset()), a);
+	    	  myAsWriter.writePreIncOp(a.getOffset(), a);
 	    	  result.setOffset(a.getOffset());
-	  	      result.setBase("%fp");
+	  	      result.setBase(a.getBase());
 	    	break;
 	      case "postIncOp":
 	    	  m_symtab.addBytes(4);
@@ -1310,9 +1310,9 @@ class MyParser extends parser
 	  	      result.setBase("%fp");
 		    break;
 	      case "preDecOp":
-	    	  myAsWriter.writePreDecOp(Integer.parseInt(a.getOffset()), a);
+	    	  myAsWriter.writePreDecOp(a.getOffset(), a);
 	    	  result.setOffset(a.getOffset());
-	  	      result.setBase("%fp");
+	  	      result.setBase(a.getBase());
 		    break;
 	      case "postDecOp":
 	    	  m_symtab.addBytes(4);
