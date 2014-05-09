@@ -874,6 +874,37 @@ public class AssemblyCodeGenerator {
    	  	
     }
     
+    public void writeIfStart(STO s, String label){
+      String template = "";
+      if(s.isConst()){
+    	template += indentString() + "set\t" + ((ConstSTO)s).getIntValue() + ", %l0\n";
+    	flush(template);
+      }
+      else{
+    	writeDoDesID(s);
+      }
+      template = indentString() + "cmp\t%l0, 0\n";
+      //If it's false, go to label (end of if statement)
+      //TODO, may need to go to else statement
+      template += indentString() + "be\t" + label + "\n";
+      template += indentString() + "nop\n";
+      flush(template);
+    }
+    
+    public void writeIfEnd(String label){
+      String template = "";
+      //When the yes branch of if ended, always go to the end of the whole if-else statement
+      template += indentString() + "ba\t" + label + "\n";
+      template += indentString() + "nop\n";
+      flush(template);
+    }
+    
+    public void writeIfCompleteEnd(String label){
+      String template = "";
+      template += label + ": \n\n";
+      flush(template);
+    }
+    
     public void writeDecltype(int globalCounter){
       String template = indentString() + "ba\tdelctype" + globalCounter + "\n";
       template += indentString() + "nop\n";

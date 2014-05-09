@@ -848,12 +848,14 @@ ArrElemsList ::=    Expr
 IfStmt ::=          T_IF Expr:_1
 					{:
 					  RESULT = ((MyParser) parser).DoIfWhileExpr(_1);
-					  ((MyParser)parser).DoIfStmt(_1);
+					  ((MyParser)parser).DoIfYesStmt(_1);
 					:}
-					CodeBlock OptElse
+					CodeBlock
 					{:
-					  ((MyParser)parser).DoIfStmtEnd(_1);
-					  
+					  ((MyParser)parser).DoIfYesStmtEnd();
+					:} OptElse
+					{:
+					  ((MyParser)parser).DoIfStmtEnd();
 					:}
     ;
 

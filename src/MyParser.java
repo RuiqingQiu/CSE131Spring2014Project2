@@ -1419,15 +1419,24 @@ class MyParser extends parser
 	 * For project 2, if statement
 	 * @param s
 	 */
-	void DoIfStmt(STO s){
-		this.currentIfLabel = "";
+	void DoIfYesStmt(STO s){
+		this.currentIfLabel = "if_stmt_" + this.globalCounter;
+		this.globalCounter++;
+		myAsWriter.writeIfStart(s, currentIfLabel);
 	}
 	
 	/**
-	 * For project 2, if statement
+	 * For project 2, if statement yes branch end
+	 */
+	void DoIfYesStmtEnd(){
+		myAsWriter.writeIfEnd(this.currentIfLabel);
+	}
+	
+	/**
+	 * For project 2, if statement totally end
 	 */
 	void DoIfStmtEnd(){
-		
+		myAsWriter.writeIfCompleteEnd(this.currentIfLabel);
 	}
 	 
 	

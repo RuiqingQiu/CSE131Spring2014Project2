@@ -1,5 +1,5 @@
 /*
- * Generated Thu May 08 21:50:19 PDT 2014
+ * Generated Thu May 08 22:29:31 PDT 2014
  */
 
 	.section ".rodata"
@@ -54,21 +54,29 @@ main:
 	mov	%l0, %l2
 
 	cmp	%l1, %l2
-	bg	greaterThan0
+	bg	greaterThan2
 	nop
 
 ! greatThanOp set false
 	set	0, %l0
 	st	%l0, [%fp-12]
-	ba	greaterThan0_done
+	ba	greaterThan2_done
 	nop
 
-greaterThan0:	
+greaterThan2:	
 ! greatThanOp set true
 	set	1, %l0
 	st	%l0, [%fp-12]
-greaterThan0_done:
+greaterThan2_done:
 
+! indodesID
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+	cmp	%l0, 0
+	be	if_stmt_3
+	nop
 	set	_strFmt, %o0
 	set	main0, %o1
 	call	printf
@@ -84,6 +92,10 @@ main0:	.asciz "hello"
 	set	_endl, %o0
 	call	printf
 	nop
+
+	ba	if_stmt_3
+	nop
+if_stmt_3: 
 
 	ret
 	restore
