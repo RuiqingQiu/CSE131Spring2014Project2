@@ -596,7 +596,7 @@ public class AssemblyCodeGenerator {
 	        template = "! minusOP second operand:" + b.getName() + " to %l2\n";
 	        template += indentString() + "mov\t%l0, %l2\n\n";
 	        flush(template);
-	        //Do the addop part
+	        //Do the subop part
 	        template = indentString() + "sub\t%l1, %l2, %l0\n";
 	        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
 	        flush(template);
@@ -675,8 +675,7 @@ public class AssemblyCodeGenerator {
     		
     	}
     }
-    public void writeModOp(int offset, STO a, STO b){
-    	
+    public void writeModOp(int offset, STO a, STO b){   	
 	  if(a.isVar())
 	    writeDoDesID(a);
 	  else if (a.isConst())
@@ -704,13 +703,92 @@ public class AssemblyCodeGenerator {
 	  flush(template);
     }
     
+    public void writeBwAndOp(int offset, STO a, STO b){
+    	if (a.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! BwAndOP first operand:" + a.getName() + " to %l1\n";
+   	  	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+    	
+    	if (b.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(b);
+    	
+    	template = "! BwAndOP first operand:" + b.getName() + " to %l2\n";
+   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+   	  	flush(template);
+    	
+   	  	//Do the BwAndOp part
+        template = indentString() + "and\t%l1, %l2, %l0\n";
+        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        flush(template);
+    }
+    public void writeBwOrOp(int offset, STO a, STO b){
+    	if (a.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! BwOrOP first operand:" + a.getName() + " to %l1\n";
+   	  	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+    	
+    	if (b.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(b);
+    	
+    	template = "! BwOrOP first operand:" + b.getName() + " to %l2\n";
+   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+   	  	flush(template);
+    	
+   	  	//Do the BwAndOp part
+        template = indentString() + "or\t%l1, %l2, %l0\n";
+        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        flush(template);
+    }
+    public void writeBwXorOp(int offset, STO a, STO b){
+    	if (a.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! BwXorOP first operand:" + a.getName() + " to %l1\n";
+   	  	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+    	
+    	if (b.isConst())
+    	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+    	else
+    	    writeDoDesID(b);
+    	
+    	template = "! BwXorOP first operand:" + b.getName() + " to %l2\n";
+   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+   	  	flush(template);
+    	
+   	  	//Do the BwXorOp part
+        template = indentString() + "xor\t%l1, %l2, %l0\n";
+        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        flush(template);
+    }
+    
     public void writeDecltype(int globalCounter){
       String template = indentString() + "ba\tdelctype" + globalCounter + "\n";
       template += indentString() + "nop\n";
     }
+    
     public void writeDecltypeDone(int count){
       String template = "decltype" + count + ": \n";
     }
+    
+    
     // 9
     public void writeAssembly(String template, String ... params) {
         StringBuilder asStmt = new StringBuilder();
