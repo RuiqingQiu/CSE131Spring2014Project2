@@ -276,8 +276,8 @@ ConstDecl ::=  OptStatic:_1 T_CONST UndecoratedType:_2 IdListWInit:_3 T_SEMI
     |          OptStatic:_3 T_CONST T_AUTO T_ID:_1 T_ASSIGN Expr:_2 T_SEMI
                {: 
                  // Assign _1 with the type _2 have and put in a symbol table
-    		//TODO, auto static
-		 ((MyParser) parser).DoConstAutoDeclaration(_1,_2);
+    			 //TODO, auto static
+		 		  ((MyParser) parser).DoConstAutoDeclaration(_1,_2);
                :}
     ;
 
@@ -1282,9 +1282,9 @@ Designator ::= T_STAR Designator:_1
     |   IncDecOp:_1 Designator:_2
         {:  
             if(_1.equals("++"))
-			  RESULT = ((MyParser) parser).DoUnaryExpr(_2, new IncOp());
+			  RESULT = ((MyParser) parser).DoUnaryExpr(_2, new IncOp("preIncOp"));
 			else
-			  RESULT = ((MyParser) parser).DoUnaryExpr(_2, new DecOp());
+			  RESULT = ((MyParser) parser).DoUnaryExpr(_2, new DecOp("preDecOp"));
         :}
     |               Designator2:_1 
                     {:
@@ -1310,9 +1310,9 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
     |               Designator2:_1 IncDecOp:_2
                     {:
                     	if(_2.equals("++"))
-                          RESULT = ((MyParser) parser).DoUnaryExpr(_1, new IncOp());
+                          RESULT = ((MyParser) parser).DoUnaryExpr(_1, new IncOp("postIncOp"));
                         else
-                          RESULT = ((MyParser) parser).DoUnaryExpr(_1, new DecOp());
+                          RESULT = ((MyParser) parser).DoUnaryExpr(_1, new DecOp("postDecOp"));
                     :}
     |               Designator2:_1 T_LPAREN OptExprList:_2 T_RPAREN
                     {:

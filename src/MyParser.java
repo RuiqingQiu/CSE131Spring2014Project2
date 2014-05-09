@@ -1295,6 +1295,33 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print (result.getName());
 		}
+		
+		//Generate code for getting both operand
+	    
+	    switch(result.getName()){
+	      case "preIncOp":
+	    	  myAsWriter.writePreIncOp(Integer.parseInt(a.getOffset()), a);
+	    	  result.setOffset(a.getOffset());
+	  	      result.setBase("%fp");
+	    	break;
+	      case "postIncOp":
+	    	  m_symtab.addBytes(4);
+	    	  result.setOffset("-" + m_symtab.getBytes());
+	  	      result.setBase("%fp");
+		    break;
+	      case "preDecOp":
+	    	  myAsWriter.writePreDecOp(Integer.parseInt(a.getOffset()), a);
+	    	  result.setOffset(a.getOffset());
+	  	      result.setBase("%fp");
+		    break;
+	      case "postDecOp":
+	    	  m_symtab.addBytes(4);
+	    	  result.setOffset("-" + m_symtab.getBytes());
+	  	      result.setBase("%fp");
+		    break;
+		    	
+	    }
+	   
 		return result;
 	}
 

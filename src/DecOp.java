@@ -1,5 +1,8 @@
 
 public class DecOp extends UnaryOp{
+	public DecOp(String postOrPre){
+		this.postOrPre = postOrPre;
+	}
 	@Override
 	STO checkOperands(STO a) {
 		Type aType = a.getType();
@@ -7,7 +10,7 @@ public class DecOp extends UnaryOp{
 		if (aType.isNumeric()) {
 			//get if the operand is a modifiable L-value
 			if(a.getIsAddressable() == true && a.getIsModifiable() == true)
-				return new ExprSTO("DecOp", aType);
+				return new ExprSTO(this.postOrPre, aType);
 			else
 				return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,  "--"));		
 		}
@@ -19,10 +22,11 @@ public class DecOp extends UnaryOp{
 			if(aType.isFuncPointer()){
 				return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(), "--"));
 			}
-			return new ExprSTO("DecOp",aType);
+			return new ExprSTO(this.postOrPre, aType);
 		}
 		else{
 			return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(), "--"));
 		}
 	}
+	private String postOrPre = "";
 }

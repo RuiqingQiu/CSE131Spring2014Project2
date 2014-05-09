@@ -1,5 +1,5 @@
 /*
- * Generated Thu May 08 22:57:12 PDT 2014
+ * Generated Fri May 09 13:00:52 PDT 2014
  */
 
 	.section ".rodata"
@@ -16,19 +16,32 @@ main:
 	set	SAVE.main, %g1
 	save	%sp, %g1, %sp
 ! init variable: x
-	set	2, %l1
+	set	0, %l1
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
-! init variable: y
-	set	4, %l1
-	set	-8, %l0
+! indodesID
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! indodesID
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! PreIncOp first operand:x to %l1
+	mov	%l0, %l1
+
+	inc	%l1
+
+	set	-4, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
 ! indodesID
-	set	-8, %l0
+	set	-4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
@@ -37,122 +50,30 @@ main:
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! indodesID
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! GreaterThanOP first operand:y to %l1
+! PreIncOp first operand:x to %l1
 	mov	%l0, %l1
 
-! indodesID
+	inc	%l1
+
 	set	-4, %l0
 	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! GreaterThanOP first operand:x to %l2
-	mov	%l0, %l2
-
-	cmp	%l1, %l2
-	bg	greaterThan2
-	nop
-
-! greatThanOp set false
-	set	0, %l0
-	st	%l0, [%fp-12]
-	ba	greaterThan2_done
-	nop
-
-greaterThan2:	
-! greatThanOp set true
-	set	1, %l0
-	st	%l0, [%fp-12]
-greaterThan2_done:
+	st	%l1, [%l0]
 
 ! indodesID
-	set	-12, %l0
+	set	--4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-	cmp	%l0, 0
-	be	else_stmt_3
-	nop
-! indodesID
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! indodesID
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! indodesID
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! GreaterThanOP first operand:y to %l1
-	mov	%l0, %l1
-
-! indodesID
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! GreaterThanOP first operand:x to %l2
-	mov	%l0, %l2
-
-	cmp	%l1, %l2
-	bg	greaterThan4
-	nop
-
-! greatThanOp set false
-	set	0, %l0
-	st	%l0, [%fp-16]
-	ba	greaterThan4_done
-	nop
-
-greaterThan4:	
-! greatThanOp set true
-	set	1, %l0
-	st	%l0, [%fp-16]
-greaterThan4_done:
-
-! indodesID
-	set	-16, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-	cmp	%l0, 0
-	be	else_stmt_5
-	nop
-	set	_strFmt, %o0
-	set	main0, %o1
+	set	_intFmt, %o0
+	mov	%l0, %o1
 	call	printf
 	nop
-
-	.section ".rodata"
-	.align 4
-main0:	.asciz "hello"
-
-	.section ".text"
-	.align 4
-
 	set	_endl, %o0
 	call	printf
 	nop
-
-	ba	end_if_stmt_6
-	nop
-end_if_stmt_6: 
-
-	ba	end_if_stmt_7
-	nop
-end_if_stmt_7: 
 
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 16) & -8
+	SAVE.main = -(92 + 4) & -8

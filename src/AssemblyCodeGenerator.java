@@ -775,7 +775,7 @@ public class AssemblyCodeGenerator {
     	else
     	    writeDoDesID(b);
     	
-    	template = "! BwAndOP first operand:" + b.getName() + " to %l2\n";
+    	template = "! BwAndOP second operand:" + b.getName() + " to %l2\n";
    	  	template += indentString() + "mov\t%l0, %l2\n\n";
    	  	flush(template);
     	
@@ -800,7 +800,7 @@ public class AssemblyCodeGenerator {
     	else
     	    writeDoDesID(b);
     	
-    	template = "! BwOrOP first operand:" + b.getName() + " to %l2\n";
+    	template = "! BwOrOP second operand:" + b.getName() + " to %l2\n";
    	  	template += indentString() + "mov\t%l0, %l2\n\n";
    	  	flush(template);
     	
@@ -825,7 +825,7 @@ public class AssemblyCodeGenerator {
     	else
     	    writeDoDesID(b);
     	
-    	template = "! BwXorOP first operand:" + b.getName() + " to %l2\n";
+    	template = "! BwXorOP second operand:" + b.getName() + " to %l2\n";
    	  	template += indentString() + "mov\t%l0, %l2\n\n";
    	  	flush(template);
     	
@@ -850,7 +850,7 @@ public class AssemblyCodeGenerator {
     	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
     	else
     	    writeDoDesID(b);
-    	template = "! GreaterThanOP first operand:" + b.getName() + " to %l2\n";
+    	template = "! GreaterThanOP second operand:" + b.getName() + " to %l2\n";
    	  	template += indentString() + "mov\t%l0, %l2\n\n";
    	  	flush(template);
    	  	
@@ -873,6 +873,35 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
    	  	
     }
+    public void storeValueBack(STO sto){
+    	String template = "";
+    	template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	    flush (template);
+    }
+    /* 1.3 */
+    public void writePreIncOp(int offset, STO a){
+    	//a must be a mod l-val
+    	writeDoDesID(a);
+    	
+    	String template = "! PreIncOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	template += indentString() + "inc\t%l1\n\n";
+   	  	flush(template);
+   	  	storeValueBack(a);
+    }
+    public void writePreDecOp(int offset, STO a){
+    	//a must be a mod l-val
+    	writeDoDesID(a);
+    	
+    	String template = "! PreDecOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	template += indentString() + "dec\t%l1\n\n";
+   	  	flush(template);
+   	  	storeValueBack(a);
+    }
+
     
     public void writeIfStart(STO s, String label){
       String template = "";
@@ -899,6 +928,10 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
+    /**
+     * This method is for when the whole if else statement ended, write an end label
+     * @param label
+     */
     public void writeIfCompleteEnd(String label){
       String template = "";
       template += label + ": \n\n";

@@ -1,12 +1,14 @@
 
 public class IncOp extends UnaryOp {
-
+	public IncOp(String postOrPre){
+		this.postOrPre = postOrPre;
+	}
 	@Override
 	STO checkOperands(STO a) {
 		Type aType = a.getType();
 		if (aType.isNumeric()) {
 			if(a.getIsAddressable() == true && a.getIsModifiable() == true)
-				return new ExprSTO("IncOp", aType);
+				return new ExprSTO(this.postOrPre, aType);
 			else
 				return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,  "++"));
 		} 
@@ -18,11 +20,13 @@ public class IncOp extends UnaryOp {
 			if(aType.isFuncPointer()){
 				return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(), "++"));
 			}
-		    return new ExprSTO("IncOp",aType);
+		    return new ExprSTO(this.postOrPre, aType);
 		}
 		else{
 			return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(), "++"));
 		}
 	}
+	private String postOrPre = "";
+	
 
 }
