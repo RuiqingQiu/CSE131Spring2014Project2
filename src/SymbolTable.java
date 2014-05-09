@@ -54,7 +54,7 @@ class SymbolTable
 
 		return (scope.accessLocal (strName));
 	}
-
+	
 
 	//----------------------------------------------------------------
 	//

@@ -4,6 +4,8 @@
 //---------------------------------------------------------------------
 
 import java_cup.runtime.*;
+
+import java.util.Stack;
 import java.util.Vector;
 
 
@@ -1416,27 +1418,38 @@ class MyParser extends parser
 	}
 	
 	/**
-	 * For project 2, if statement
+	 * For project 2, if statement, check if the result, else go to Else block
 	 * @param s
 	 */
 	void DoIfYesStmt(STO s){
-		this.currentIfLabel = "if_stmt_" + this.globalCounter;
+		String label = "else_stmt_" + this.globalCounter;
+		this.IfStmtElseLabels.push(label);
 		this.globalCounter++;
-		myAsWriter.writeIfStart(s, currentIfLabel);
+		myAsWriter.writeIfStart(s, label);
 	}
 	
 	/**
 	 * For project 2, if statement yes branch end
 	 */
 	void DoIfYesStmtEnd(){
-		myAsWriter.writeIfEnd(this.currentIfLabel);
+		String label = "end_if_stmt_" + this.globalCounter;
+		this.globalCounter++;
+		this.IfStmtEndLabels.push(label);
+		myAsWriter.writeIfEnd(label);
 	}
 	
 	/**
 	 * For project 2, if statement totally end
+	 * Write an label to indicate where the end of this if - else statement is
 	 */
 	void DoIfStmtEnd(){
-		myAsWriter.writeIfCompleteEnd(this.currentIfLabel);
+		String label = this.IfStmtEndLabels.pop();
+		myAsWriter.writeIfCompleteEnd(label);
+	}
+	
+	void DoElseStmtStart(){
+		String label = this.IfStmtElseLabels.pop();
+		myAsWriter.writeIfCompleteEnd(label);
 	}
 	 
 	
@@ -1860,6 +1873,7 @@ class MyParser extends parser
     private AssemblyCodeGenerator myAsWriter;
 	private SymbolTable		m_symtab;
 	private Vector<ConstSTO> coutStrings = new Vector<ConstSTO>();
-	private String currentIfLabel;
+	private Stack<String> IfStmtEndLabels = new Stack<String>();
+	private Stack<String> IfStmtElseLabels = new Stack<String>();
 	private int globalCounter = 0;
 }

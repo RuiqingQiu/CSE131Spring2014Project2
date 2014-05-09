@@ -114,7 +114,7 @@ non terminal
     Stmt,
     CodeBlock,
     IfStmt,
-    OptElse,
+
     WhileStmt,
     BreakStmt,
     ContinueStmt,
@@ -136,6 +136,7 @@ non terminal String
     MulOp,
     IncDecOp,
     OptRef,
+    OptElse,
     OptStatic,
     UnarySign,
     WritePairList,
@@ -853,14 +854,21 @@ IfStmt ::=          T_IF Expr:_1
 					CodeBlock
 					{:
 					  ((MyParser)parser).DoIfYesStmtEnd();
-					:} OptElse
+					:} OptElse:_2
 					{:
+					  if(_2 == null)
+					    ((MyParser)parser).DoElseStmtStart();
 					  ((MyParser)parser).DoIfStmtEnd();
 					:}
     ;
 
 
-OptElse ::=         T_ELSE CodeBlock
+OptElse ::=         T_ELSE
+					{:
+					  ((MyParser)parser).DoElseStmtStart();
+					  RESULT = "else";
+					:} 
+					CodeBlock
     |               /* empty */
     ;
 

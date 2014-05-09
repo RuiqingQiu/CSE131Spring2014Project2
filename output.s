@@ -1,5 +1,5 @@
 /*
- * Generated Thu May 08 22:29:31 PDT 2014
+ * Generated Thu May 08 22:57:12 PDT 2014
  */
 
 	.section ".rodata"
@@ -22,17 +22,12 @@ main:
 	st	%l1, [%l0]
 
 ! init variable: y
-	set	3, %l1
+	set	4, %l1
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
 ! indodesID
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! indodesID
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
@@ -42,15 +37,20 @@ main:
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! GreaterThanOP first operand:x to %l1
+! indodesID
+	set	-8, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! GreaterThanOP first operand:y to %l1
 	mov	%l0, %l1
 
 ! indodesID
-	set	-8, %l0
+	set	-4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! GreaterThanOP first operand:y to %l2
+! GreaterThanOP first operand:x to %l2
 	mov	%l0, %l2
 
 	cmp	%l1, %l2
@@ -75,7 +75,57 @@ greaterThan2_done:
 	ld	[%l0], %l0
 
 	cmp	%l0, 0
-	be	if_stmt_3
+	be	else_stmt_3
+	nop
+! indodesID
+	set	-8, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! indodesID
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! indodesID
+	set	-8, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! GreaterThanOP first operand:y to %l1
+	mov	%l0, %l1
+
+! indodesID
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! GreaterThanOP first operand:x to %l2
+	mov	%l0, %l2
+
+	cmp	%l1, %l2
+	bg	greaterThan4
+	nop
+
+! greatThanOp set false
+	set	0, %l0
+	st	%l0, [%fp-16]
+	ba	greaterThan4_done
+	nop
+
+greaterThan4:	
+! greatThanOp set true
+	set	1, %l0
+	st	%l0, [%fp-16]
+greaterThan4_done:
+
+! indodesID
+	set	-16, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+	cmp	%l0, 0
+	be	else_stmt_5
 	nop
 	set	_strFmt, %o0
 	set	main0, %o1
@@ -93,12 +143,16 @@ main0:	.asciz "hello"
 	call	printf
 	nop
 
-	ba	if_stmt_3
+	ba	end_if_stmt_6
 	nop
-if_stmt_3: 
+end_if_stmt_6: 
+
+	ba	end_if_stmt_7
+	nop
+end_if_stmt_7: 
 
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 12) & -8
+	SAVE.main = -(92 + 16) & -8
