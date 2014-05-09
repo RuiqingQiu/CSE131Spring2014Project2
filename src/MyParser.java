@@ -1100,6 +1100,8 @@ class MyParser extends parser
 				}
 			}
 		}
+		myAsWriter.writeReturnStmt(m_symtab.getFunc().getName(), s, this.globalCounter);
+		this.globalCounter++;
 		return;
 	}
 
@@ -1469,12 +1471,10 @@ class MyParser extends parser
 						//pass by reference, argument is not a modifiable L-value
 						else if(params.get(i).getType().isReference() && !arguments.get(i).isModLValue()){
 							//If it's an array name, should be a mod l-val
-							if(arguments.get(i).getType().isArray()){
+							if(arguments.get(i).getType().isArray())
 								count++;
-							}
-							else{
+							else
 								break;
-							}
 						}
 						else{
 							count++;
@@ -1496,6 +1496,8 @@ class MyParser extends parser
 				m_errors.print (Formatter.toString(ErrorMsg.error22_Illegal, sto.getName()));
 				return (new ErrorSTO (sto.getName ()));
 			}
+			//End of checking overloading
+			
 			else{
 			  //It's a FuncSTO, check number of arguments
 			  FuncSTO tmp = (FuncSTO) sto;
@@ -1548,14 +1550,21 @@ class MyParser extends parser
 				if(errorArgument)
 					return (new ErrorSTO ("DoFuncCall, pass-by-value error"));
 			    //The function evaluates to return type
+				//Project 2, generate code for making function call
+				ExprSTO ret = new ExprSTO("FuncCall", tmp.getReturnType());
+				m_symtab.addBytes(tmp.getReturnType().getSize());
+				
+				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes());
+				ret.setOffset("-" + m_symtab.getBytes());
+				ret.setBase("%fp");
 				//Return by reference, return a mod l-val
 				if(tmp.getReturnType().isReference()){
-					ExprSTO ret = new ExprSTO("FuncCall", tmp.getReturnType());
+					
 					ret.setIsAddressable(true);
 					ret.setIsModifiable(true);
 					return ret;
 				}
-			    return new ExprSTO("FuncCall", tmp.getReturnType());
+			    return ret;
 			}
 			else{
 				m_nNumErrors++;

@@ -486,9 +486,65 @@ public class AssemblyCodeGenerator {
     
     public void writeRetRestore(){
       String template = indentString() + "ret\n";
-      template += indentString() + "restore\n";
+      template += indentString() + "restore\n\n";
       flush(template);
     }
+    
+    public void setConst(String functionName, ConstSTO s, int globalCounter){
+    	String template = "";
+    	if(s.getType().isInt()){
+    		template += indentString() + "set\t" + s.getIntValue() + ", " + "%l0\n";
+    	}
+    	else if(s.getType().isBool()){
+    		template += indentString() + "set\t" + s.getIntValue() + ", " + "%l0\n";
+    	}
+    	else if(s.getType().isFloat()){
+    		writeData();
+  	        flush(writeAlignment(4));
+  	        String label = functionName + "_f_return_" + globalCounter;
+  	        flush(label + ":\t" + ".single " + "0r" + s.getFloatValue() + "\n");
+  	        //Go back to text segment
+  	        writeText();
+  	        flush(writeAlignment(4));
+  	    	template += indentString() + "set\t" + label + ", " + "%l0\n";
+    	}
+    	flush(template);
+    }
+    
+    /**
+     * This is for writing assembly code for moving the return value to %o0
+     * @param funcName
+     * @param s
+     * @param globalCounter
+     */
+    public void writeReturnStmt(String funcName, STO s, int globalCounter){
+      if(s.isConst()){
+    	setConst(funcName, (ConstSTO)s, globalCounter);
+      }else{
+    	writeDoDesID(s);
+      }
+      flush("! return stmt\n");
+      String template = indentString() + "mov\t%l0, %i0\n";
+      flush(template);
+    }
+    
+    public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset){
+      //No argument function call
+      String template = "";
+      if(arguments.size() == 0){
+    	template += indentString() + "call\t" + function.getName() + "\n";
+    	template += indentString() + "nop\n";
+      }
+      //TODO Argument is not 0
+      else{
+    	  
+      }
+      template += "! Store return to a local tmp\n";
+      template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
+      flush(template);
+      
+    }
+    
     
     public void writeCout(String funcName, int x, String str){
       String template = "";

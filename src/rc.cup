@@ -900,7 +900,7 @@ ReturnStmt ::=   T_RETURN T_SEMI
   				   //((MyParser) parser).DoReturnCheck(new VoidType("void",4));
   				   ((MyParser) parser).DoReturnCheck(new ExprSTO("void",new VoidType("void",4)));
   				 :}
-    |               T_RETURN Expr:_1 T_SEMI
+    |            T_RETURN Expr:_1 T_SEMI
          	     {:
          	       ((MyParser)parser).DoReturnCheck(_1); 
          	     :}

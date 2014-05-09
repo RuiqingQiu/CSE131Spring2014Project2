@@ -1,5 +1,5 @@
 /*
- * Generated Wed May 07 20:21:21 PDT 2014
+ * Generated Thu May 08 21:09:51 PDT 2014
  */
 
 	.section ".rodata"
@@ -11,52 +11,67 @@ _boolF:		.asciz "false"
 
 	.section ".text"
 	.align 4
+	.global foo
+foo:
+	set	SAVE.foo, %g1
+	save	%sp, %g1, %sp
+	set	_strFmt, %o0
+	set	foo0, %o1
+	call	printf
+	nop
+
+	.section ".rodata"
+	.align 4
+foo0:	.asciz "second "
+
+	.section ".text"
+	.align 4
+
+! init variable: y
+	set	1000, %l1
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	st	%l1, [%l0]
+
+	set	0, %l0
+! return stmt
+	mov	%l0, %o0
+	ret
+	restore
+
+! from DoFuncDecl2
+	SAVE.foo = -(92 + 4) & -8
+	.section ".text"
+	.align 4
 	.global main
 main:
 	set	SAVE.main, %g1
 	save	%sp, %g1, %sp
 ! init variable: x
-	set	1, %l1
+	set	100, %l1
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
-! init variable: y
-	set	2, %l1
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
+	set	_strFmt, %o0
+	set	main1, %o1
+	call	printf
+	nop
 
-! indodesID
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
+	.section ".rodata"
+	.align 4
+main1:	.asciz "first "
 
-! indodesID
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
+	.section ".text"
+	.align 4
 
-! indodesID
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! adding first operand:x to %l1
-	mov	%l0, %l1
+	call	foo
+	nop
+! Store return to a local tmp
+	st	%o0, [%fp-8]
 
 ! indodesID
 	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! adding second operand:y to %l2
-	mov	%l0, %l2
-
-	add	%l1, %l2, %l0
-	st	%l0, [%fp-12]
-! indodesID
-	set	-12, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
@@ -64,11 +79,8 @@ main:
 	mov	%l0, %o1
 	call	printf
 	nop
-	set	_endl, %o0
-	call	printf
-	nop
-
 	ret
 	restore
+
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 12) & -8
+	SAVE.main = -(92 + 8) & -8
