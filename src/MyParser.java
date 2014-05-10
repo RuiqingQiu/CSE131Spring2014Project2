@@ -1419,6 +1419,8 @@ class MyParser extends parser
 		result.setType(leftHandSide.getType().clone());
 		result.setIsAddressable(false);
 		result.setIsModifiable(false);
+		myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter);
+		globalCounter++;
 		return result;
 	}
 

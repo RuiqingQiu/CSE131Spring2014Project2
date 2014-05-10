@@ -377,7 +377,8 @@ public class AssemblyCodeGenerator {
     	  if(sto.getType().isFloat()){
     		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
   		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-  		    template += indentString() + "ld\t" + "[%l0], %f0" + "\n\n";
+  		    template += indentString() + "ld\t" + "[%l0], %f0\n";
+  		    template += indentString() + "ld\t" + "[%l0], %l0\n\n";
     	  }else{
     	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
 		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
@@ -388,7 +389,8 @@ public class AssemblyCodeGenerator {
     	  if(sto.getType().isFloat()){
       		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-    		template += indentString() + "ld\t" + "[%l0], %f0" + "\n\n";
+    		template += indentString() + "ld\t" + "[%l0], %f0\n";
+  		    template += indentString() + "ld\t" + "[%l0], %l0\n\n";
       	  }else{
       	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
   		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
@@ -423,6 +425,9 @@ public class AssemblyCodeGenerator {
       template += indentString() + "nop\n";
       flush(template);
     }
+    /**
+     * This is combined use with writeConstFloatTol0, which put the value into %f0 for printing
+     */
     public void writeCoutFloat(){
       String template = indentString() + "call\tprintFloat\n";
       template += indentString() + "nop\n";
@@ -490,6 +495,12 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
+    /**
+     * This method takes in an constSTO and then check its base type and put the value into %l0
+     * @param functionName
+     * @param s
+     * @param globalCounter
+     */
     public void setConst(String functionName, ConstSTO s, int globalCounter){
     	String template = "";
     	if(s.getType().isInt()){
@@ -507,6 +518,7 @@ public class AssemblyCodeGenerator {
   	        writeText();
   	        flush(writeAlignment(4));
   	    	template += indentString() + "set\t" + label + ", " + "%l0\n";
+  	    	template += indentString() + "ld\t[%l0], %l0\n";
     	}
     	flush(template);
     }
@@ -937,8 +949,34 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
    	  	storeValueBack(a);
     }
-
     
+    /**
+     * This method is for write code to do assignment
+     * @param left
+     * @param right
+     */
+    public void writeAssignment(STO left, STO right, int globalCounter){
+    	String template = "";
+    	flush("! Doing Assignment, getting the right side value\n");
+    	if(right.isConst()){
+    		setConst(left.getName() + "_assign_right", (ConstSTO)right, globalCounter);
+    	}
+    	else
+    		writeDoDesID(right);
+    	template += "! moving the right side value to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n";
+    	template += "! Doing Assignment, getting the left side location\n";
+    	template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "st\t%l1, [%l0]\n";
+    	flush(template);
+    }
+    
+    /**
+     * This method is for cmp the expr inside if statement
+     * @param s
+     * @param label
+     */   
     public void writeIfStart(STO s, String label){
       String template = "";
       if(s.isConst()){
