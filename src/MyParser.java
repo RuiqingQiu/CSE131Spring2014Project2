@@ -156,7 +156,7 @@ class MyParser extends parser
 	{
 	  // Opens the global scope.
 	  m_symtab.openScope ();
-          myAsWriter = new AssemblyCodeGenerator("output.s");
+      myAsWriter = new AssemblyCodeGenerator("rc.s");
 	  myAsWriter.increaseIndent();
 	  myAsWriter.writeStringFormat();
         }
