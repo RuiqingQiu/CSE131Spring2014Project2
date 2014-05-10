@@ -1306,6 +1306,7 @@ class MyParser extends parser
 	    	break;
 	      case "postIncOp":
 	    	  m_symtab.addBytes(4);
+	    	  myAsWriter.writePostIncOp("-" + m_symtab.getBytes(), a);
 	    	  result.setOffset("-" + m_symtab.getBytes());
 	  	      result.setBase("%fp");
 		    break;
@@ -1316,6 +1317,7 @@ class MyParser extends parser
 		    break;
 	      case "postDecOp":
 	    	  m_symtab.addBytes(4);
+	    	  myAsWriter.writePostDecOp("-" + m_symtab.getBytes(), a);
 	    	  result.setOffset("-" + m_symtab.getBytes());
 	  	      result.setBase("%fp");
 		    break;

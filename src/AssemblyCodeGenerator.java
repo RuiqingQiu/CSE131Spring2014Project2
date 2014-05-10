@@ -372,7 +372,7 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     public void writeDoDesID(STO sto){
-      String template = "! indodesID\n";
+      String template = "! indodesID : " + sto.getName() + "\n";
       if(sto.isVar()){
     	  if(sto.getType().isFloat()){
     		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
@@ -873,6 +873,10 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
    	  	
     }
+    /**
+     * This method assumes that decrement or increment has been done and the value is in %l1
+     * @param sto
+     */
     public void storeValueBack(STO sto){
     	String template = "";
     	template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
@@ -894,9 +898,38 @@ public class AssemblyCodeGenerator {
     public void writePreDecOp(String offset, STO a){
     	//a must be a mod l-val
     	writeDoDesID(a);
-    	
     	String template = "! PreDecOp first operand:" + a.getName() + " to %l1\n";
     	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	template += indentString() + "dec\t%l1\n\n";
+   	  	flush(template);
+   	  	storeValueBack(a);
+    }
+    
+    public void writePostIncOp(String offset, STO a){
+    	writeDoDesID(a);
+    	String template = "! PostIncOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+    	
+    	template += "! Store the previous value before post inc to a tmp location\n";
+    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+        template += indentString() + "add\t%fp, %l0, %l0\n";
+	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	    
+   	  	template += indentString() + "inc\t%l1\n\n";
+   	  	flush(template);
+   	  	storeValueBack(a);
+    }
+    
+    public void writePostDecOp(String offset, STO a){
+    	writeDoDesID(a);
+    	String template = "! PostDecOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+    	
+    	template += "! Store the previous value before post inc to a tmp location\n";
+    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+        template += indentString() + "add\t%fp, %l0, %l0\n";
+	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	    
    	  	template += indentString() + "dec\t%l1\n\n";
    	  	flush(template);
    	  	storeValueBack(a);
