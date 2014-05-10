@@ -518,9 +518,12 @@ public class AssemblyCodeGenerator {
      * @param globalCounter
      */
     public void writeReturnStmt(String funcName, STO s, int globalCounter){
+      if(s.getType().isVoid())
+    	  return;
       if(s.isConst()){
     	setConst(funcName, (ConstSTO)s, globalCounter);
-      }else{
+      }
+      else{
     	writeDoDesID(s);
       }
       flush("! return stmt\n");
