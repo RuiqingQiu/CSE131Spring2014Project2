@@ -508,7 +508,7 @@ DeclareType ::=  T_DECLTYPE
 				 {:
 				   ((MyParser) parser).doDecltype();
 				 :}
-				 T_LPAREN Expr0:_1 T_RPAREN
+				 T_LPAREN Expr:_1 T_RPAREN
 				 {:
 				   ((MyParser)parser).doDecltypeDone();
 				    if(_1.isError())

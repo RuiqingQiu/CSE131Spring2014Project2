@@ -951,6 +951,21 @@ public class AssemblyCodeGenerator {
     }
     
     /**
+     * 1.3 Exit statement
+     */
+    public void writeExit(STO expr, int globalCounter){
+    	flush("\n! set exit statement number to %o0\n");
+    	if(expr.isConst())
+    		setConst("exitStmtNumber", (ConstSTO)expr, globalCounter);
+    	else
+    		writeDoDesID(expr);
+    	String template = indentString() + "mov\t%l0, %o0\n";
+    	template += indentString() + "call\texit\n";
+    	template += indentString() + "nop\n";
+    	flush(template);
+    }
+    
+    /**
      * This method is for write code to do assignment
      * @param left
      * @param right
@@ -1013,12 +1028,14 @@ public class AssemblyCodeGenerator {
     }
     
     public void writeDecltype(int globalCounter){
-      String template = indentString() + "ba\tdelctype" + globalCounter + "\n";
+      String template = indentString() + "ba\tdecltype_" + globalCounter + "\n";
       template += indentString() + "nop\n";
+      flush(template);
     }
     
     public void writeDecltypeDone(int count){
-      String template = "decltype" + count + ": \n";
+      String template = "decltype_" + count + ": \n";
+      flush(template);
     }
     
     

@@ -1,5 +1,5 @@
 /*
- * Generated Fri May 09 21:29:26 PDT 2014
+ * Generated Sat May 10 16:26:48 PDT 2014
  */
 
 	.section ".rodata"
@@ -20,10 +20,11 @@ x:	.word 10
 main:
 	set	SAVE.main, %g1
 	save	%sp, %g1, %sp
-! local variable:   y    without init, just add offset
-! indodesID : y
-	set	-4, %l0
-	add	%fp, %l0, %l0
+	ba	delctype0
+	nop
+! indodesID : x
+	set	x, %l0
+	add	%g0, %l0, %l0
 	ld	[%l0], %l0
 
 ! indodesID : x
@@ -31,20 +32,37 @@ main:
 	add	%g0, %l0, %l0
 	ld	[%l0], %l0
 
-! Doing Assignment, getting the right side value
-! indodesID : x
-	set	x, %l0
-	add	%g0, %l0, %l0
-	ld	[%l0], %l0
-
-! moving the right side value to %l1
+! PostIncOp first operand:x to %l1
 	mov	%l0, %l1
-! Doing Assignment, getting the left side location
+
+! Store the previous value before post inc to a tmp location
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
+
+	inc	%l1
+
+	set	x, %l0
+	add	%g0, %l0, %l0
+	st	%l1, [%l0]
+
+decltype0: 
+! local variable:   y    without init, just add offset
+! indodesID : x
+	set	x, %l0
+	add	%g0, %l0, %l0
+	ld	[%l0], %l0
+
+	set	_intFmt, %o0
+	mov	%l0, %o1
+	call	printf
+	nop
+	set	_endl, %o0
+	call	printf
+	nop
+
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 4) & -8
+	SAVE.main = -(92 + 8) & -8

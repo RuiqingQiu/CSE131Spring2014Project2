@@ -1195,11 +1195,14 @@ class MyParser extends parser
 	DoExitStmtCheck(STO s){
 		if(s.isError())
 			return;
-		//cehck if the STO is assignable to an int
+		//check if the STO is assignable to an int
 		if(!(s.getType().isAssignableTo(new IntType("int",4)))){
 			m_nNumErrors++;
 			m_errors.print (Formatter.toString(ErrorMsg.error7_Exit, s.getType().getName()));
 		}
+		myAsWriter.writeExit(s, globalCounter);
+		globalCounter++;
+		
 	}
 	
 	void
@@ -1304,11 +1307,12 @@ class MyParser extends parser
 	void
 	doDecltype(){
 	  myAsWriter.writeDecltype(this.globalCounter);
+	  this.decltypeCurrentCount = globalCounter;
 	  globalCounter++;
 	}
 	void 
 	doDecltypeDone(){
-	  myAsWriter.writeDecltypeDone(this.globalCounter - 1);
+	  myAsWriter.writeDecltypeDone(this.decltypeCurrentCount);
 	}
 	STO
 	DoUnaryExpr(STO a, UnaryOp o)
@@ -1935,4 +1939,6 @@ class MyParser extends parser
 	private Stack<String> IfStmtEndLabels = new Stack<String>();
 	private Stack<String> IfStmtElseLabels = new Stack<String>();
 	private int globalCounter = 0;
+	
+	private int decltypeCurrentCount;
 }
