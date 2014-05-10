@@ -787,6 +787,10 @@ class MyParser extends parser
 		else{
 			//Return an sto of the element type
 			Type t = ((PointerType)deref.getType()).getElementType().clone();
+			if(t.isStruct()){
+				STO s = m_symtab.access(t.getName());
+				t.setSize(s.getType().getSize());
+			}
 			ExprSTO sto = new ExprSTO("pointer dereference", t);
 			sto.setIsAddressable(true);
 			sto.setIsModifiable(true);
@@ -1402,6 +1406,7 @@ class MyParser extends parser
 			return var;
 		}
 		if(var.getType().isNullPointer()){
+			
 			int size = var.getType().getSize();
 			ConstSTO ret = new ConstSTO(var.getName()+"'s size");
 			ret.setValue(size);
@@ -1418,6 +1423,7 @@ class MyParser extends parser
 			int size = var.getType().getSize();
 			ConstSTO ret = new ConstSTO(var.getName()+"'s size");
 			ret.setValue(size);
+			
 			ret.setType(new IntType("int", 4));
 			return ret; 
 		}
