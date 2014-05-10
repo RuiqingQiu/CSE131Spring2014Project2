@@ -248,10 +248,10 @@ VarDecl ::=     OptStatic:_1 UndecoratedType:_2 IdListWOptInit:_3 T_SEMI
 	                         }
 	                     }
                     :}
-    |           OptStatic T_AUTO T_ID:_1 T_ASSIGN Expr:_2 T_SEMI
+    |           OptStatic:_3 T_AUTO T_ID:_1 T_ASSIGN Expr:_2 T_SEMI
                 {: 
                   // Assign _1 with the type _2 have and put in a symbol table
-                  ((MyParser) parser).DoAutoDeclaration(_1,_2);
+                  ((MyParser) parser).DoAutoDeclaration(_1,_2,_3);
                 :}
 
     ;

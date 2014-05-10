@@ -174,7 +174,7 @@ class MyParser extends parser
 	}
 	
 	void
-	DoAutoDeclaration(String id, STO sto){
+	DoAutoDeclaration(String id, STO sto, String isStatic){
 		if(sto.isError()){
 			return;
 		}
@@ -192,6 +192,27 @@ class MyParser extends parser
 		//Regular declare, l-value
 		v.setIsAddressable(true);
 		v.setIsModifiable(true);
+		
+		v.setInit(sto);
+		if(m_symtab.getLevel() == 1){
+			v.setOffset(v.getName());
+			v.setBase("%g0");
+			if(isStatic!= null){
+				v.setStatic(true);
+			    myAsWriter.writeStatic(v);
+			}
+			else
+		  	    myAsWriter.writeGlobal(v); 
+		}
+		//Local variable
+		else{
+		  m_symtab.addBytes(v.getType().getSize());
+		  //Local variables negative offsets
+		  v.setOffset("-" + m_symtab.getBytes());
+		  v.setBase("%fp");
+		  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, v);
+		  globalCounter++;
+		}
 		m_symtab.insert(v);
 	}
 	
@@ -223,6 +244,7 @@ class MyParser extends parser
 		//Regular declare, l-value
 		v.setIsAddressable(false);
 		v.setIsModifiable(true);
+		
 		m_symtab.insert(v);	
 	}
 	
