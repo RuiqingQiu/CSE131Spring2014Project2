@@ -1271,16 +1271,41 @@ class MyParser extends parser
 		    m_symtab.addBytes(4);
 		    switch(result.getName()){
 		      case "AddOp":
-		    	myAsWriter.writeAddOp(m_symtab.getBytes(), a, b);
+		    	//Check if need bytes for prompting
+		    	if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+		    	    m_symtab.addBytes(4);
+		    		myAsWriter.writeAddOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	}else{
+		          myAsWriter.writeAddOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	}
+		    	globalCounter++;
 		        break;
 		      case "MinusOp":
-		    	myAsWriter.writeMinusOp(m_symtab.getBytes(), a, b);
+		    	  if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+			    	  m_symtab.addBytes(4);
+			    	  myAsWriter.writeMinusOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	  }else{
+		    		  myAsWriter.writeMinusOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	  }
+		    	  globalCounter++;
 		    	break;
 		      case "MulOp":
-		    	myAsWriter.writeMulOp(m_symtab.getBytes(), a, b);
+		    	  if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+			    	  m_symtab.addBytes(4);
+			    	  myAsWriter.writeMulOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	  }else{
+		    		  myAsWriter.writeMulOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	  }
+		    	  globalCounter++;
 		    	break;
 		      case "DivOp":
-		    	myAsWriter.writeDivOp(m_symtab.getBytes(), a, b);
+		    	  if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+			    	  m_symtab.addBytes(4);
+			    	  myAsWriter.writeDivOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	  }else{
+		    		  myAsWriter.writeDivOp(m_symtab.getBytes(), a, b, this.globalCounter);
+		    	  }
+		    	  globalCounter++;
 		    	break;
 		      case "ModOp":
 		    	myAsWriter.writeModOp(m_symtab.getBytes(), a, b);
@@ -1299,6 +1324,7 @@ class MyParser extends parser
 		    	this.globalCounter++;
 		    	break;
 		    }
+		  
 		    result.setOffset("-" + m_symtab.getBytes());
 		    result.setBase("%fp");
 		    return result;

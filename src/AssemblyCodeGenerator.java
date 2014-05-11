@@ -518,6 +518,8 @@ public class AssemblyCodeGenerator {
   	        writeText();
   	        flush(writeAlignment(4));
   	    	template += indentString() + "set\t" + label + ", " + "%l0\n";
+  	    	//This load the value to %f0 since it's useful for float operation
+  	    	template += indentString() + "ld\t[%l0], %f0\n";
   	    	template += indentString() + "ld\t[%l0], %l0\n";
     	}
     	flush(template);
@@ -611,8 +613,63 @@ public class AssemblyCodeGenerator {
         template += indentString() + "ld\t[%fp-" + offset +"], %l0\n\n";
         flush(template);
       }
-    
-    public void writeAddOp(int offset, STO a, STO b){
+    public void getValueIntof1(STO a, int globalCounter, int offset){
+    	String template = "";
+    	//Prompt to float
+    	if(a.getType().isInt()){
+    		if(a.isConst()){
+    			setConst("", (ConstSTO)a, 0);
+    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    			template += indentString() + "fitos\t%f0, %f1\n";
+    		}
+    		else{
+    			writeDoDesID(a);
+    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    			template += indentString() + "fitos\t%f0, %f1\n";
+    		}
+    	}else{
+    		if(a.isConst()){
+    			setConst("getValueTo_f1", (ConstSTO)a, globalCounter);
+    			template += indentString() + "fmovs\t%f0, %f1\n";
+    		}
+    		else{
+    			writeDoDesID(a);
+    			template += indentString() + "fmovs\t%f0, %f1\n";
+    		}
+    	}
+    	flush(template);
+    }
+    public void getValueIntof2(STO b, int globalCounter, int offset){
+    	String template = "";
+    	//Prompt to float
+    	if(b.getType().isInt()){
+    		if(b.isConst()){
+    			setConst("", (ConstSTO)b, 0);
+    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    			template += indentString() + "fitos\t%f0, %f2\n";
+    		}
+    		else{
+    			writeDoDesID(b);
+    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    			template += indentString() + "fitos\t%f0, %f2\n";
+    		}
+    	}else{
+    		if(b.isConst()){
+    			setConst("getValueTo_f2", (ConstSTO)b, globalCounter);
+    			template += indentString() + "fmovs\t%f0, %f2\n";
+    		}
+    		else{
+    			writeDoDesID(b);
+    			template += indentString() + "fmovs\t%f0, %f2\n";
+    		}
+    	}
+    	flush(template);
+    }
+    public void writeAddOp(int offset, STO a, STO b, int globalCounter){
     	if(a.getType().isInt() && b.getType().isInt()){
 	      if(a.isVar())
 	        writeDoDesID(a);
@@ -640,12 +697,27 @@ public class AssemblyCodeGenerator {
 	      flush(template);
       }
       //If one of the operand is float
+  	  else if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+  		int position_to_store_tmp = offset - 4;
+  		getValueIntof1(a, globalCounter, position_to_store_tmp);
+  		getValueIntof2(b, globalCounter, position_to_store_tmp);
+  		String template = "! adding %f1 & %f2 to %f0\n";
+  		template += indentString() + "fadds\t%f1, %f2, %f0\n";
+  		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+	    flush(template);
+      }
+      //Float add float
   	  else{
-  		
+  		getValueIntof1(a, globalCounter, offset);
+  		getValueIntof2(b, globalCounter, offset);
+  		String template = "! adding %f1 & %f2 to %f0\n";
+  		template += indentString() + "fadds\t%f1, %f2, %f0\n";
+  		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+	    flush(template);
       }
     }
     
-    public void writeMinusOp(int offset, STO a, STO b){
+    public void writeMinusOp(int offset, STO a, STO b, int globalCounter){
     	if(a.getType().isInt() && b.getType().isInt()){
 	        if(a.isVar())
 	          writeDoDesID(a);
@@ -673,12 +745,27 @@ public class AssemblyCodeGenerator {
 	        flush(template);
     	}
     	//If one of the operand is float
-    	else{
-    		
-    	}
+    	else if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+    		int position_to_store_tmp = offset - 4;
+    		getValueIntof1(a, globalCounter, position_to_store_tmp);
+    		getValueIntof2(b, globalCounter, position_to_store_tmp);
+    		String template = "! adding %f1 & %f2 to %f0\n";
+    		template += indentString() + "fsubs\t%f1, %f2, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+    		flush(template);
+        }
+        //Float add float
+    	  else{
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! adding %f1 & %f2 to %f0\n";
+    		template += indentString() + "fsubs\t%f1, %f2, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+    		flush(template);
+        }
     }
     //1.2 mul
-    public void writeMulOp(int offset, STO a, STO b){
+    public void writeMulOp(int offset, STO a, STO b, int globalCounter){
     	if(a.getType().isInt() && b.getType().isInt()){
 	        if(a.isVar())
 	          writeDoDesID(a);
@@ -706,14 +793,29 @@ public class AssemblyCodeGenerator {
 	        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
 	        flush(template);
     	}
-    	else
-    	{
-    		
-    	}
+    	//If one of the operand is float
+    	else if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+    		int position_to_store_tmp = offset - 4;
+    		getValueIntof1(a, globalCounter, position_to_store_tmp);
+    		getValueIntof2(b, globalCounter, position_to_store_tmp);
+    		String template = "! adding %f1 & %f2 to %f0\n";
+    		template += indentString() + "fmuls\t%f1, %f2, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+    		flush(template);
+        }
+        //Float add float
+    	  else{
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! adding %f1 & %f2 to %f0\n";
+    		template += indentString() + "fmuls\t%f1, %f2, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+    		flush(template);
+        }
     }
     
     //1.2 div
-    public void writeDivOp(int offset, STO a, STO b){
+    public void writeDivOp(int offset, STO a, STO b, int globalCounter){
     	if(a.getType().isInt() && b.getType().isInt()){
 	        if(a.isVar())
 	          writeDoDesID(a);
@@ -741,10 +843,25 @@ public class AssemblyCodeGenerator {
 	        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
 	        flush(template);
     	}
-    	else
-    	{
-    		
-    	}
+    	//If one of the operand is float
+    	else if((a.getType().isInt() && b.getType().isFloat()) || (a.getType().isFloat() && b.getType().isInt())){
+    		int position_to_store_tmp = offset - 4;
+    		getValueIntof1(a, globalCounter, position_to_store_tmp);
+    		getValueIntof2(b, globalCounter, position_to_store_tmp);
+    		String template = "! adding %f1 & %f2 to %f0\n";
+    		template += indentString() + "fdivs\t%f1, %f2, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+    		flush(template);
+        }
+        //Float add float
+    	  else{
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! adding %f1 & %f2 to %f0\n";
+    		template += indentString() + "fdivs\t%f1, %f2, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+    		flush(template);
+        }
     }
     public void writeModOp(int offset, STO a, STO b){   	
 	  if(a.isVar())
@@ -903,51 +1020,58 @@ public class AssemblyCodeGenerator {
     public void writePreIncOp(String offset, STO a){
     	//a must be a mod l-val
     	writeDoDesID(a);
-    	
-    	String template = "! PreIncOp first operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n\n";
-   	  	template += indentString() + "inc\t%l1\n\n";
-   	  	flush(template);
-   	  	storeValueBack(a);
+    	if(a.getType().isInt()){
+	    	String template = "! PreIncOp first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	template += indentString() + "inc\t%l1\n\n";
+	   	  	flush(template);
+	   	  	storeValueBack(a);
+    	}
     }
     public void writePreDecOp(String offset, STO a){
     	//a must be a mod l-val
     	writeDoDesID(a);
-    	String template = "! PreDecOp first operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n\n";
-   	  	template += indentString() + "dec\t%l1\n\n";
-   	  	flush(template);
-   	  	storeValueBack(a);
+    	if(a.getType().isInt()){
+	    	String template = "! PreDecOp first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	template += indentString() + "dec\t%l1\n\n";
+	   	  	flush(template);
+	   	  	storeValueBack(a);
+    	}
     }
     
     public void writePostIncOp(String offset, STO a){
     	writeDoDesID(a);
-    	String template = "! PostIncOp first operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n\n";
-    	
-    	template += "! Store the previous value before post inc to a tmp location\n";
-    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
-        template += indentString() + "add\t%fp, %l0, %l0\n";
-	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
-	    
-   	  	template += indentString() + "inc\t%l1\n\n";
-   	  	flush(template);
-   	  	storeValueBack(a);
+    	if(a.getType().isInt()){
+	    	String template = "! PostIncOp first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	    	
+	    	template += "! Store the previous value before post inc to a tmp location\n";
+	    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+	        template += indentString() + "add\t%fp, %l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+		    
+	   	  	template += indentString() + "inc\t%l1\n\n";
+	   	  	flush(template);
+	   	  	storeValueBack(a);
+    	}
     }
     
     public void writePostDecOp(String offset, STO a){
     	writeDoDesID(a);
-    	String template = "! PostDecOp first operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n\n";
-    	
-    	template += "! Store the previous value before post inc to a tmp location\n";
-    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
-        template += indentString() + "add\t%fp, %l0, %l0\n";
-	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
-	    
-   	  	template += indentString() + "dec\t%l1\n\n";
-   	  	flush(template);
-   	  	storeValueBack(a);
+    	if(a.getType().isInt()){
+	    	String template = "! PostDecOp first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	    	
+	    	template += "! Store the previous value before post inc to a tmp location\n";
+	    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+	        template += indentString() + "add\t%fp, %l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+		    
+	   	  	template += indentString() + "dec\t%l1\n\n";
+	   	  	flush(template);
+	   	  	storeValueBack(a);
+    	}
     }
     
     /**
