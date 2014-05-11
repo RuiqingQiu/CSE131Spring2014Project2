@@ -1449,7 +1449,13 @@ class MyParser extends parser
 		result.setType(leftHandSide.getType().clone());
 		result.setIsAddressable(false);
 		result.setIsModifiable(false);
-		myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter);
+		if(leftHandSide.getType().isFloat() && rightHandSide.getType().isInt()){
+			//Need promption
+			m_symtab.addBytes(rightHandSide.getType().getSize());
+			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
+		}
+		else
+			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, 0);
 		globalCounter++;
 		return result;
 	}

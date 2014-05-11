@@ -1116,7 +1116,7 @@ public class AssemblyCodeGenerator {
      * @param left
      * @param right
      */
-    public void writeAssignment(STO left, STO right, int globalCounter){
+    public void writeAssignment(STO left, STO right, int globalCounter, int offset){
     	String template = "";
     	flush("! Doing Assignment, getting the right side value\n");
     	if(right.isConst()){
@@ -1124,12 +1124,24 @@ public class AssemblyCodeGenerator {
     	}
     	else
     		writeDoDesID(right);
-    	template += "! moving the right side value to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n";
-    	template += "! Doing Assignment, getting the left side location\n";
-    	template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
-		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
-    	template += indentString() + "st\t%l1, [%l0]\n";
+    	//Check if need promption
+    	if(left.getType().isFloat() && right.getType().isInt()){
+    		template += "! prompt int to float\n";
+    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    		//Prompt an int to float
+    		template += indentString() + "fitos\t %f0, %f0\n";
+    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+	    	template += indentString() + "st\t%f0, [%l0]\n\n";
+    	}else{
+	    	template += "! moving the right side value to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n";
+	    	template += "! Doing Assignment, getting the left side location\n";
+	    	template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+	    	template += indentString() + "st\t%l1, [%l0]\n";
+    	}
     	flush(template);
     }
     
