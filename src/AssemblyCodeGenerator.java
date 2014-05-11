@@ -217,6 +217,10 @@ public class AssemblyCodeGenerator {
       template += "_boolT:\t\t.asciz \"true\"\n";
       template += "_boolF:\t\t.asciz \"false\"\n\n";
       flush(template);
+      template = indentString() + ".section \".text\"\n";
+      template += indentString() + ".align 4\n";
+      template += "value_one:\t.single 0r1.0\n";
+      flush(template);
     }
 
     public String indentString(){
@@ -1007,14 +1011,24 @@ public class AssemblyCodeGenerator {
     }
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1
+     * And if it's a float, it will assume the value has been set into %f0
      * @param sto
      */
     public void storeValueBack(STO sto){
     	String template = "";
-    	template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
-        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
-	    flush (template);
+    	if(sto.getType().isInt()){
+	    	template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+	        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+		    flush (template);
+		}
+    	else if(sto.getType().isFloat()){
+    		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+	        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+		    template += indentString() + "st\t" + "%f0, " + "[%l0]\n\n";	
+		    flush (template);
+    		
+    	}
     }
     /* 1.3 */
     public void writePreIncOp(String offset, STO a){
@@ -1025,6 +1039,14 @@ public class AssemblyCodeGenerator {
 	    	template += indentString() + "mov\t%l0, %l1\n\n";
 	   	  	template += indentString() + "inc\t%l1\n\n";
 	   	  	flush(template);
+	   	  	storeValueBack(a);
+    	}
+    	else if(a.getType().isFloat()){
+    		String template = "! PreIncOp float first operand: " + a.getName() + " to %f0\n";
+    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f1\n";
+    		template += indentString() + "fadds\t%f0, %f1, %f0\n";
+    		flush(template);
 	   	  	storeValueBack(a);
     	}
     }
