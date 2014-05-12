@@ -1129,6 +1129,7 @@ class MyParser extends parser
 			}
 		}
 		myAsWriter.writeReturnStmt(m_symtab.getFunc().getName(), s, this.globalCounter);
+		myAsWriter.writeRetRestore();
 		this.globalCounter++;
 		return;
 	}

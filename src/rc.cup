@@ -853,7 +853,8 @@ IfStmt ::=          T_IF Expr:_1
 					CodeBlock
 					{:
 					  ((MyParser)parser).DoIfYesStmtEnd();
-					:} OptElse:_2
+					:} 
+					OptElse:_2
 					{:
 					  if(_2 == null)
 					    ((MyParser)parser).DoElseStmtStart();
@@ -1332,7 +1333,6 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
-                      System.out.println(_1);
                         ConstSTO s = new ConstSTO(_1,new IntType("int",4));
                         try{
 	                        int value = Integer.decode(_1);
