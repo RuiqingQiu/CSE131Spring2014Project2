@@ -985,7 +985,7 @@ public class AssemblyCodeGenerator {
     
     public void writeGreaterThanOp(int offset, STO a, STO b, int globalCounter){
     	if (a.isConst())
-    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+    	    setConst("greaterThanOp" , (ConstSTO)a, globalCounter);
     	else
     	    writeDoDesID(a);
     	
