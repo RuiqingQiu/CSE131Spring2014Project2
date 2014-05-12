@@ -609,13 +609,23 @@ public class AssemblyCodeGenerator {
     public void writeNegative(int offset, STO s){
         flush("! convert to negative and store\n");
         writeDoDesID(s);
-        String template = indentString() + "mov\t%l0, %o0\n";
-        template += indentString() + "set\t-1, %o1\n";
-        template += indentString() + "call\t.mul\n";
-        template += indentString() + "nop\n";
-        template += indentString() + "st\t%o0, [%fp-" + offset + "]\n";
-        template += indentString() + "ld\t[%fp-" + offset +"], %l0\n\n";
-        flush(template);
+        if(s.getType().isInt()){
+	        String template = indentString() + "mov\t%l0, %o0\n";
+	        template += indentString() + "set\t-1, %o1\n";
+	        template += indentString() + "call\t.mul\n";
+	        template += indentString() + "nop\n";
+	        template += indentString() + "st\t%o0, [%fp-" + offset + "]\n";
+	        template += indentString() + "ld\t[%fp-" + offset +"], %l0\n\n";
+	        flush(template);
+        }
+        //If it's float
+        else{
+        	String template = indentString() + "fnegs\t%f0, %f0\n";
+	        template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+	        template += indentString() + "ld\t[%fp-" + offset + "], %l0\n\n";
+	        template += indentString() + "ld\t[%fp-" + offset + "], %f0\n\n";
+	        flush(template);
+        }
       }
     public void getValueIntof1(STO a, int globalCounter, int offset){
     	String template = "";
