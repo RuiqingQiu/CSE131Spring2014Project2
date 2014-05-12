@@ -1384,7 +1384,12 @@ class MyParser extends parser
 	    	  result.setOffset("-" + m_symtab.getBytes());
 	  	      result.setBase("%fp");
 		    break;
-		    	
+	      case "NotOp":
+	    	  m_symtab.addBytes(4);
+	    	  myAsWriter.writeNotOp("-" + m_symtab.getBytes(), a, this.globalCounter);
+	    	  globalCounter++;
+	    	  result.setOffset("-" + m_symtab.getBytes());
+	  	      result.setBase("%fp");
 	    }
 	   
 		return result;

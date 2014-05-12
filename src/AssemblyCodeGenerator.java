@@ -1141,6 +1141,38 @@ public class AssemblyCodeGenerator {
     }
     
     /**
+     * 2.1 Not op
+     * @param offset
+     * @param a
+     */
+    public void writeNotOp(String offset, STO a, int globalCounter){
+    	writeDoDesID(a);
+    	String template = "! NotOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+    	template += indentString() + "cmp\t%l1, %g0\n";
+    	template += indentString() + "be\tNotOpSetZero" + globalCounter + "\n";
+    	template += indentString() + "nop\n";
+    	//it's true need to set false
+    	template += "! the value is true, need to set to false\n";
+    	template += indentString() + "mov\t%g0, %l1\n";
+    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+        template += indentString() + "add\t%fp, %l0, %l0\n";
+	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";
+	    template += indentString() + "ba\tendOfNotOp" + globalCounter +"\n";
+	    template += indentString() + "nop\n";
+    	//If it's false, need to set true
+    	template += "! the value is false, need to set to true\n";
+    	template += "NotOpSetZero" + globalCounter + ": \n";
+    	template += indentString() + "set\t1, %l1\n";
+    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+        template += indentString() + "add\t%fp, %l0, %l0\n";
+	    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";
+	    
+	    template += "endOfNotOp" + globalCounter + ": \n";
+   	  	flush(template);
+    }
+    
+    /**
      * 1.3 Exit statement
      */
     public void writeExit(STO expr, int globalCounter){
