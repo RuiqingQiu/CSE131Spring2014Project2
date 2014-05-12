@@ -984,85 +984,273 @@ public class AssemblyCodeGenerator {
     }
     
     public void writeGreaterThanOp(int offset, STO a, STO b, int globalCounter){
-    	if (a.isConst())
-            setConst("greatThanConstEval", (ConstSTO)a, globalCounter);
-    	else
-    	    writeDoDesID(a);
-    	
-    	String template = "! GreaterThanOP first operand:" + a.getName() + " to %l1\n";
-   	  	template += indentString() + "mov\t%l0, %l1\n\n";
-   	  	flush(template);
-    	
-    	
-    	if (b.isConst())
-            setConst("greatThanConstEval", (ConstSTO)b, globalCounter);
-    	else
-    	    writeDoDesID(b);
-    	template = "! GreaterThanOP second operand:" + b.getName() + " to %l2\n";
-   	  	template += indentString() + "mov\t%l0, %l2\n\n";
-   	  	flush(template);
-   	  	
-   	  	template = indentString() + "cmp\t%l1, %l2\n";
-   	  	String label = "greaterThan" + globalCounter;
-   	  	template += indentString() + "bg\t" + label + "\n";
-   	  	template += indentString() + "nop\n\n";
-   	  	//If not greater than, than store false value to the tmp
-   	  	template += "! greatThanOp set false\n";
-   	  	template += indentString() + "set\t0, %l0\n";
-   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-   	  	template += indentString() + "ba\t" + label + "_done\n";
-   	  	template += indentString() + "nop\n\n";
-   	  	//If greater than store true value to the tmp
-   	  	template += label + ":\t\n";
-   	  	template += "! greatThanOp set true\n";
-   	  	template += indentString() + "set\t1, %l0\n";
-   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-   	  	template += label+"_done:\n\n";
-   	  	flush(template);
-   	  	
+    	if(a.getType().isInt() && b.getType().isInt()){
+	    	if (a.isConst())
+	            setConst("greatThanConstEval", (ConstSTO)a, globalCounter);
+	    	else
+	    	    writeDoDesID(a);
+	    	
+	    	String template = "! GreaterThanOP first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	flush(template);
+	    	
+	    	
+	    	if (b.isConst())
+	            setConst("greatThanConstEval", (ConstSTO)b, globalCounter);
+	    	else
+	    	    writeDoDesID(b);
+	    	template = "! GreaterThanOP second operand:" + b.getName() + " to %l2\n";
+	   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	flush(template);
+	   	  	
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = "greaterThan" + globalCounter;
+	   	  	template += indentString() + "bg\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! greatThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! greatThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+    	}
+    	//If one of the operand is float
+    	else{ 		
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! cmp %f1 & %f2\n";
+    		template += indentString() + "fcmps\t%f1, %f2\n";
+    		template += indentString() + "nop\n";
+    		
+    		
+    		String label = "greaterThan" + globalCounter;
+	   	  	template += indentString() + "fbg\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! greatThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! greatThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+        }
     }
-
+    
+    
     /*
      * This function is used to do greaterequalthan operation
      * Added by Mingshan
      */
     public void writeGreaterAndEqualThanOp(int offset,STO a,STO b,int globalCounter){
-        if(a.isConst()){
-          setConst("greatAndEqualThanConstEval", (ConstSTO)a, globalCounter);
-        }
-        else
-            writeDoDesID(a);
-        String template = "! GreaterThanEqualOp first operand : "+ a.getName() + "to %l1\n";
-        template += indentString() + "mov\t%l0,%l1\n\n";
-        flush(template);
-
-        if(b.isConst())
-        	setConst("greatAndEqualThanConstEval", (ConstSTO)b, globalCounter);
-        else
-            writeDoDesID(b);
-        template = "! GraterThanEqualOp second operand: " + b.getName() + " to %l2\n";
-        template += indentString() + "mov\t%l0,%l2\n\n";
-        flush(template);
-
-        template = indentString() + "cmp\t%l1,%l2\n";
-        String label = "greaterThanEqual" + globalCounter;
-        template += indentString() + "bge\t" + label + "\n";
-        template += indentString() + "nop\n\n";
-        //If strictly less than, than store the false value to the tmp
-        template += "! greaterThanEqualOp set falst\n";
-        template += indentString() + "mov\t%g0,%l0\n";
-        template += indentString() + "st\t%l0,[%fp-" + offset + "]\n";
-        template += indentString() + "ba\t" + label + "_done\n";
-        template += indentString() + "nop\n\n";
-
-        //If greaterequal than store true value to the tmp
-        template += label + ":\t\n";
-        template += "! greaterThanEqualThan set true\n";
-        template += indentString() + "set\t1,%l0\n";
-        template += indentString() + "st\t%l0,[%fp-" + offset + "]\n";
-        template += label + "_done:\n\n";
-        flush(template);
+    	if(a.getType().isInt() && b.getType().isInt()){
+	        if(a.isConst()){
+	          setConst("greatAndEqualThanConstEval", (ConstSTO)a, globalCounter);
+	        }
+	        else
+	            writeDoDesID(a);
+	        String template = "! GreaterThanEqualOp first operand : "+ a.getName() + "to %l1\n";
+	        template += indentString() + "mov\t%l0,%l1\n\n";
+	        flush(template);
+	
+	        if(b.isConst())
+	        	setConst("greatAndEqualThanConstEval", (ConstSTO)b, globalCounter);
+	        else
+	            writeDoDesID(b);
+	        template = "! GraterThanEqualOp second operand: " + b.getName() + " to %l2\n";
+	        template += indentString() + "mov\t%l0,%l2\n\n";
+	        flush(template);
+	
+	        template = indentString() + "cmp\t%l1,%l2\n";
+	        String label = "greaterThanEqual" + globalCounter;
+	        template += indentString() + "bge\t" + label + "\n";
+	        template += indentString() + "nop\n\n";
+	        //If strictly less than, than store the false value to the tmp
+	        template += "! greaterThanEqualOp set falst\n";
+	        template += indentString() + "mov\t%g0,%l0\n";
+	        template += indentString() + "st\t%l0,[%fp-" + offset + "]\n";
+	        template += indentString() + "ba\t" + label + "_done\n";
+	        template += indentString() + "nop\n\n";
+	
+	        //If greaterequal than store true value to the tmp
+	        template += label + ":\t\n";
+	        template += "! greaterThanEqualThan set true\n";
+	        template += indentString() + "set\t1,%l0\n";
+	        template += indentString() + "st\t%l0,[%fp-" + offset + "]\n";
+	        template += label + "_done:\n\n";
+	        flush(template);
+    	}
+    	else{
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! cmp %f1 & %f2\n";
+    		template += indentString() + "fcmps\t%f1, %f2\n";
+    		template += indentString() + "nop\n";
+    		
+    		
+    		String label = "greaterThanEqualThan" + globalCounter;
+	   	  	template += indentString() + "fbge\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greaterThanEqual than, than store false value to the tmp
+	   	  	template += "! greaterThanEqualThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greaterThanEqual than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! greaterThanEqualThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+    	}
     }
+
+    public void writeLessThanOp(int offset, STO a, STO b, int globalCounter){
+    	if(a.getType().isInt() && b.getType().isInt()){
+	    	if (a.isConst())
+	            setConst("lessThanConstEval", (ConstSTO)a, globalCounter);
+	    	else
+	    	    writeDoDesID(a);
+	    	
+	    	String template = "! lessThanOP first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	flush(template);
+	    	
+	    	
+	    	if (b.isConst())
+	            setConst("lessThanConstEval", (ConstSTO)b, globalCounter);
+	    	else
+	    	    writeDoDesID(b);
+	    	template = "! lessThanOP second operand:" + b.getName() + " to %l2\n";
+	   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	flush(template);
+	   	  	
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = "lessThan" + globalCounter;
+	   	  	template += indentString() + "bl\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! lessThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! lessThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+    	}
+    	//If one of the operand is float
+    	else{ 		
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! cmp %f1 & %f2\n";
+    		template += indentString() + "fcmps\t%f1, %f2\n";
+    		template += indentString() + "nop\n";
+    		
+    		
+    		String label = "lessThan" + globalCounter;
+	   	  	template += indentString() + "fbl\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not less than, than store false value to the tmp
+	   	  	template += "! lessThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If less than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! lessThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+        }
+    }
+    
+    public void writeLessAndEqualThanOp(int offset, STO a, STO b, int globalCounter){
+    	if(a.getType().isInt() && b.getType().isInt()){
+	    	if (a.isConst())
+	            setConst("lessAndEqualThanConstEval", (ConstSTO)a, globalCounter);
+	    	else
+	    	    writeDoDesID(a);
+	    	
+	    	String template = "! lessAndEqualThanOP first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	flush(template);
+	    	
+	    	
+	    	if (b.isConst())
+	            setConst("lessAndEqualThanConstEval", (ConstSTO)b, globalCounter);
+	    	else
+	    	    writeDoDesID(b);
+	    	template = "! lessAndEqualThanOP second operand:" + b.getName() + " to %l2\n";
+	   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	flush(template);
+	   	  	
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = "lessAndEqualThan" + globalCounter;
+	   	  	template += indentString() + "ble\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! lessAndEqualThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! lessAndEqualThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+    	}
+    	//If one of the operand is float
+    	else{ 		
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! cmp %f1 & %f2\n";
+    		template += indentString() + "fcmps\t%f1, %f2\n";
+    		template += indentString() + "nop\n";
+    		
+    		
+    		String label = "lessAndEqualThan" + globalCounter;
+	   	  	template += indentString() + "fble\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! lessAndEqualThanOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! lessAndEqualThanOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+        }
+    }
+
 
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1

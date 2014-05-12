@@ -1332,7 +1332,15 @@ class MyParser extends parser
                 myAsWriter.writeGreaterAndEqualThanOp(m_symtab.getBytes(),a,b,this.globalCounter);
                 this.globalCounter++;
                 break;
-		    }
+              case "LessThanOp":
+            	  myAsWriter.writeLessThanOp(m_symtab.getBytes(),a,b,this.globalCounter);
+            	  this.globalCounter++;
+            	  break;
+              case "LessAndEqualThanOp":
+            	  myAsWriter.writeLessAndEqualThanOp(m_symtab.getBytes(),a,b,this.globalCounter);
+            	  this.globalCounter++;
+            	  break;
+            }
 		  
 		    result.setOffset("-" + m_symtab.getBytes());
 		    result.setBase("%fp");
