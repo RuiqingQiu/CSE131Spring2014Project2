@@ -1060,6 +1060,14 @@ public class AssemblyCodeGenerator {
 	   	  	flush(template);
 	   	  	storeValueBack(a);
     	}
+    	else if(a.getType().isFloat()){
+    		String template = "! PreDecOp float first operand: " + a.getName() + " to %f0\n";
+    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f1\n";
+    		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
+    		flush(template);
+	   	  	storeValueBack(a);
+    	}
     }
     
     public void writePostIncOp(String offset, STO a){
@@ -1077,6 +1085,18 @@ public class AssemblyCodeGenerator {
 	   	  	flush(template);
 	   	  	storeValueBack(a);
     	}
+    	else if(a.getType().isFloat()){
+    		String template = "! PostIncOp float first operand: " + a.getName() + " to %f0\n";
+    		template += "! Store the value of %f0 to a tmp location\n";
+    		template += indentString() + "set\t" + offset + ", " + "%l0\n";
+    		template += indentString() + "add\t%fp, %l0, %l0\n";
+    		template += indentString() + "st\t" + "%f0, " + "[%l0]\n\n";	
+    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f1\n";
+    		template += indentString() + "fadds\t%f0, %f1, %f0\n";
+    		flush(template);
+	   	  	storeValueBack(a);
+    	}
     }
     
     public void writePostDecOp(String offset, STO a){
@@ -1092,6 +1112,18 @@ public class AssemblyCodeGenerator {
 		    
 	   	  	template += indentString() + "dec\t%l1\n\n";
 	   	  	flush(template);
+	   	  	storeValueBack(a);
+    	}
+    	else if(a.getType().isFloat()){
+    		String template = "! PostDecOp float first operand: " + a.getName() + " to %f0\n";
+    		template += "! Store the value of %f0 to a tmp location\n";
+    		template += indentString() + "set\t" + offset + ", " + "%l0\n";
+    		template += indentString() + "add\t%fp, %l0, %l0\n";
+    		template += indentString() + "st\t" + "%f0, " + "[%l0]\n\n";	
+    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f1\n";
+    		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
+    		flush(template);
 	   	  	storeValueBack(a);
     	}
     }
