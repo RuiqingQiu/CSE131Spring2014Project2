@@ -1332,9 +1332,15 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
+                      System.out.println(_1);
                         ConstSTO s = new ConstSTO(_1,new IntType("int",4));
-                        int value = Integer.decode(_1);
-                        s.setValue(value);
+                        try{
+	                        int value = Integer.decode(_1);
+	                        s.setValue(value);
+	                    }
+	                    catch(NumberFormatException e){
+	                      //TODO
+	                    }
                         RESULT = s;
                         
                     :}

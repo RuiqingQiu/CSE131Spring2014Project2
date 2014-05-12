@@ -1459,9 +1459,14 @@ class MyParser extends parser
 			//Need promption
 			m_symtab.addBytes(rightHandSide.getType().getSize());
 			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
+			result.setBase(leftHandSide.getBase());
+			result.setOffset(leftHandSide.getOffset());
 		}
-		else
+		else{
 			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, 0);
+			result.setBase(leftHandSide.getBase());
+			result.setOffset(leftHandSide.getOffset());
+		}
 		globalCounter++;
 		return result;
 	}
