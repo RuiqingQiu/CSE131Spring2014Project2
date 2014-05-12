@@ -1228,6 +1228,32 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
+    /**
+     * 
+     * @param arrayName
+     * @param indexExpr
+     */
+    public void writeDoArrayDes(STO arrayName, STO indexExpr){
+    	flush("! doing array dereference\n");
+    	//Move the index value into %l0
+    	writeDoDesID(indexExpr);
+    	//Store index value to %l1
+    	String template = indentString() + "mov\t%l0, %l1\n";
+    	template += indentString() + "set\t" + ((CompositeType)arrayName.getType()).getElementType().getSize() + ", %o0\n";
+    	template += indentString() + "mov\t%l1, %o1\n";
+    	template += indentString() + "call\t.mul\n";
+    	template += indentString() + "nop\n\n";
+    	//Move the actual offset to %l1
+    	template += "! move the actual offset to %l1\n";
+    	template += indentString() + "mov\t%o0, %l1\n";
+    	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
+		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "add\t%l0, %l1, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	template += "! done with do array des\n";
+    	flush(template);
+    }
+    
     
     // 9
     public void writeAssembly(String template, String ... params) {

@@ -1176,7 +1176,11 @@ class MyParser extends parser
 	  }
 	  //If the cout is an expression
 	  else if(s.isExpr()){
-		myAsWriter.writeDoDesID(s);
+		if(s.getName().equals("array_doDesignator2")){
+			
+		}
+		else
+			myAsWriter.writeDoDesID(s);
 		//These assumes do des put the correct value into %l0
 		if(s.getType().isInt()){
 		  myAsWriter.writeCoutInt();
@@ -1333,13 +1337,15 @@ class MyParser extends parser
 	void
 	doDecltype(){
 	  myAsWriter.writeDecltype(this.globalCounter);
-	  this.decltypeCurrentCount = globalCounter;
+	  this.decltypeLabels.push(globalCounter);
 	  globalCounter++;
 	}
 	void 
 	doDecltypeDone(){
-	  myAsWriter.writeDecltypeDone(this.decltypeCurrentCount);
+	  Integer labelCount = this.decltypeLabels.pop();
+	  myAsWriter.writeDecltypeDone(labelCount);
 	}
+	
 	STO
 	DoUnaryExpr(STO a, UnaryOp o)
 	{
@@ -1893,6 +1899,7 @@ class MyParser extends parser
 		ExprSTO e = new ExprSTO("array_doDesignator2", ((CompositeType)nameSto.getType()).getElementType());
 		e.setIsAddressable(true);
 		e.setIsModifiable(true);
+		myAsWriter.writeDoArrayDes(nameSto, indexExpr);
 		//Correct usage of array, dereference the array and get its element type
 		return e;
 	}
@@ -1971,6 +1978,7 @@ class MyParser extends parser
 	private Vector<ConstSTO> coutStrings = new Vector<ConstSTO>();
 	private Stack<String> IfStmtEndLabels = new Stack<String>();
 	private Stack<String> IfStmtElseLabels = new Stack<String>();
+	private Stack<Integer> decltypeLabels = new Stack<Integer>();
 	private int globalCounter = 0;
 	
 	private int decltypeCurrentCount;
