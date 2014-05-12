@@ -242,8 +242,8 @@ class MyParser extends parser
 		v.setType(sto.getType().clone());
 		v.setValue(((ConstSTO)sto).getValue());
 		//Regular declare, l-value
-		v.setIsAddressable(false);
-		v.setIsModifiable(true);
+		v.setIsAddressable(true);
+		v.setIsModifiable(false);
 		
 		m_symtab.insert(v);	
 	}
