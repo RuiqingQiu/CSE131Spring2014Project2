@@ -985,7 +985,7 @@ public class AssemblyCodeGenerator {
     
     public void writeGreaterThanOp(int offset, STO a, STO b, int globalCounter){
     	if (a.isConst())
-    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
+            setConst("greatThanConstEval", (ConstSTO)a, globalCounter);
     	else
     	    writeDoDesID(a);
     	
@@ -995,7 +995,7 @@ public class AssemblyCodeGenerator {
     	
     	
     	if (b.isConst())
-    	    flush(indentString() + "set\t" + ((ConstSTO)b).getIntValue() + ", %l0");
+            setConst("greatThanConstEval", (ConstSTO)b, globalCounter);
     	else
     	    writeDoDesID(b);
     	template = "! GreaterThanOP second operand:" + b.getName() + " to %l2\n";
@@ -1028,7 +1028,7 @@ public class AssemblyCodeGenerator {
      */
     public void writeGreaterAndEqualThanOp(int offset,STO a,STO b,int globalCounter){
         if(a.isConst()){
-          flush(indentString()+"set\t" + ((ConstSTO)a).getIntValue() + ",%l0");
+          setConst("greatAndEqualThanConstEval", (ConstSTO)a, globalCounter);
         }
         else
             writeDoDesID(a);
@@ -1037,7 +1037,7 @@ public class AssemblyCodeGenerator {
         flush(template);
 
         if(b.isConst())
-            flush(indentString()+"set\t" + ((ConstSTO)b).getIntValue() + " ,%l0");
+        	setConst("greatAndEqualThanConstEval", (ConstSTO)b, globalCounter);
         else
             writeDoDesID(b);
         template = "! GraterThanEqualOp second operand: " + b.getName() + " to %l2\n";
