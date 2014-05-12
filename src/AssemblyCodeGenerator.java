@@ -985,7 +985,7 @@ public class AssemblyCodeGenerator {
     
     public void writeGreaterThanOp(int offset, STO a, STO b, int globalCounter){
     	if (a.isConst())
-    	    setConst("greaterThanOp" , (ConstSTO)a, globalCounter);
+    	    flush(indentString() + "set\t" + ((ConstSTO)a).getIntValue() + ", %l0");
     	else
     	    writeDoDesID(a);
     	
@@ -1021,6 +1021,49 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
    	  	
     }
+
+    /*
+     * This function is used to do greaterequalthan operation
+     * Added by Mingshan
+     */
+    public void writeGreaterAndEqualThanOp(int offset,STO a,STO b,int globalCounter){
+        if(a.isConst()){
+          flush(indentString()+"set\t" + ((ConstSTO)a).getIntValue() + ",%l0");
+        }
+        else
+            writeDoDesID(a);
+        String template = "! GreaterThanEqualOp first operand : "+ a.getName() + "to %l1\n";
+        template += indentString() + "mov\t%l0,%l1\n\n";
+        flush(template);
+
+        if(b.isConst())
+            flush(indentString()+"set\t" + ((ConstSTO)b).getIntValue() + " ,%l0");
+        else
+            writeDoDesID(b);
+        template = "! GraterThanEqualOp second operand: " + b.getName() + " to %l2\n";
+        template += indentString() + "mov\t%l0,%l2\n\n";
+        flush(template);
+
+        template = indentString() + "cmp\t%l1,%l2\n";
+        String label = "greaterThanEqual" + globalCounter;
+        template += indentString() + "bge\t" + label + "\n";
+        template += indentString() + "nop\n\n";
+        //If strictly less than, than store the false value to the tmp
+        template += "! greaterThanEqualOp set falst\n";
+        template += indentString() + "mov\t%g0,%l0\n";
+        template += indentString() + "st\t%l0,[%fp-" + offset + "]\n";
+        template += indentString() + "ba\t" + label + "_done\n";
+        template += indentString() + "nop\n\n";
+
+        //If greaterequal than store true value to the tmp
+        template += label + ":\t\n";
+        template += "! greaterThanEqualThan set true\n";
+        template += indentString() + "set\t1,%l0\n";
+        template += indentString() + "st\t%l0,[%fp-" + offset + "]\n";
+        template += label + "_done:\n\n";
+        flush(template);
+    }
+
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1
      * And if it's a float, it will assume the value has been set into %f0
