@@ -1928,6 +1928,7 @@ class MyParser extends parser
 			sto = new ErrorSTO (strID);
 		}
 		sto.setIsGlobal(true);
+		myAsWriter.writeDoDesID(sto);
 		return (sto);
 	}
 
