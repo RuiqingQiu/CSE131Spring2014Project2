@@ -1,5 +1,5 @@
 /*
- * Generated Sun May 11 19:30:52 PDT 2014
+ * Generated Mon May 12 18:20:34 PDT 2014
  */
 
 	.section ".rodata"
@@ -41,7 +41,7 @@ main:
 	be	NotOpSetZero1
 	nop
 ! the value is true, need to set to false
-	set	%g0, %l1
+	mov	%g0, %l1
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
@@ -49,13 +49,13 @@ main:
 	ba	endOfNotOp1
 	nop
 ! the value is false, need to set to true
-NotOpSetZero: 1
-	set	%1, %l1
+NotOpSetZero1: 
+	set	1, %l1
 	set	-8, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
-endOfNotOp: 
+endOfNotOp1: 
 ! init variable: y
 ! init is an expression
 	set	-8, %l0
@@ -65,30 +65,60 @@ endOfNotOp:
 	add	%fp,%l0, %l0
 	st	%l1, [%l0]
 
+! indodesID : x
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
 ! indodesID : y
 	set	-12, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-	cmp	%l0, 0
-	be	setFalse3
+! indodesID : x
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! AndOp first operand:x to %l1
+	mov	%l0, %l1
+
+! Comparing %l1 with %g0
+	cmp	%l0, %g0
+	be	AndOp_False3
 	nop
-	set	_boolT, %o0
-	call	printf
+! indodesID : y
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! AndOp second operand:x to %l1
+	mov	%l0, %l2
+
+! Comparing %l2 with %g0
+	cmp	%l0, %g0
+	be	AndOp_False3
 	nop
-	ba	done3
+! it enter here if both side are true
+	set	1, %l0
+	st	%l0, [%fp-16]
+	ba	AddOp_End3
 	nop
-setFalse3:
-	set	_boolF, %o0
-	call	printf
-	nop
-done3:
-	set	_endl, %o0
-	call	printf
-	nop
+AndOp_False3: 
+	set	%g0, %l0
+	st	%l0, [%fp-16]
+AddOp_End3: 
+! init variable: z
+! init is an expression
+	set	-16, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l1
+	set	-20, %l0
+	add	%fp,%l0, %l0
+	st	%l1, [%l0]
 
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 12) & -8
+	SAVE.main = -(92 + 20) & -8

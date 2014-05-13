@@ -1388,6 +1388,120 @@ public class AssemblyCodeGenerator {
 	   	  	flush(template);
         }
     }
+    
+    /**
+     * This method is for generating code to check && operator
+     * Short circuiting if a evaluates to false.
+     * @param offset
+     * @param a
+     * @param b
+     * @param globalCounter
+     */
+    public void writeAndOp(int offset, STO a, STO b, int globalCounter){
+    	if (a.isConst())
+            setConst("AddConstEval", (ConstSTO)a, globalCounter);
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! AndOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+   	  	template = "! Comparing %l1 with %g0\n";
+   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	//If it's false, go to end
+   	  	String label = "AndOp_False" + globalCounter;
+   	  	template += indentString() + "be\t" + label + "\n";
+   	  	template += indentString() + "nop\n";
+   	  	flush(template);
+   	  	//Here if a is true, evaluate b
+   	  	
+    	if (b.isConst())
+            setConst("AddConstEval", (ConstSTO)b, globalCounter);
+    	else
+    	    writeDoDesID(b);
+    	template = "! AndOp second operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l2\n\n";
+    	flush(template);
+    	
+    	template = "! Comparing %l2 with %g0\n";
+   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	//If it's false, go to end
+   	  	template += indentString() + "be\t" + label + "\n";
+   	  	template += indentString() + "nop\n";
+   	  	flush(template);
+   	  	//Here if both are true
+   	  	template = "! it enter here if both side are true\n";
+   	  	//Set to true
+   	  	template += indentString() + "set\t1, %l0\n";
+	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	  	template += indentString() + "ba\tAddOp_End" + globalCounter + "\n";
+	  	template += indentString() + "nop\n";
+	  	
+	  	//Set false label
+	  	template += label + ": \n";
+	  	template += indentString() + "set\t0, %l0\n";
+	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	  	template += "AddOp_End" + globalCounter + ": \n";
+	  	flush(template);
+    }
+    
+    /**
+     * This method is for generating code to check && operator
+     * Short circuiting if a evaluates to true.
+     * @param offset
+     * @param a
+     * @param b
+     * @param globalCounter
+     */
+    public void writeOrOp(int offset, STO a, STO b, int globalCounter){
+    	if (a.isConst())
+            setConst("OrConstEval", (ConstSTO)a, globalCounter);
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! OrOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+   	  	template = "! Comparing %l1 with %g0\n";
+   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	//If it's false, go to end
+   	  	String label = "OrOp_True" + globalCounter;
+   	  	template += indentString() + "bne\t" + label + "\n";
+   	  	template += indentString() + "nop\n";
+   	  	flush(template);
+   	  	//Here if a is true, evaluate b
+   	  	
+    	if (b.isConst())
+            setConst("OrConstEval", (ConstSTO)b, globalCounter);
+    	else
+    	    writeDoDesID(b);
+    	template = "! OrOp second operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l2\n\n";
+    	flush(template);
+    	
+    	template = "! Comparing %l2 with %g0\n";
+   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	//If it's true, go to end
+   	  	template += indentString() + "bne\t" + label + "\n";
+   	  	template += indentString() + "nop\n";
+   	  	flush(template);
+   	  	//Here if both are false
+   	  	template = "! it enter here if both side are false\n";
+   	  	//Set to true
+   	  	template += indentString() + "set\t0, %l0\n";
+	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	  	template += indentString() + "ba\tOrOp_End" + globalCounter + "\n";
+	  	template += indentString() + "nop\n";
+	  	
+	  	//Set false label
+	  	template += label + ": \n";
+	  	template += indentString() + "set\t1, %l0\n";
+	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	  	template += "OrOp_End" + globalCounter + ": \n";
+	  	flush(template);
+    }
 
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1

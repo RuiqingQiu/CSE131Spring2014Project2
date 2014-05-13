@@ -1348,6 +1348,14 @@ class MyParser extends parser
             	  myAsWriter.writeEqualOp(m_symtab.getBytes(),a,b,this.globalCounter);
             	  this.globalCounter++;
             	  break;
+              case "AndOp":
+            	  myAsWriter.writeAndOp(m_symtab.getBytes(), a,b, this.globalCounter);
+            	  this.globalCounter++;
+            	  break;
+              case "OrOp":
+            	  myAsWriter.writeOrOp(m_symtab.getBytes(), a,b, this.globalCounter);
+            	  this.globalCounter++;
+            	  break;
             }
 		  
 		    result.setOffset("-" + m_symtab.getBytes());
