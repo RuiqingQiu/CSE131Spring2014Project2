@@ -1361,12 +1361,16 @@ class MyParser extends parser
             	  this.globalCounter++;
             	  break;
               case "AndOp":
-            	  String Andlabel = this.AndShortCircuitLabel.pop();
+            	  String Andlabel = "";
+            	  
+            	  Andlabel = this.AndShortCircuitLabel.pop();
             	  myAsWriter.writeAndOp(m_symtab.getBytes(), a,b, this.globalCounter, Andlabel);
             	  this.globalCounter++;
             	  break;
               case "OrOp":
-            	  String Orlabel = this.OrShortCircuitLabel.pop();
+            	  String Orlabel = "";
+            	  
+            	  Orlabel = this.OrShortCircuitLabel.pop();
             	  myAsWriter.writeOrOp(m_symtab.getBytes(), a,b, this.globalCounter, Orlabel);
             	  this.globalCounter++;
             	  break;

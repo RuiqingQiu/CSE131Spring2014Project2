@@ -1027,10 +1027,8 @@ Expr ::=         Designator:_1 T_ASSIGN Expr:_2
 
 Expr0 ::=        Expr0:_1 T_OR
 				 {:
-				   if(_1.isConst()){
-				   }
-				   else
-				      ((MyParser)parser).DoOrOpCheckFirst(_1);
+
+				    ((MyParser)parser).DoOrOpCheckFirst(_1);
 				 :}					 
 				 Expr1:_3
                  {:
@@ -1045,11 +1043,8 @@ Expr0 ::=        Expr0:_1 T_OR
 
 Expr1 ::=        Expr1:_1 T_AND
   				 {:
-  				   if(_1.isConst()){
-  				   }  
-  				   else{ 
-  				     ((MyParser)parser).DoAndOpCheckFirst(_1);
-  				   }
+  				   ((MyParser)parser).DoAndOpCheckFirst(_1);
+  				   
 				 :} 
 				 Expr2:_3
                  {:
