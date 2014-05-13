@@ -1251,6 +1251,143 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    /*
+     * This function is to deal with == binary expression
+     */
+    public void writeEqualOp(int offset, STO a, STO b, int globalCounter){
+    	if(a.getType().isInt() && b.getType().isInt()){
+	    	if (a.isConst())
+	            setConst("equalConstEval", (ConstSTO)a, globalCounter);
+	    	else
+	    	    writeDoDesID(a);
+	    	
+	    	String template = "! equalOP first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	flush(template);
+	    	
+	    	
+	    	if (b.isConst())
+	            setConst("equalConstEval", (ConstSTO)b, globalCounter);
+	    	else
+	    	    writeDoDesID(b);
+	    	template = "! EqualThanOP second operand:" + b.getName() + " to %l2\n";
+	   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	flush(template);
+	   	  	
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = "equalEqual" + globalCounter;
+	   	  	template += indentString() + "be\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! equalOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! equalOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+    	}
+    	//If one of the operand is float
+    	else{ 		
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! cmp %f1 & %f2\n";
+    		template += indentString() + "fcmps\t%f1, %f2\n";
+    		template += indentString() + "nop\n";
+    		
+    		
+    		String label = "equalEqual" + globalCounter;
+	   	  	template += indentString() + "fbe\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! equalOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! equalOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+        }
+    }
+    
+    /*
+     * This function is to do != boolean expression
+     */
+    public void writeNotEqualOp(int offset, STO a, STO b, int globalCounter){
+    	if(a.getType().isInt() && b.getType().isInt()){
+	    	if (a.isConst())
+	            setConst("notEqualConstEval", (ConstSTO)a, globalCounter);
+	    	else
+	    	    writeDoDesID(a);
+	    	
+	    	String template = "! notEqualOP first operand:" + a.getName() + " to %l1\n";
+	    	template += indentString() + "mov\t%l0, %l1\n\n";
+	   	  	flush(template);
+	    	
+	    	
+	    	if (b.isConst())
+	            setConst("notEqualConstEval", (ConstSTO)b, globalCounter);
+	    	else
+	    	    writeDoDesID(b);
+	    	template = "! notEqualOP second operand:" + b.getName() + " to %l2\n";
+	   	  	template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	flush(template);
+	   	  	
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = "notEqualTo" + globalCounter;
+	   	  	template += indentString() + "bne\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! notEqualOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! notEqualOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+    	}
+    	//If one of the operand is float
+    	else{ 		
+    		getValueIntof1(a, globalCounter, offset);
+    		getValueIntof2(b, globalCounter, offset);
+    		String template = "! cmp %f1 & %f2\n";
+    		template += indentString() + "fcmps\t%f1, %f2\n";
+    		template += indentString() + "nop\n";
+    		
+    		
+    		String label = "notEqualTo" + globalCounter;
+	   	  	template += indentString() + "fbne\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! notEqualOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! notEqualOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label+"_done:\n\n";
+	   	  	flush(template);
+        }
+    }
 
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1
