@@ -878,10 +878,13 @@ WhileStmt ::=       T_WHILE
 					  //Set label at the beginning
 					  ((MyParser)parser).DoWhileBegin();
 					:}
-					Expr:_1 CodeBlock
+					Expr:_1
 					{:
 					  //Set in while to be true if it was false, increment the while level
 					  ((MyParser)parser).DoWhileStmt();
+					:} 
+					CodeBlock
+					{:
 					  RESULT = ((MyParser) parser).DoIfWhileExpr(_1);
 					  ((MyParser) parser).DoWhileLoopCheck(_1);
 					:}
@@ -890,8 +893,8 @@ WhileStmt ::=       T_WHILE
 
 BreakStmt ::=       T_BREAK:_1 T_SEMI
                     {: 
-                     //Check illegal break statement
-                     //break statement should be inside the while loop
+                      //Check illegal break statement
+                      //break statement should be inside the while loop
                       ((MyParser) parser).DoBreakStmtCheck(); 
                     :}
     ;
