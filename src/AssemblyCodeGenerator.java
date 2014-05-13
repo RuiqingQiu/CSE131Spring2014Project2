@@ -1533,15 +1533,22 @@ public class AssemblyCodeGenerator {
      * 2.2 While statement
      * @param label
      */
-    public void writeWhileLabel(String label){
+    public void writeWhileLabel(String label, String endLabel){
     	String template = "! Do While Label\n";
     	template += label + ": \n";
     	flush(template);
     }
-    public void writeWhileLoopCheck(String label, String endLabel){
-    	String template = "! while loop ending condition check\n";
+    public void writeWhileCheckCondition(String endLabel){
+    	String template = "";
     	template += indentString() + "cmp\t%l0, %g0\n";
-		template += indentString() + "bne\t" + label + "\n";
+    	//If it's false, need to go to end of while
+    	template += indentString() + "be\t" + endLabel + "\n";
+    	template += indentString() + "nop\n";
+    	flush(template);
+    }
+    public void writeWhileLoopCheck(String label, String endLabel){
+    	String template = "! while loop ending always go back\n";
+    	template += indentString() + "ba\t" + label + "\n";
 		template += indentString() + "nop\n";
 		template += endLabel + ": \n";
 		flush(template);

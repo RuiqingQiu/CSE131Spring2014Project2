@@ -878,10 +878,10 @@ WhileStmt ::=       T_WHILE
 					  //Set label at the beginning
 					  ((MyParser)parser).DoWhileBegin();
 					:}
-					Expr:_1
+				    Expr:_1
 					{:
 					  //Set in while to be true if it was false, increment the while level
-					  ((MyParser)parser).DoWhileStmt();
+					  ((MyParser)parser).DoWhileStmt(_1);
 					:} 
 					CodeBlock
 					{:

@@ -1585,17 +1585,20 @@ class MyParser extends parser
 		}
 	}
 	
-	void DoWhileStmt(){
+	void DoWhileStmt(STO s){
 		this.m_symtab.inWhileLoop(true);
+		myAsWriter.writeDoDesID(s);
+		myAsWriter.writeWhileCheckCondition(this.WhileStmtEndLabels.peek());
 	}
 	void
 	DoWhileBegin(){
 		String label = "whileStmt_" + this.globalCounter;
 		globalCounter++;
 		this.WhileStmtLabels.push(label);
-		myAsWriter.writeWhileLabel(label);
 		String endLabel = label + "_end";
 		this.WhileStmtEndLabels.push(endLabel);
+		myAsWriter.writeWhileLabel(label, endLabel);
+		
 	}
 	
 	void 
