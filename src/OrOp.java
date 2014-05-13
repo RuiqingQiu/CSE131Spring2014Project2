@@ -8,7 +8,7 @@ public class OrOp extends BooleanOp {
 		//Both operands must be bool type
 		if (aType.isBool() && bType.isBool()) {
 			if(a.isConst() && b.isConst()){
-				ConstSTO c = new ConstSTO("", new BoolType("bool", 4));
+				ConstSTO c = new ConstSTO("OrOp", new BoolType("bool", 4));
 				if(((ConstSTO)a).getBoolValue() || ((ConstSTO)b).getBoolValue())
 					c.setValue(1.0);
 				else
