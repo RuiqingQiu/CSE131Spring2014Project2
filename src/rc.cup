@@ -873,14 +873,17 @@ OptElse ::=         T_ELSE
     ;
 
 
-WhileStmt ::=       T_WHILE Expr:_1 
+WhileStmt ::=       T_WHILE
 					{:
-					  //Set inwhile to be true if it was false, increment the while level
-					  ((MyParser)parser).DoWhileStmt();
+					  //Set label at the beginning
+					  ((MyParser)parser).DoWhileBegin();
 					:}
-					CodeBlock
+					Expr:_1 CodeBlock
 					{:
+					  //Set in while to be true if it was false, increment the while level
+					  ((MyParser)parser).DoWhileStmt();
 					  RESULT = ((MyParser) parser).DoIfWhileExpr(_1);
+					  ((MyParser) parser).DoWhileLoopCheck(_1);
 					:}
     ;
 

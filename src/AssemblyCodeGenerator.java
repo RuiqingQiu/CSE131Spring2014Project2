@@ -1524,6 +1524,22 @@ public class AssemblyCodeGenerator {
     }
 
     /**
+     * 2.2 While statement
+     * @param label
+     */
+    public void writeWhileLabel(String label){
+    	String template = "! Do While Label\n";
+    	template += label + ": \n";
+    	flush(template);
+    }
+    public void writeWhileLoopCheck(String label){
+    	String template = "! while loop ending condition check\n";
+    	template += indentString() + "cmp\t%l0, %g0\n";
+		template += indentString() + "bne\t" + label + "\n";
+		template += indentString() + "nop\n";
+		flush(template);
+    }
+    /**
      * This method assumes that decrement or increment has been done and the value is in %l1
      * And if it's a float, it will assume the value has been set into %f0
      * @param sto

@@ -1566,6 +1566,38 @@ class MyParser extends parser
 	void DoWhileStmt(){
 		this.m_symtab.inWhileLoop(true);
 	}
+	void
+	DoWhileBegin(){
+		String label = "whileStmt_" + this.globalCounter;
+		globalCounter++;
+		this.WhileStmtLabels.push(label);
+		myAsWriter.writeWhileLabel(label);
+	}
+	
+	void 
+	DoWhileLoopCheck(STO s){
+		myAsWriter.writeDoDesID(s);
+		String label = this.WhileStmtLabels.pop();
+		myAsWriter.writeWhileLoopCheck(label);
+		
+	}
+	STO
+	DoIfWhileExpr(STO expr)
+	{
+		if(expr.isError()){
+			return expr;
+		}
+		if(expr.getType().isBool() || expr.getType().isInt())
+			return expr;
+		
+		STO result = new ErrorSTO(Formatter.toString(ErrorMsg.error4_Test, 
+				expr.getType().getName()));
+		result.setType(new ErrorType("error",8));
+		m_nNumErrors++;
+		m_errors.print (result.getName());
+		return result;
+	}
+	
 	
 	/**
 	 * For project 2, if statement, check if the result, else go to Else block
@@ -1602,25 +1634,6 @@ class MyParser extends parser
 		myAsWriter.writeIfCompleteEnd(label);
 	}
 	 
-	
-	STO
-	DoIfWhileExpr(STO expr)
-	{
-		if(expr.isError()){
-			return expr;
-		}
-		if(expr.getType().isBool() || expr.getType().isInt())
-			return expr;
-		
-		STO result = new ErrorSTO(Formatter.toString(ErrorMsg.error4_Test, 
-				expr.getType().getName()));
-		result.setType(new ErrorType("error",8));
-		m_nNumErrors++;
-		m_errors.print (result.getName());
-		return result;
-	}
-	
-	
 
 	//----------------------------------------------------------------
 	//
@@ -2029,6 +2042,6 @@ class MyParser extends parser
 	private Stack<String> IfStmtElseLabels = new Stack<String>();
 	private Stack<Integer> decltypeLabels = new Stack<Integer>();
 	private int globalCounter = 0;
-	
+	private Stack<String> WhileStmtLabels = new Stack<String>();
 	private int decltypeCurrentCount;
 }
