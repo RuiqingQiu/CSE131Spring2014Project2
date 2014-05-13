@@ -1051,14 +1051,20 @@ class MyParser extends parser
 		else if(params.size() == 0)
                   return;
 		else{
+			int offset = 68;
 			//Add all the param to the symbal table and FuncSTO
-			for(STO s : params){
+			for(int i = 0; i < params.size(); i++){
+				STO s = params.elementAt(i);
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
 				s.setIsModifiable(true);
+				s.setBase("%fp");
+				s.setOffset("" + offset);
 				((FunctionPointerType)(m_symtab.getFunc().getType())).addParameter(s);
 				m_symtab.getFunc().addParameter(s);
 				m_symtab.insert(s);
+				myAsWriter.writeFormalParam(s, i);
+				offset = offset + s.getType().getSize();
 			}
 		}
 		m_symtab.getFunc().getType().setName(((FunctionPointerType)(m_symtab.getFunc().getType())).getErrorName());
@@ -1787,7 +1793,8 @@ class MyParser extends parser
 				ExprSTO ret = new ExprSTO("FuncCall", tmp.getReturnType());
 				m_symtab.addBytes(tmp.getReturnType().getSize());
 				
-				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes());
+				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes(), this.globalCounter);
+				globalCounter++;
 				ret.setOffset("-" + m_symtab.getBytes());
 				ret.setBase("%fp");
 				//Return by reference, return a mod l-val

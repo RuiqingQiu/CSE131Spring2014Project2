@@ -551,15 +551,41 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
-    public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset){
+    /**
+     * 2.3 function call with parameters
+     * @param s
+     * @param index
+     */
+    public void writeFormalParam(STO s, int index){
+    	String template = "\n\n! storing " + index + "th element onto stack\n";
+    	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "st\t%i" + index + ", [%l0]\n";
+    	flush(template);
+    }
+    public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset, int globalCounter){
       //No argument function call
-      String template = "! making function call :" + function.getName() + "\n";
+      String template = "\n\n! making function call :" + function.getName() + "\n";
       if(arguments.size() == 0){
     	template += indentString() + "call\t" + function.getName() + "\n";
     	template += indentString() + "nop\n";
       }
       //TODO Argument is not 0
-      else{
+      else{    	 
+    	  template += "! moving all the arguments into %o registers\n";
+    	  flush(template);
+    	  for(int i = 0; i < arguments.size(); i++){
+    		  if(arguments.elementAt(i).isConst())
+    			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
+    		  else
+    			  writeDoDesID(arguments.elementAt(i));
+    		  template = "! " + i + "th argument of this function\n";
+    		  template += indentString() + "mov\t%l0, %o" + i + "\n";
+    		  flush(template);
+    		  template = "";
+    	  }
+    	  template += indentString() + "call\t" + function.getName() + "\n";
+      	  template += indentString() + "nop\n";
     	  
       }
       template += "! Store return to a local tmp\n";

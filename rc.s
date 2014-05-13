@@ -1,5 +1,5 @@
 /*
- * Generated Tue May 13 00:22:57 PDT 2014
+ * Generated Tue May 13 00:52:11 PDT 2014
  */
 
 	.section ".rodata"
@@ -14,147 +14,42 @@ _boolF:		.asciz "false"
 value_one:	.single 0r1.0
 	.section ".text"
 	.align 4
-	.global main
-main:
-	set	SAVE.main, %g1
+	.global print
+print:
+	set	SAVE.print, %g1
 	save	%sp, %g1, %sp
-! init variable: i
-	set	55, %l1
-	set	-4, %l0
+
+
+! storing 0th element onto stack
+	set	68, %l0
 	add	%fp, %l0, %l0
-	st	%l1, [%l0]
+	st	%i0, [%l0]
 
-! Do While Label
-whileStmt_1: 
-! indodesID : i
-	set	-4, %l0
+
+! storing 1th element onto stack
+	set	72, %l0
 	add	%fp, %l0, %l0
-	ld	[%l0], %l0
+	st	%i1, [%l0]
 
-! indodesID : i
-	set	-4, %l0
+
+! storing 2th element onto stack
+	set	76, %l0
 	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! PostDecOp first operand:i to %l1
-	mov	%l0, %l1
-
-! Store the previous value before post inc to a tmp location
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-	dec	%l1
-
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-! indodesID : postDecOp
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! GreaterThanOP first operand:postDecOp to %l1
-	mov	%l0, %l1
-
-	set	0, %l0
-! GreaterThanOP second operand:0 to %l2
-	mov	%l0, %l2
-
-	cmp	%l1, %l2
-	bg	greaterThan2
+	st	%i2, [%l0]
+	set	_strFmt, %o0
+	set	print0, %o1
+	call	printf
 	nop
 
-! greatThanOp set false
-	set	0, %l0
-	st	%l0, [%fp-12]
-	ba	greaterThan2_done
-	nop
+	.section ".rodata"
+	.align 4
+print0:	.asciz "int i is : "
 
-greaterThan2:	
-! greatThanOp set true
-	set	1, %l0
-	st	%l0, [%fp-12]
-greaterThan2_done:
-
-! indodesID : GreaterThanOp
-	set	-12, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-	cmp	%l0, %g0
-	be	whileStmt_1_end
-	nop
-! indodesID : i
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
+	.section ".text"
+	.align 4
 
 ! indodesID : i
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! modOP first operand:i to %o0
-	mov	%l0, %o0
-
-	set	2, %l0! modOP second operand:2 to %o1
-	mov	%l0, %o1
-
-! modOP second operand:2 to %o1
-	mov	%l0, %o1
-
-	call	.rem
-	nop
-	st	%o0, [%fp-16]
-! indodesID : ModOp
-	set	-16, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! equalOP first operand:ModOp to %l1
-	mov	%l0, %l1
-
-	set	0, %l0
-! EqualThanOP second operand:0 to %l2
-	mov	%l0, %l2
-
-	cmp	%l1, %l2
-	be	equalEqual3
-	nop
-
-! equalOp set false
-	set	0, %l0
-	st	%l0, [%fp-20]
-	ba	equalEqual3_done
-	nop
-
-equalEqual3:	
-! equalOp set true
-	set	1, %l0
-	st	%l0, [%fp-20]
-equalEqual3_done:
-
-! indodesID : EqualOp
-	set	-20, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-	cmp	%l0, 0
-	be	else_stmt_4
-	nop
-! continue stmt
-	ba	whileStmt_1
-	nop
-	ba	end_if_stmt_5
-	nop
-else_stmt_4: 
-
-end_if_stmt_5: 
-
-! indodesID : i
-	set	-4, %l0
+	set	68, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
@@ -162,15 +57,64 @@ end_if_stmt_5:
 	mov	%l0, %o1
 	call	printf
 	nop
-! indodesID : GreaterThanOp
-	set	-12, %l0
+	set	_endl, %o0
+	call	printf
+	nop
+
+	set	_strFmt, %o0
+	set	print1, %o1
+	call	printf
+	nop
+
+	.section ".rodata"
+	.align 4
+print1:	.asciz "float j is : "
+
+	.section ".text"
+	.align 4
+
+! indodesID : j
+	set	72, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %f0
+	ld	[%l0], %l0
+
+	call	printFloat
+	nop
+	set	_endl, %o0
+	call	printf
+	nop
+
+	set	_strFmt, %o0
+	set	print2, %o1
+	call	printf
+	nop
+
+	.section ".rodata"
+	.align 4
+print2:	.asciz "bool k is : "
+
+	.section ".text"
+	.align 4
+
+! indodesID : k
+	set	76, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! while loop ending always go back
-	ba	whileStmt_1
+	cmp	%l0, 0
+	be	setFalse0
 	nop
-whileStmt_1_end: 
+	set	_boolT, %o0
+	call	printf
+	nop
+	ba	done0
+	nop
+setFalse0:
+	set	_boolF, %o0
+	call	printf
+	nop
+done0:
 	set	_endl, %o0
 	call	printf
 	nop
@@ -179,4 +123,40 @@ whileStmt_1_end:
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 20) & -8
+	SAVE.print = -92 & -8
+	.section ".text"
+	.align 4
+	.global main
+main:
+	set	SAVE.main, %g1
+	save	%sp, %g1, %sp
+
+
+! making function call :print
+! moving all the arguments into %o registers
+	set	1, %l0
+! 0th argument of this function
+	mov	%l0, %o0
+	.section ".data"
+	.align 4
+MakingFuncCall_f_return_1:	.single 0r2.0
+	.section ".text"
+	.align 4
+	set	MakingFuncCall_f_return_1, %l0
+	ld	[%l0], %f0
+	ld	[%l0], %l0
+! 1th argument of this function
+	mov	%l0, %o1
+	set	1, %l0
+! 2th argument of this function
+	mov	%l0, %o2
+	call	print
+	nop
+! Store return to a local tmp
+	st	%o0, [%fp-4]
+
+	ret
+	restore
+
+! from DoFuncDecl2
+	SAVE.main = -(92 + 4) & -8
