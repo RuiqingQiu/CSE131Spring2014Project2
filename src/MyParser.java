@@ -1227,6 +1227,7 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print (ErrorMsg.error12_Break);
 		}
+		myAsWriter.writeBreakStmt(this.WhileStmtEndLabels.peek());
 	}
 	
 	void
@@ -1236,6 +1237,7 @@ class MyParser extends parser
 		  m_nNumErrors++;
 		  m_errors.print (ErrorMsg.error12_Continue);
 		}	
+		myAsWriter.writeContinueStmt(this.WhileStmtLabels.peek());
 	}
 
     //----------------------------------------------------------------
@@ -1572,13 +1574,16 @@ class MyParser extends parser
 		globalCounter++;
 		this.WhileStmtLabels.push(label);
 		myAsWriter.writeWhileLabel(label);
+		String endLabel = label + "_end";
+		this.WhileStmtEndLabels.push(endLabel);
 	}
 	
 	void 
 	DoWhileLoopCheck(STO s){
 		myAsWriter.writeDoDesID(s);
 		String label = this.WhileStmtLabels.pop();
-		myAsWriter.writeWhileLoopCheck(label);
+		String endLabel = this.WhileStmtEndLabels.pop();
+		myAsWriter.writeWhileLoopCheck(label, endLabel);
 		
 	}
 	STO
@@ -2043,5 +2048,6 @@ class MyParser extends parser
 	private Stack<Integer> decltypeLabels = new Stack<Integer>();
 	private int globalCounter = 0;
 	private Stack<String> WhileStmtLabels = new Stack<String>();
+	private Stack<String> WhileStmtEndLabels = new Stack<String>();
 	private int decltypeCurrentCount;
 }

@@ -1,5 +1,5 @@
 /*
- * Generated Mon May 12 19:27:21 PDT 2014
+ * Generated Mon May 12 20:10:36 PDT 2014
  */
 
 	.section ".rodata"
@@ -96,6 +96,56 @@ greaterThan2_done:
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
+! indodesID : x
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! indodesID : x
+	set	-4, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+! equalOP first operand:x to %l1
+	mov	%l0, %l1
+
+	set	5, %l0
+! EqualThanOP second operand:5 to %l2
+	mov	%l0, %l2
+
+	cmp	%l1, %l2
+	be	equalEqual3
+	nop
+
+! equalOp set false
+	set	0, %l0
+	st	%l0, [%fp-16]
+	ba	equalEqual3_done
+	nop
+
+equalEqual3:	
+! equalOp set true
+	set	1, %l0
+	st	%l0, [%fp-16]
+equalEqual3_done:
+
+! indodesID : EqualOp
+	set	-16, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l0
+
+	cmp	%l0, 0
+	be	else_stmt_4
+	nop
+! break stmt
+	ba	endLabl
+	nop
+	ba	end_if_stmt_5
+	nop
+else_stmt_4: 
+
+end_if_stmt_5: 
+
 ! indodesID : GreaterThanOp
 	set	-8, %l0
 	add	%fp, %l0, %l0
@@ -105,8 +155,9 @@ greaterThan2_done:
 	cmp	%l0, %g0
 	bne	whileStmt_1
 	nop
+whileStmt_1_end: 
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 12) & -8
+	SAVE.main = -(92 + 16) & -8

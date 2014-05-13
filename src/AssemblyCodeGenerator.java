@@ -1532,12 +1532,27 @@ public class AssemblyCodeGenerator {
     	template += label + ": \n";
     	flush(template);
     }
-    public void writeWhileLoopCheck(String label){
+    public void writeWhileLoopCheck(String label, String endLabel){
     	String template = "! while loop ending condition check\n";
     	template += indentString() + "cmp\t%l0, %g0\n";
 		template += indentString() + "bne\t" + label + "\n";
 		template += indentString() + "nop\n";
+		template += endLabel + ": \n";
 		flush(template);
+    }
+    
+    public void writeBreakStmt(String endLabel){
+    	String template = "! break stmt\n";
+    	template += indentString() + "ba\t" + endLabel + "\n";
+    	template += indentString() + "nop\n";
+    	flush(template);
+    }
+    
+    public void writeContinueStmt(String label){
+    	String template = "! continue stmt\n";
+    	template += indentString() + "ba\t" + label + "\n";
+    	template += indentString() + "nop\n";
+    	flush(template);
     }
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1
