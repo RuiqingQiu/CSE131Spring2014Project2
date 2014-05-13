@@ -1281,7 +1281,7 @@ public class AssemblyCodeGenerator {
      * This function is to deal with == binary expression
      */
     public void writeEqualOp(int offset, STO a, STO b, int globalCounter){
-    	if(a.getType().isInt() && b.getType().isInt()){
+    	if((a.getType().isInt() && b.getType().isInt()) || (a.getType().isBool() && b.getType().isBool())){
 	    	if (a.isConst())
 	            setConst("equalConstEval", (ConstSTO)a, globalCounter);
 	    	else
@@ -1350,7 +1350,7 @@ public class AssemblyCodeGenerator {
      * This function is to do != boolean expression
      */
     public void writeNotEqualOp(int offset, STO a, STO b, int globalCounter){
-    	if(a.getType().isInt() && b.getType().isInt()){
+    	if((a.getType().isInt() && b.getType().isInt()) || (a.getType().isBool() && b.getType().isBool())){
 	    	if (a.isConst())
 	            setConst("notEqualConstEval", (ConstSTO)a, globalCounter);
 	    	else
