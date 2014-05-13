@@ -1622,6 +1622,8 @@ public class AssemblyCodeGenerator {
 	    	String template = "! PreIncOp first operand:" + a.getName() + " to %l1\n";
 	    	template += indentString() + "mov\t%l0, %l1\n\n";
 	   	  	template += indentString() + "inc\t%l1\n\n";
+	   	  	template += "! Store the pre inc value into local tmp\n";
+	   	  	template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
 	   	  	flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -1630,6 +1632,8 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "set\tvalue_one, %l0\n";
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fadds\t%f0, %f1, %f0\n";
+    		template += "! Store the pre inc value into local tmp\n";
+	   	  	template += indentString() + "st\t%f0, [%fp" + offset + "]\n";
     		flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -1641,6 +1645,8 @@ public class AssemblyCodeGenerator {
 	    	String template = "! PreDecOp first operand:" + a.getName() + " to %l1\n";
 	    	template += indentString() + "mov\t%l0, %l1\n\n";
 	   	  	template += indentString() + "dec\t%l1\n\n";
+	   	  	template += "! Store the pre dec value into local tmp\n";
+	   	  	template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
 	   	  	flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -1649,6 +1655,8 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "set\tvalue_one, %l0\n";
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
+    		template += "! Store the pre inc value into local tmp\n";
+	   	  	template += indentString() + "st\t%f0, [%fp" + offset + "]\n";
     		flush(template);
 	   	  	storeValueBack(a);
     	}

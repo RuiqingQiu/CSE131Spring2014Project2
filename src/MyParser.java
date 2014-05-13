@@ -1412,26 +1412,25 @@ class MyParser extends parser
 		}
 		
 		//Generate code for getting both operand
-	    
+		m_symtab.addBytes(4);
 	    switch(result.getName()){
 	      case "preIncOp":
-	    	  myAsWriter.writePreIncOp(a.getOffset(), a);
-	    	  result.setOffset(a.getOffset());
-	  	      result.setBase(a.getBase());
+	    	  myAsWriter.writePreIncOp("-" + m_symtab.getBytes(), a);
+	    	  result.setOffset("-" + m_symtab.getBytes());
+	  	      result.setBase("%fp");
 	    	break;
 	      case "postIncOp":
-	    	  m_symtab.addBytes(4);
+	    	 
 	    	  myAsWriter.writePostIncOp("-" + m_symtab.getBytes(), a);
 	    	  result.setOffset("-" + m_symtab.getBytes());
 	  	      result.setBase("%fp");
 		    break;
 	      case "preDecOp":
-	    	  myAsWriter.writePreDecOp(a.getOffset(), a);
-	    	  result.setOffset(a.getOffset());
-	  	      result.setBase(a.getBase());
+	    	  myAsWriter.writePreDecOp("-" + m_symtab.getBytes(), a);
+	    	  result.setOffset("-" + m_symtab.getBytes());
+	  	      result.setBase("%fp");
 		    break;
 	      case "postDecOp":
-	    	  m_symtab.addBytes(4);
 	    	  myAsWriter.writePostDecOp("-" + m_symtab.getBytes(), a);
 	    	  result.setOffset("-" + m_symtab.getBytes());
 	  	      result.setBase("%fp");
