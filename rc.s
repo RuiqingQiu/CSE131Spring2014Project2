@@ -1,5 +1,5 @@
 /*
- * Generated Mon May 12 20:10:36 PDT 2014
+ * Generated Mon May 12 21:12:57 PDT 2014
  */
 
 	.section ".rodata"
@@ -12,152 +12,165 @@ _boolF:		.asciz "false"
 	.section ".text"
 	.align 4
 value_one:	.single 0r1.0
+	.section ".data"
+	.global	success
+	.align 4
+success:	.word 1
+
+	.section ".text"
+	.align 4
+	.global fail
+fail:
+	set	SAVE.fail, %g1
+	save	%sp, %g1, %sp
+	set	_strFmt, %o0
+	set	fail0, %o1
+	call	printf
+	nop
+
+	.section ".rodata"
+	.align 4
+fail0:	.asciz "failure"
+
+	.section ".text"
+	.align 4
+
+	set	_endl, %o0
+	call	printf
+	nop
+
+! indodesID : success
+	set	success, %l0
+	add	%g0, %l0, %l0
+	ld	[%l0], %l0
+
+! Doing Assignment, getting the right side value
+	set	0, %l0
+! moving the right side value to %l1
+	mov	%l0, %l1
+! Doing Assignment, getting the left side location
+	set	success, %l0
+	add	%g0, %l0, %l0
+	st	%l1, [%l0]
+	set	1, %l0
+! return stmt
+	mov	%l0, %i0
+	ret
+	restore
+
+	ret
+	restore
+
+! from DoFuncDecl2
+	SAVE.fail = -92 & -8
 	.section ".text"
 	.align 4
 	.global main
 main:
 	set	SAVE.main, %g1
 	save	%sp, %g1, %sp
-! init variable: x
-	set	10, %l1
+! init variable: a
+	set	1, %l1
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	st	%l1, [%l0]
 
-! Do While Label
-whileStmt_1: 
-! indodesID : x
+! init variable: x
+	set	0, %l1
+	set	-8, %l0
+	add	%fp, %l0, %l0
+	st	%l1, [%l0]
+
+! indodesID : a
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! indodesID : x
+! indodesID : a
 	set	-4, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-! GreaterThanOP first operand:x to %l1
+! OrOp first operand:a to %l1
 	mov	%l0, %l1
 
-	set	0, %l0
-! GreaterThanOP second operand:0 to %l2
-	mov	%l0, %l2
-
-	cmp	%l1, %l2
-	bg	greaterThan2
+! Comparing %l1 with %g0
+	cmp	%l0, %g0
+	bne	OrOp_True4
 	nop
-
-! greatThanOp set false
-	set	0, %l0
-	st	%l0, [%fp-8]
-	ba	greaterThan2_done
+! making function call :fail
+	call	fail
 	nop
+! Store return to a local tmp
+	st	%o0, [%fp-12]
 
-greaterThan2:	
-! greatThanOp set true
-	set	1, %l0
-	st	%l0, [%fp-8]
-greaterThan2_done:
-
-! indodesID : x
-	set	-4, %l0
+! indodesID : FuncCall
+	set	-12, %l0
 	add	%fp, %l0, %l0
 	ld	[%l0], %l0
 
-	set	_intFmt, %o0
-	mov	%l0, %o1
+! OrOp second operand:a to %l1
+	mov	%l0, %l2
+
+! Comparing %l2 with %g0
+	cmp	%l0, %g0
+	bne	OrOp_True4
+	nop
+! it enter here if both side are false
+	set	0, %l0
+	st	%l0, [%fp-16]
+	ba	OrOp_End5
+	nop
+OrOp_True4: 
+	set	1, %l0
+	st	%l0, [%fp-16]
+OrOp_End5: 
+! init variable: b
+! init is an expression
+	set	-16, %l0
+	add	%fp, %l0, %l0
+	ld	[%l0], %l1
+	set	-20, %l0
+	add	%fp,%l0, %l0
+	st	%l1, [%l0]
+
+! indodesID : success
+	set	success, %l0
+	add	%g0, %l0, %l0
+	ld	[%l0], %l0
+
+! indodesID : success
+	set	success, %l0
+	add	%g0, %l0, %l0
+	ld	[%l0], %l0
+
+	cmp	%l0, 0
+	be	else_stmt_7
+	nop
+	set	_strFmt, %o0
+	set	main1, %o1
 	call	printf
 	nop
+
+	.section ".rodata"
+	.align 4
+main1:	.asciz "success"
+
+	.section ".text"
+	.align 4
+
 	set	_endl, %o0
 	call	printf
 	nop
 
-! indodesID : x
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! indodesID : x
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! PostDecOp first operand:x to %l1
-	mov	%l0, %l1
-
-! Store the previous value before post inc to a tmp location
-	set	-12, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-	dec	%l1
-
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
-
-! indodesID : x
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! indodesID : x
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! equalOP first operand:x to %l1
-	mov	%l0, %l1
-
-	set	5, %l0
-! EqualThanOP second operand:5 to %l2
-	mov	%l0, %l2
-
-	cmp	%l1, %l2
-	be	equalEqual3
+	ba	end_if_stmt_8
 	nop
+else_stmt_7: 
 
-! equalOp set false
-	set	0, %l0
-	st	%l0, [%fp-16]
-	ba	equalEqual3_done
-	nop
+end_if_stmt_8: 
 
-equalEqual3:	
-! equalOp set true
-	set	1, %l0
-	st	%l0, [%fp-16]
-equalEqual3_done:
-
-! indodesID : EqualOp
-	set	-16, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-	cmp	%l0, 0
-	be	else_stmt_4
-	nop
-! break stmt
-	ba	endLabl
-	nop
-	ba	end_if_stmt_5
-	nop
-else_stmt_4: 
-
-end_if_stmt_5: 
-
-! indodesID : GreaterThanOp
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! while loop ending condition check
-	cmp	%l0, %g0
-	bne	whileStmt_1
-	nop
-whileStmt_1_end: 
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 16) & -8
+	SAVE.main = -(92 + 20) & -8

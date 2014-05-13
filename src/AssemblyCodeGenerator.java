@@ -553,7 +553,7 @@ public class AssemblyCodeGenerator {
     
     public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset){
       //No argument function call
-      String template = "";
+      String template = "! making function call :" + function.getName() + "\n";
       if(arguments.size() == 0){
     	template += indentString() + "call\t" + function.getName() + "\n";
     	template += indentString() + "nop\n";
@@ -1397,27 +1397,12 @@ public class AssemblyCodeGenerator {
      * @param b
      * @param globalCounter
      */
-    public void writeAndOp(int offset, STO a, STO b, int globalCounter){
-    	if (a.isConst())
-            setConst("AddConstEval", (ConstSTO)a, globalCounter);
-    	else
-    	    writeDoDesID(a);
-    	
-    	String template = "! AndOp first operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n\n";
-   	  	flush(template);
-    	
-   	  	template = "! Comparing %l1 with %g0\n";
-   	  	template += indentString() + "cmp\t%l0, %g0\n";
-   	  	//If it's false, go to end
-   	  	String label = "AndOp_False" + globalCounter;
-   	  	template += indentString() + "be\t" + label + "\n";
-   	  	template += indentString() + "nop\n";
-   	  	flush(template);
+    public void writeAndOp(int offset, STO a, STO b, int globalCounter, String label){
+    	String template = "";
    	  	//Here if a is true, evaluate b
    	  	
     	if (b.isConst())
-            setConst("AddConstEval", (ConstSTO)b, globalCounter);
+            setConst("AndConstEval", (ConstSTO)b, globalCounter);
     	else
     	    writeDoDesID(b);
     	template = "! AndOp second operand:" + a.getName() + " to %l1\n";
@@ -1454,23 +1439,8 @@ public class AssemblyCodeGenerator {
      * @param b
      * @param globalCounter
      */
-    public void writeOrOp(int offset, STO a, STO b, int globalCounter){
-    	if (a.isConst())
-            setConst("OrConstEval", (ConstSTO)a, globalCounter);
-    	else
-    	    writeDoDesID(a);
-    	
-    	String template = "! OrOp first operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l1\n\n";
-   	  	flush(template);
-    	
-   	  	template = "! Comparing %l1 with %g0\n";
-   	  	template += indentString() + "cmp\t%l0, %g0\n";
-   	  	//If it's false, go to end
-   	  	String label = "OrOp_True" + globalCounter;
-   	  	template += indentString() + "bne\t" + label + "\n";
-   	  	template += indentString() + "nop\n";
-   	  	flush(template);
+    public void writeOrOp(int offset, STO a, STO b, int globalCounter, String label){
+    	String template = "";
    	  	//Here if a is true, evaluate b
    	  	
     	if (b.isConst())
@@ -1501,6 +1471,42 @@ public class AssemblyCodeGenerator {
 	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
 	  	template += "OrOp_End" + globalCounter + ": \n";
 	  	flush(template);
+    }
+    
+    public void writeOrOpFirst(int offset, STO a, String label, int globalCounter){
+    	if (a.isConst())
+            setConst("OrConstEval", (ConstSTO)a, globalCounter);
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! OrOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+   	  	template = "! Comparing %l1 with %g0\n";
+   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	//If it's false, go to end
+   	  	template += indentString() + "bne\t" + label + "\n";
+   	  	template += indentString() + "nop\n";
+   	  	flush(template);
+    }
+    
+    public void writeAndOpFirst(int offset, STO a, String label, int globalCounter){
+    	if (a.isConst())
+            setConst("AndConstEval", (ConstSTO)a, globalCounter);
+    	else
+    	    writeDoDesID(a);
+    	
+    	String template = "! AndOp first operand:" + a.getName() + " to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n\n";
+   	  	flush(template);
+    	
+   	  	template = "! Comparing %l1 with %g0\n";
+   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	//If it's false, go to end
+   	  	template += indentString() + "be\t" + label + "\n";
+   	  	template += indentString() + "nop\n";
+   	  	flush(template);
     }
     
     public void writeCinInt(STO s){

@@ -1361,11 +1361,13 @@ class MyParser extends parser
             	  this.globalCounter++;
             	  break;
               case "AndOp":
-            	  myAsWriter.writeAndOp(m_symtab.getBytes(), a,b, this.globalCounter);
+            	  String Andlabel = this.AndShortCircuitLabel.pop();
+            	  myAsWriter.writeAndOp(m_symtab.getBytes(), a,b, this.globalCounter, Andlabel);
             	  this.globalCounter++;
             	  break;
               case "OrOp":
-            	  myAsWriter.writeOrOp(m_symtab.getBytes(), a,b, this.globalCounter);
+            	  String Orlabel = this.OrShortCircuitLabel.pop();
+            	  myAsWriter.writeOrOp(m_symtab.getBytes(), a,b, this.globalCounter, Orlabel);
             	  this.globalCounter++;
             	  break;
             }
@@ -1435,6 +1437,20 @@ class MyParser extends parser
 		return result;
 	}
 
+	void
+	DoOrOpCheckFirst(STO a){
+		String label = "OrOp_True" + globalCounter;
+		this.OrShortCircuitLabel.push(label);
+		myAsWriter.writeOrOpFirst(m_symtab.getBytes(), a, label, globalCounter);
+		this.globalCounter++;
+	}
+	void 
+	DoAndOpCheckFirst(STO a){
+		String label = "AndOp_True" + globalCounter;
+		this.AndShortCircuitLabel.push(label);
+		myAsWriter.writeAndOpFirst(m_symtab.getBytes(), a, label, globalCounter);
+		this.globalCounter++;
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -2049,5 +2065,7 @@ class MyParser extends parser
 	private int globalCounter = 0;
 	private Stack<String> WhileStmtLabels = new Stack<String>();
 	private Stack<String> WhileStmtEndLabels = new Stack<String>();
+	private Stack<String> OrShortCircuitLabel = new Stack<String>();
+	private Stack<String> AndShortCircuitLabel = new Stack<String>();
 	private int decltypeCurrentCount;
 }

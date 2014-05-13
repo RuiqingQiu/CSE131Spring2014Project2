@@ -1025,7 +1025,11 @@ Expr ::=         Designator:_1 T_ASSIGN Expr:_2
     ;
 
 
-Expr0 ::=        Expr0:_1 T_OR Expr1:_3
+Expr0 ::=        Expr0:_1 T_OR
+				 {:
+				   ((MyParser)parser).DoOrOpCheckFirst(_1);
+				 :}					 
+				 Expr1:_3
                  {:
 					RESULT = ((MyParser) parser).DoBinaryExpr(_1, new OrOp(), _3);
                  :}
@@ -1036,7 +1040,11 @@ Expr0 ::=        Expr0:_1 T_OR Expr1:_3
     ;
 
 
-Expr1 ::=        Expr1:_1 T_AND Expr2:_3
+Expr1 ::=        Expr1:_1 T_AND
+  				 {:
+  				   ((MyParser)parser).DoAndOpCheckFirst(_1);
+				 :} 
+				 Expr2:_3
                  {:
                    RESULT = ((MyParser) parser).DoBinaryExpr(_1, new AndOp(), _3);
                  :}
