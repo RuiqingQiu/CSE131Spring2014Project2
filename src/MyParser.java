@@ -1197,6 +1197,16 @@ class MyParser extends parser
 	}
 	
 	void
+	DoCinStmt(STO s){
+		if(s.getType().isInt()){
+			myAsWriter.writeCinInt(s);
+		}
+		else if(s.getType().isFloat()){
+			myAsWriter.writeCinFloat(s);
+		}
+	}
+	
+	void
 	DoExitStmtCheck(STO s){
 		if(s.isError())
 			return;

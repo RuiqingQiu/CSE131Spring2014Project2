@@ -1502,6 +1502,26 @@ public class AssemblyCodeGenerator {
 	  	template += "OrOp_End" + globalCounter + ": \n";
 	  	flush(template);
     }
+    
+    public void writeCinInt(STO s){
+    	String template = "! Doing CIN Int statement\n";
+    	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "call\tinputInt\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "st\t%o0, [%l0]\n";
+    	flush(template);
+    }
+    
+    public void writeCinFloat(STO s){
+    	String template = "! Doing CIN Float statement\n";
+    	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "call\tinputFloat\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "st\t%f0, [%l0]\n";
+    	flush(template);
+    }
 
     /**
      * This method assumes that decrement or increment has been done and the value is in %l1
