@@ -1406,7 +1406,7 @@ public class AssemblyCodeGenerator {
     	else
     	    writeDoDesID(b);
     	template = "! AndOp second operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l0, %l2\n\n";
+    	template += indentString() + "mov\t%l1, %l2\n\n";
     	flush(template);
     	
     	template = "! Comparing %l2 with %g0\n";
@@ -1447,12 +1447,12 @@ public class AssemblyCodeGenerator {
             setConst("OrConstEval", (ConstSTO)b, globalCounter);
     	else
     	    writeDoDesID(b);
-    	template = "! OrOp second operand:" + a.getName() + " to %l1\n";
+    	template = "! OrOp second operand:" + a.getName() + " to %l2\n";
     	template += indentString() + "mov\t%l0, %l2\n\n";
     	flush(template);
     	
     	template = "! Comparing %l2 with %g0\n";
-   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	template += indentString() + "cmp\t%l2, %g0\n";
    	  	//If it's true, go to end
    	  	template += indentString() + "bne\t" + label + "\n";
    	  	template += indentString() + "nop\n";
@@ -1484,7 +1484,7 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
     	
    	  	template = "! Comparing %l1 with %g0\n";
-   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	template += indentString() + "cmp\t%l1, %g0\n";
    	  	//If it's false, go to end
    	  	template += indentString() + "bne\t" + label + "\n";
    	  	template += indentString() + "nop\n";
@@ -1502,7 +1502,7 @@ public class AssemblyCodeGenerator {
    	  	flush(template);
     	
    	  	template = "! Comparing %l1 with %g0\n";
-   	  	template += indentString() + "cmp\t%l0, %g0\n";
+   	  	template += indentString() + "cmp\t%l1, %g0\n";
    	  	//If it's false, go to end
    	  	template += indentString() + "be\t" + label + "\n";
    	  	template += indentString() + "nop\n";
