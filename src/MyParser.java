@@ -1196,8 +1196,7 @@ class MyParser extends parser
 			globalCounter++;
 			myAsWriter.writeCoutFloat();
 		  }
-		  else if(s.getType() != null && s.getType().isBool()){
-			
+		  else if(s.getType() != null && s.getType().isBool()){		
 			String value = "" + ((ConstSTO)s).getBoolValue();
 			this.coutStrings.addElement(new ConstSTO(value));
 			myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(), value);	 
@@ -1224,6 +1223,9 @@ class MyParser extends parser
 	  //If the cout is an expression
 	  else if(s.isExpr()){
 		if(s.getName().equals("array_doDesignator2")){
+			
+		}
+		else if(s.getName().equals("dodes_dot")){
 			
 		}
 		else
@@ -1950,7 +1952,7 @@ class MyParser extends parser
 				target = s;
 				break;
 			}
-			fieldOffset+= s.getType().getSize();
+			fieldOffset += s.getType().getSize();
 		}
 		if(!found){
 			m_nNumErrors++;
@@ -1958,12 +1960,13 @@ class MyParser extends parser
 		    return new ErrorSTO("ERROR");
 		}
 		//To write the field of the struct and pass in the struct sto and fieldoffset
-		//TODOwriteStructField(sto,fieldOffset);
+		//TODO
+		myAsWriter.writeStructField(sto,fieldOffset);
 		//no error occur, return the StructSTO
 		ExprSTO ret = new ExprSTO("dodes_dot", target.getType());
 		ret.setIsModifiable(true);
 		ret.setIsAddressable(true);
-		ret.setBase(sto.getBase());
+		//ret.setBase(sto.getBase());
         
 		//int offset = Integer.parseInt(sto.getOffset()) + fieldOffset;
 		

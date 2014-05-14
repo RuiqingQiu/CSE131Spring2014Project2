@@ -1,5 +1,5 @@
 /*
- * Generated Tue May 13 22:53:38 PDT 2014
+ * Generated Tue May 13 23:56:08 PDT 2014
  */
 
 	.section ".rodata"
@@ -12,68 +12,96 @@ _boolF:		.asciz "false"
 	.section ".text"
 	.align 4
 value_one:	.single 0r1.0
-	.section ".bss"
-	.align 4
-.globalScope_a0:	.skip 4
-
-	.global	.const_global_b1
-	.align 4
-	.section ".data"
-.const_global_b1:	.word 10
-
-	.align 4
-	.section ".data"
-.AutoConstGlobalScope_c3:	.word 10
-
 	.section ".text"
 	.align 4
 	.global main
 main:
 	set	SAVE.main, %g1
 	save	%sp, %g1, %sp
-! indodesID : a
-	set	.globalScope_a0, %l0
-	add	%g0, %l0, %l0
-	ld	[%l0], %l0
+! local variable:   m    without init, just add offset
 
+! doing struct field & put into %l2
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	set	0, %l1
+	add	%l0, %l1, %l0
+! put the address of the field into %l2
+	mov	%l0, %l2
+! load the value of the field and put into %l0
+	ld	[%l0], %l0
 ! Doing Assignment, getting the right side value
-	set	10, %l0
+	set	1, %l0
 ! moving the right side value to %l1
 	mov	%l0, %l1
 ! Doing Assignment, getting the left side location
-	set	.globalScope_a0, %l0
-	add	%g0, %l0, %l0
+	mov	%l2, %l0
 	st	%l1, [%l0]
-! indodesID : a
-	set	.globalScope_a0, %l0
-	add	%g0, %l0, %l0
-	ld	[%l0], %l0
 
-! indodesID : b
+! doing struct field & put into %l2
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	set	4, %l1
+	add	%l0, %l1, %l0
+! put the address of the field into %l2
+	mov	%l0, %l2
+! load the value of the field and put into %l0
+	ld	[%l0], %l0
 ! Doing Assignment, getting the right side value
-	set	10, %l0
+	.section ".data"
+	.align 4
+dodes_dot_assign_right_f_return_2:	.single 0r1.1
+	.section ".text"
+	.align 4
+	set	dodes_dot_assign_right_f_return_2, %l0
+	ld	[%l0], %f0
+	ld	[%l0], %l0
 ! moving the right side value to %l1
 	mov	%l0, %l1
 ! Doing Assignment, getting the left side location
-	set	.globalScope_a0, %l0
-	add	%g0, %l0, %l0
+	mov	%l2, %l0
 	st	%l1, [%l0]
-! indodesID : a
-	set	.globalScope_a0, %l0
-	add	%g0, %l0, %l0
-	ld	[%l0], %l0
 
-! indodesID : c
+! doing struct field & put into %l2
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	set	8, %l1
+	add	%l0, %l1, %l0
+! put the address of the field into %l2
+	mov	%l0, %l2
+! load the value of the field and put into %l0
+	ld	[%l0], %l0
 ! Doing Assignment, getting the right side value
-	set	10, %l0
+	set	0, %l0
 ! moving the right side value to %l1
 	mov	%l0, %l1
 ! Doing Assignment, getting the left side location
-	set	.globalScope_a0, %l0
-	add	%g0, %l0, %l0
+	mov	%l2, %l0
 	st	%l1, [%l0]
+
+! doing struct field & put into %l2
+	set	-12, %l0
+	add	%fp, %l0, %l0
+	set	0, %l1
+	add	%l0, %l1, %l0
+! put the address of the field into %l2
+	mov	%l0, %l2
+! load the value of the field and put into %l0
+	ld	[%l0], %l0
+! indodesID : dodes_dot
+	set	null, %l0
+	add	null, %l0, %l0
+	ld	[%l0], %l0
+
+	set	_intFmt, %o0
+	mov	%l0, %o1
+	call	printf
+	nop
+	set	_endl, %o0
+	call	printf
+	nop
+
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -92 & -8
+	SAVE.main = -(92 + 12) & -8

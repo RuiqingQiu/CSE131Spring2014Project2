@@ -427,6 +427,12 @@ public class AssemblyCodeGenerator {
     	  }
       }
       else if(sto.isExpr()){
+    	  if(sto.getName().equals("array_doDesignator2")){
+  			return;
+  		  }
+  		  else if(sto.getName().equals("dodes_dot")){
+  			return;
+  	 	  }
     	  if(sto.getType().isFloat()){
       		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
@@ -1848,6 +1854,9 @@ public class AssemblyCodeGenerator {
     		if(left.getName().equals("array_doDesignator2")){
     			template += indentString() + "mov\t%l2, %l0\n";
     		}
+    		else if(left.getName().equals("dodes_dot")){
+	    		template += indentString() + "mov\t%l2, %l0\n";
+	    	}
     		else{
     			template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
     			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
@@ -1858,6 +1867,9 @@ public class AssemblyCodeGenerator {
 	    	template += indentString() + "mov\t%l0, %l1\n";
 	    	template += "! Doing Assignment, getting the left side location\n";
 	    	if(left.getName().equals("array_doDesignator2")){
+	    		template += indentString() + "mov\t%l2, %l0\n";
+	    	}
+	    	else if(left.getName().equals("dodes_dot")){
 	    		template += indentString() + "mov\t%l2, %l0\n";
 	    	}
 	    	else{
@@ -1956,7 +1968,24 @@ public class AssemblyCodeGenerator {
     	template += "! done with do array des\n";
     	flush(template);
     }
-    
+    /**
+     * 2.3 struct field & assignment
+     * @param sto
+     * @param fieldOffset
+     */
+    public void writeStructField(STO sto, int fieldOffset){
+    	String template = "\n! doing struct field & put into %l2\n";
+    	template += indentString() + "set\t" +  sto.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "set\t" + fieldOffset + ", %l1\n";
+    	template += indentString() + "add\t%l0, %l1, %l0\n";
+    	template += "! put the address of the field into %l2\n";
+    	template += indentString() + "mov\t%l0, %l2\n";
+    	template += "! load the value of the field and put into %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	flush(template);
+    }
+
     
     // 9
     public void writeAssembly(String template, String ... params) {
