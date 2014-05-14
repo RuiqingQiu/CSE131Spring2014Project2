@@ -669,11 +669,13 @@ class MyParser extends parser
 			if(m_symtab.getLevel() == 1)
 			{
 			  //Global variable, offset is its name label
-		      sto.setOffset(sto.getName());
+			  String label = ".const_global_" + sto.getName() + this.globalCounter;
+			  this.globalCounter++;
+		      sto.setOffset(label);
 			  sto.setBase("%g0");	
 			 
 			  if(STOlst.elementAt(i).isStatic()){
-				String label = ".AutoConstGlobalScope_" + sto.getName() + this.globalCounter;
+				label = ".AutoConstGlobalScope_" + sto.getName() + this.globalCounter;
 			    myAsWriter.writeStatic(sto, label);
 			  }
 			  else{

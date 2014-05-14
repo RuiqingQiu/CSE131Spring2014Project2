@@ -178,29 +178,29 @@ public class AssemblyCodeGenerator {
         if(tmp.getInit() != null){
 	      writeData();
 	      if(tmp.getType().isInt() || tmp.getType().isBool()){
-            template += tmp.getName() + ":" + SEPARATOR + ".word ";
+            template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
 	        template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
           }
 	      else if(tmp.getType().isFloat()){
-	        template += tmp.getName() + ":" + SEPARATOR + ".single ";
+	        template += tmp.getOffset() + ":" + SEPARATOR + ".single ";
 	        template += "0r" + ((ConstSTO)tmp.getInit()).getFloatValue() +"\n\n";
 	      }
         }
         //No init
         else{
 	      writeBss();
-          template += variable.getName() + ":" + SEPARATOR + ".skip " + variable.getType().getSize() + "\n\n";
+          template += variable.getOffset() + ":" + SEPARATOR + ".skip " + variable.getType().getSize() + "\n\n";
         }
       }
       else if(variable.isConst()){
 	    ConstSTO tmp = (ConstSTO)variable;
 	    template += indentString() + ".section \".data\"\n";
 	    if(tmp.getType().isInt() || tmp.getType().isBool()){
-          template += tmp.getName() + ":" + SEPARATOR + ".word ";
+          template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
 	      template += tmp.getIntValue() + "\n\n"; 
       	}
 	    else if(tmp.getType().isFloat()){
-	      template += tmp.getName() + ":" + SEPARATOR + ".single ";
+	      template += tmp.getOffset() + ":" + SEPARATOR + ".single ";
 	      template += "0r" + tmp.getFloatValue() +"\n\n";
 	    }
       }
@@ -236,7 +236,7 @@ public class AssemblyCodeGenerator {
         sto = (VarSTO)sto;
 	    template += indentString();
         template += ".global\t";
-        template += sto.getName() + "\n";
+        template += sto.getOffset() + "\n";
         template += writeAlignment(4);
         template += writeGlobalLabel(sto);
         flush(template);
@@ -244,7 +244,7 @@ public class AssemblyCodeGenerator {
       else if(sto.isConst()){
         template += indentString();
 	    template += ".global\t";
-	    template += sto.getName() + "\n";
+	    template += sto.getOffset() + "\n";
 	    template += writeAlignment(4);
 	    template += writeGlobalLabel(sto);
 	    flush(template);
