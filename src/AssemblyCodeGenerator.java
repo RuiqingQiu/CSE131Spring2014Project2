@@ -250,10 +250,42 @@ public class AssemblyCodeGenerator {
 	    flush(template);
       }
     }
-    public void writeStatic(STO sto){
+    public void writeStatic(STO sto, String label){
       String template = "";
       template += writeAlignment(4);
-      template += writeGlobalLabel(sto);
+      
+      //if variable is a VarSTO
+      if(sto.isVar()){
+	    VarSTO tmp = (VarSTO)sto;
+        if(tmp.getInit() != null){
+	      writeData();
+	      if(tmp.getType().isInt() || tmp.getType().isBool()){
+            template += label + ":" + SEPARATOR + ".word ";
+	        template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
+          }
+	      else if(tmp.getType().isFloat()){
+	        template += label + ":" + SEPARATOR + ".single ";
+	        template += "0r" + ((ConstSTO)tmp.getInit()).getFloatValue() +"\n\n";
+	      }
+        }
+        //No init
+        else{
+	      writeBss();
+          template += label + ":" + SEPARATOR + ".skip " + sto.getType().getSize() + "\n\n";
+        }
+      }
+      else if(sto.isConst()){
+	    ConstSTO tmp = (ConstSTO)sto;
+	    template += indentString() + ".section \".data\"\n";
+	    if(tmp.getType().isInt() || tmp.getType().isBool()){
+          template += label + ":" + SEPARATOR + ".word ";
+	      template += tmp.getIntValue() + "\n\n"; 
+      	}
+	    else if(tmp.getType().isFloat()){
+	      template += label + ":" + SEPARATOR + ".single ";
+	      template += "0r" + tmp.getFloatValue() +"\n\n";
+	    }
+      }    
       flush(template);
     }
 

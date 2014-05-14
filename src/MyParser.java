@@ -195,23 +195,34 @@ class MyParser extends parser
 		
 		v.setInit(sto);
 		if(m_symtab.getLevel() == 1){
-			v.setOffset(v.getName());
+			String label = ".AutoGlobalScope_" + sto.getName() + this.globalCounter;
+			this.globalCounter++;
+			v.setOffset(label);
 			v.setBase("%g0");
 			if(isStatic!= null){
 				v.setStatic(true);
-			    myAsWriter.writeStatic(v);
+			    myAsWriter.writeStatic(v, label);
 			}
 			else
 		  	    myAsWriter.writeGlobal(v); 
 		}
 		//Local variable
 		else{
-		  m_symtab.addBytes(v.getType().getSize());
-		  //Local variables negative offsets
-		  v.setOffset("-" + m_symtab.getBytes());
-		  v.setBase("%fp");
-		  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, v);
-		  globalCounter++;
+		  if(v.isStatic()){
+				 String label = ".AutoInternalStatic_" + v.getName() + this.globalCounter;
+				 this.globalCounter++;
+				 myAsWriter.writeStatic(v, label);
+				 this.globalCounter++;
+				 v.setBase("%g0");
+		  }
+		  else{
+			  m_symtab.addBytes(v.getType().getSize());
+			  //Local variables negative offsets
+			  v.setOffset("-" + m_symtab.getBytes());
+			  v.setBase("%fp");
+			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, v);
+			  globalCounter++;
+		  }
 		}
 		m_symtab.insert(v);
 	}
@@ -551,16 +562,25 @@ class MyParser extends parser
 			m_symtab.insert(sto);
 
 			if(m_symtab.getLevel() == 1){
-			  sto.setOffset(sto.getName());
+			  String label = ".globalScope_" + sto.getName() + this.globalCounter;
+			  globalCounter++;
+			  sto.setOffset(label);	  
 			  sto.setBase("%g0");
 			  if(sto.isStatic()){
-			    myAsWriter.writeStatic(sto);
+			    myAsWriter.writeStatic(sto, label);
 			  }
 			  else
 		  	    myAsWriter.writeGlobal(sto); 
 			}
 			//Local variable
 			else{
+			  if(sto.isStatic()){
+				 String label = ".internalStatic_" + sto.getName() + this.globalCounter;
+				 this.globalCounter++;
+				 myAsWriter.writeStatic(sto, label);
+				 this.globalCounter++;
+				 sto.setBase("%g0");
+			  }
 			  m_symtab.addBytes(sto.getType().getSize());
 			  //Local variables negative offsets
 			  sto.setOffset("-" + m_symtab.getBytes());
@@ -651,8 +671,10 @@ class MyParser extends parser
 			  //Global variable, offset is its name label
 		      sto.setOffset(sto.getName());
 			  sto.setBase("%g0");	
+			 
 			  if(STOlst.elementAt(i).isStatic()){
-			    myAsWriter.writeStatic(sto);
+				String label = ".AutoConstGlobalScope_" + sto.getName() + this.globalCounter;
+			    myAsWriter.writeStatic(sto, label);
 			  }
 			  else{
 			    myAsWriter.writeGlobal(sto);
@@ -660,12 +682,20 @@ class MyParser extends parser
 			}
 			//Local const
 			else {
-		      m_symtab.addBytes(sto.getType().getSize());
-		      //Local variables negative offsets
-		      sto.setOffset("-" + m_symtab.getBytes());
-		      sto.setBase("%fp");	 
-			  myAsWriter.writeConstLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
-			  globalCounter++;
+			 if(STOlst.elementAt(i).isStatic()){
+				String label = ".AutoConstInternalStatic_" + sto.getName() + this.globalCounter;
+				this.globalCounter++;
+				myAsWriter.writeStatic(sto, label);
+				this.globalCounter++;
+				sto.setBase("%g0");
+			  }else{
+				  m_symtab.addBytes(sto.getType().getSize());
+		      	//Local variables negative offsets
+		      	sto.setOffset("-" + m_symtab.getBytes());
+		      	sto.setBase("%fp");	 
+		      	myAsWriter.writeConstLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
+			  	globalCounter++;
+			  }
 			}
 		}
 	}
