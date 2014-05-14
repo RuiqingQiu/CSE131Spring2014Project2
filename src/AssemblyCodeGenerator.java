@@ -640,7 +640,7 @@ public class AssemblyCodeGenerator {
     		  template = "! " + i + "th argument of this function\n";
     		  if(arguments.elementAt(i).getType().isInt() && params.elementAt(i).getType().isFloat()){
     			  template += "! need do int to float promption\n";
-    			  template += indentString() + "st\t[%fp-" + offset + "]\n";
+    			  template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     			  template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
     			  template += "! prompt int to float & store back\n";
     			  template += indentString() + "fitos\t%f0, %f0\n";
