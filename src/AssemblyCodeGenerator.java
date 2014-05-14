@@ -627,9 +627,14 @@ public class AssemblyCodeGenerator {
     		  else{
     			  //Check if it's reference, if so, pass the address of that variable
     			  if(params.elementAt(i).getType().isReference()){
-    				  flush("! argument pass by reference, get the address\n");
-    				  flush(indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n");
-    			  	  flush(indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n");
+    				  template = "! argument pass by reference, get the address\n";
+    				  template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
+    			  	  template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
+    			  	  if(arguments.elementAt(i).getType().isReference()){
+    			  		  template += "! argument is also reference, need one more load \n";
+    			  		  template += indentString() + "ld\t[%l0], %l0\n";
+    			  	  }
+    			  	  flush(template);
     			  }
     			  else
     				  writeDoDesID(arguments.elementAt(i));
