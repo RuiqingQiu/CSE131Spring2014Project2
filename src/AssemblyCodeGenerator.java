@@ -1813,15 +1813,25 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
     		//Prompt an int to float
     		template += indentString() + "fitos\t %f0, %f0\n";
-    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
-			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+    		if(left.getName().equals("array_doDesignator2")){
+    			template += indentString() + "mov\t%l2, %l0\n";
+    		}
+    		else{
+    			template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+    			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+    		}
 	    	template += indentString() + "st\t%f0, [%l0]\n\n";
     	}else{
 	    	template += "! moving the right side value to %l1\n";
 	    	template += indentString() + "mov\t%l0, %l1\n";
 	    	template += "! Doing Assignment, getting the left side location\n";
-	    	template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
-			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+	    	if(left.getName().equals("array_doDesignator2")){
+	    		template += indentString() + "mov\t%l2, %l0\n";
+	    	}
+	    	else{
+	    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+	    		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+	    	}
 			if(left.getType().isReference()){
 				template += "! reference type left, need to load one more time to store\n";
 				template += indentString() + "ld\t[%l0], %l0\n";
@@ -1890,22 +1900,26 @@ public class AssemblyCodeGenerator {
     public void writeDoArrayDes(STO arrayName, STO indexExpr){
     	flush("! doing array dereference\n");
     	//Move the index value into %l0
-    	writeDoDesID(indexExpr);
+    	if(indexExpr.isConst()){
+    		flush(indentString() + "set\t" + ((ConstSTO)indexExpr).getIntValue() + ", %l0\n");
+    	}
+    	else
+    		writeDoDesID(indexExpr);
     	//Store index value to %l1
-    	String template = indentString() + "mov\t%l0, %l1\n";
+    	String template = "";
     	template += indentString() + "set\t" + ((CompositeType)arrayName.getType()).getElementType().getSize() + ", %o0\n";
-    	template += indentString() + "mov\t%l1, %o1\n";
+    	template += indentString() + "mov\t%l0, %o1\n";
     	template += indentString() + "call\t.mul\n";
     	template += indentString() + "nop\n\n";
     	//Move the actual offset to %l1
-    	template += "! move the actual offset to %l1\n";
-    	template += indentString() + "mov\t%o0, %l1\n";
+    	template += "! the actual offset in %o0\n";
     	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
 		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
-    	template += indentString() + "add\t%l0, %l1, %l0\n";
+    	template += indentString() + "add\t%l0, %o0, %l0\n";
     	if(((ArrayType)(arrayName.getType())).getElementType().isFloat()){
     		template += indentString() + "ld\t[%l0], %f0\n";
     	}
+    	template += indentString() + "mov\t%l0, %l2\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
     	template += "! done with do array des\n";
     	flush(template);

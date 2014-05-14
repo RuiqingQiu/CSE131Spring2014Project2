@@ -731,13 +731,11 @@ class MyParser extends parser
 		st.setSize(st.getStructSize());
 		m_symtab.access(m_symtab.getStruct().getName()).setType(st);
 		
-		
 	}
 	void 
 	DoStructdefDeclEnd(){
 		m_symtab.setStruct(null);
-		m_symtab.setStructDefineComplete(true);
-		
+		m_symtab.setStructDefineComplete(true);		
 	}
     
 	STO
@@ -1901,6 +1899,8 @@ class MyParser extends parser
 		//check type of struct has no field named strID
 		Vector<STO> fieldList = ((StructType)(sto.getType())).getField();
 		boolean found = false;
+		//Store the offset of the founded field
+		int fieldOffset = 0;
 		STO target = null;
 		for(STO s: fieldList){
 			if(strID.equals(s.getName())){
@@ -1908,16 +1908,23 @@ class MyParser extends parser
 				target = s;
 				break;
 			}
+			fieldOffset+= s.getType().getSize();
 		}
 		if(!found){
 			m_nNumErrors++;
 			m_errors.print (Formatter.toString(ErrorMsg.error14f_StructExp, strID,sto.getType().getName()));
 		    return new ErrorSTO("ERROR");
 		}
+		//To write the field of the struct and pass in the struct sto and fieldoffset
+		//TODOwriteStructField(sto,fieldOffset);
 		//no error occur, return the StructSTO
 		ExprSTO ret = new ExprSTO("dodes_dot", target.getType());
 		ret.setIsModifiable(true);
 		ret.setIsAddressable(true);
+		ret.setBase(sto.getBase());
+        
+		//int offset = Integer.parseInt(sto.getOffset()) + fieldOffset;
+		
 		return ret;
 	}
 
