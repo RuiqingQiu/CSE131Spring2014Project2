@@ -15,7 +15,7 @@ public class OrOp extends BooleanOp {
 					c.setValue(0.0);
 				return c;
 			}
-			return new ExprSTO("OrOp", aType);
+			return new ExprSTO("OrOp", new BoolType("bool", 4));
 		}
 		else {
 			// error

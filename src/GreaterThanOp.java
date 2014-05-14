@@ -19,7 +19,7 @@ public class GreaterThanOp extends BooleanOp {
 					c.setValue(0.0);
 				return c;
 			}
-			return new ExprSTO("GreaterThanOp", new BoolType("Bool", 1));
+			return new ExprSTO("GreaterThanOp", new BoolType("bool", 1));
 		}
     }
 }

@@ -8,11 +8,11 @@ public class BwAndOp extends BitwiseOp{
 		if (aType.isInt() && bType.isInt()) {
 			if(a.isConst() && b.isConst()){
 				int x = ((ConstSTO)a).getIntValue() & ((ConstSTO)b).getIntValue();
-				ConstSTO c = new ConstSTO("",aType);
+				ConstSTO c = new ConstSTO("", new IntType("int", 4));
 				c.setValue(x);
 				return c;
 			}
-			return new ExprSTO("BwAndOp", aType);
+			return new ExprSTO("BwAndOp", new IntType("int", 4));
 		}
 		else {
 			// error

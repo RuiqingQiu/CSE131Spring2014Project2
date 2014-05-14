@@ -18,12 +18,12 @@ public class ModOp extends ArithmeticOp{
 				if(((ConstSTO)b).getIntValue() == 0){
 					return new ErrorSTO(ErrorMsg.error8_Arithmetic);
 				}
-				ConstSTO c = new ConstSTO("", aType);
+				ConstSTO c = new ConstSTO("", new IntType("int", 4));
 				c.setValue(((ConstSTO)a).getIntValue() % ((ConstSTO)b).getIntValue());
 				return c;	
 			}
 			else{
-				return new ExprSTO("ModOp",aType);
+				return new ExprSTO("ModOp", new IntType("int", 4));
 			}
 		}
 	}

@@ -7,11 +7,11 @@ public class BwXorOp extends BitwiseOp{
 		if (aType.isInt() && bType.isInt()) {
 			if(a.isConst() && b.isConst()){
 				int x = ((ConstSTO)a).getIntValue() ^ ((ConstSTO)b).getIntValue();
-				ConstSTO c = new ConstSTO("", aType);
+				ConstSTO c = new ConstSTO("", new IntType("int", 4));
 				c.setValue(x);
 				return c;
 			}
-			return new ExprSTO("BwXorOp", aType);
+			return new ExprSTO("BwXorOp", new IntType("int", 4));
 		}
 		else {
 			// error

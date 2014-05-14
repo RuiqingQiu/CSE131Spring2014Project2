@@ -18,11 +18,11 @@ public class DivOp extends ArithmeticOp{
 					return new ErrorSTO(ErrorMsg.error8_Arithmetic);
 				}
 				int x = ((ConstSTO)a).getIntValue() / ((ConstSTO)b).getIntValue();
-				ConstSTO c = new ConstSTO("", aType);
+				ConstSTO c = new ConstSTO("", new IntType("int", 4));
 				c.setValue(x);
 				return c;
 			}
-			return new ExprSTO("DivOp", aType);
+			return new ExprSTO("DivOp", new IntType("int", 4));
 		} else {
 			if(a.isConst() && b.isConst()){
 				//Check if dividing by 0

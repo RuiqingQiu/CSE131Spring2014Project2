@@ -14,12 +14,12 @@ public class AddOp extends ArithmeticOp  {
 		else if (aType.isInt() && bType.isInt()) {
 			if(a.isConst() && b.isConst()){
 				int x = ((ConstSTO)a).getIntValue() + ((ConstSTO)b).getIntValue();
-				ConstSTO c = new ConstSTO("", aType.clone());
+				ConstSTO c = new ConstSTO("", new IntType("int", 4));
 				c.setValue(x);
 				return c;
 			}
 			//Calculate the value of two Ints
-			STO result = new ExprSTO("AddOp", aType);
+			STO result = new ExprSTO("AddOp", new IntType("int", 4));
 			return result;
 		} else {
 			if(a.isConst()&& b.isConst()){

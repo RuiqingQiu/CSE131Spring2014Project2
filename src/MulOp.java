@@ -11,12 +11,12 @@ public class MulOp extends ArithmeticOp{
 		else if (aType.isInt() && bType.isInt()) {
 			if(a.isConst() && b.isConst()){
 				int x = ((ConstSTO)a).getIntValue() * ((ConstSTO)b).getIntValue();
-				ConstSTO c = new ConstSTO("", aType);
+				ConstSTO c = new ConstSTO("", new IntType("int", 4));
 				c.setValue(x);
 				return c;
 			}
 			//Calculate the value of two Ints
-			return new ExprSTO("MulOp", aType);
+			return new ExprSTO("MulOp", new IntType("int", 4));
 		} else {
 			if(a.isConst() && b.isConst()){
 				float x =  ((ConstSTO)a).getFloatValue() * ((ConstSTO)b).getFloatValue();

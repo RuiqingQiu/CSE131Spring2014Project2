@@ -388,6 +388,11 @@ public class AssemblyCodeGenerator {
 		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
 		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
     	  }
+    	  //Check if it's reference, if so, need to do another load
+    	  if(sto.getType().isReference()){	  
+    		  template += "! " + sto.getName() + " reference variable, need to load one more time\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }
       }
       else if(sto.isExpr()){
     	  if(sto.getType().isFloat()){
@@ -401,6 +406,7 @@ public class AssemblyCodeGenerator {
   		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
       	  }
       }
+      
       flush(template);
     }
     
@@ -563,22 +569,31 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "st\t%i" + index + ", [%l0]\n";
     	flush(template);
     }
-    public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset, int globalCounter){
+    public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset, int globalCounter, Vector<STO> params){
       //No argument function call
       String template = "\n\n! making function call :" + function.getName() + "\n";
       if(arguments.size() == 0){
     	template += indentString() + "call\t" + function.getName() + "\n";
     	template += indentString() + "nop\n";
       }
-      //TODO Argument is not 0
+      //Argument is not 0
       else{    	 
     	  template += "! moving all the arguments into %o registers\n";
     	  flush(template);
     	  for(int i = 0; i < arguments.size(); i++){
-    		  if(arguments.elementAt(i).isConst())
+    		  if(arguments.elementAt(i).isConst()){
     			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
-    		  else
-    			  writeDoDesID(arguments.elementAt(i));
+    		  }  		 
+    		  else{
+    			  //Check if it's reference, if so, pass the address of that variable
+    			  if(params.elementAt(i).getType().isReference()){
+    				  flush("! argument pass by reference, get the address\n");
+    				  flush(indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n");
+    			  	  flush(indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n");
+    			  }
+    			  else
+    				  writeDoDesID(arguments.elementAt(i));
+    		  }
     		  template = "! " + i + "th argument of this function\n";
     		  template += indentString() + "mov\t%l0, %o" + i + "\n";
     		  flush(template);
@@ -1778,8 +1793,14 @@ public class AssemblyCodeGenerator {
     	if(right.isConst()){
     		setConst(left.getName() + "_assign_right", (ConstSTO)right, globalCounter);
     	}
-    	else
+    	else{
     		writeDoDesID(right);
+    		if(right.getType().isReference()){
+    			template += "! Doing assignment, Reference variable, need to load one more time\n";
+	    		template += indentString() + "ld\t[%l0], %l0\n";
+	    		flush(template);
+    		}
+    	}
     	//Check if need promption
     	if(left.getType().isFloat() && right.getType().isInt()){
     		template += "! prompt int to float\n";
@@ -1796,6 +1817,10 @@ public class AssemblyCodeGenerator {
 	    	template += "! Doing Assignment, getting the left side location\n";
 	    	template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
 			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+			if(left.getType().isReference()){
+				template += "! reference type left, need to load one more time to store\n";
+				template += indentString() + "ld\t[%l0], %l0\n";
+			}
 	    	template += indentString() + "st\t%l1, [%l0]\n";
     	}
     	flush(template);

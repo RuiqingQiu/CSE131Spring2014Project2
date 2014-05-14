@@ -1792,7 +1792,7 @@ class MyParser extends parser
 				ExprSTO ret = new ExprSTO("FuncCall", tmp.getReturnType());
 				m_symtab.addBytes(tmp.getReturnType().getSize());
 				
-				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes(), this.globalCounter);
+				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes(), this.globalCounter, params);
 				globalCounter++;
 				ret.setOffset("-" + m_symtab.getBytes());
 				ret.setBase("%fp");

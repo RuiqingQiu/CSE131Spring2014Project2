@@ -6,9 +6,12 @@ public class IncOp extends UnaryOp {
 	@Override
 	STO checkOperands(STO a) {
 		Type aType = a.getType();
+		Type tmp = aType.clone();
+		tmp.setReference(false);
 		if (aType.isNumeric()) {
-			if(a.getIsAddressable() == true && a.getIsModifiable() == true)
-				return new ExprSTO(this.postOrPre, aType);
+			if(a.getIsAddressable() == true && a.getIsModifiable() == true){				
+				return new ExprSTO(this.postOrPre, tmp);
+			}
 			else
 				return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,  "++"));
 		} 
@@ -20,7 +23,7 @@ public class IncOp extends UnaryOp {
 			if(aType.isFuncPointer()){
 				return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(), "++"));
 			}
-		    return new ExprSTO(this.postOrPre, aType);
+		    return new ExprSTO(this.postOrPre, tmp);
 		}
 		else{
 			return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(), "++"));
