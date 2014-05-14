@@ -214,6 +214,8 @@ class MyParser extends parser
 				 myAsWriter.writeStatic(v, label);
 				 this.globalCounter++;
 				 v.setBase("%g0");
+				 myAsWriter.writeText();
+				 myAsWriter.flush(myAsWriter.writeAlignment(4));
 		  }
 		  else{
 			  m_symtab.addBytes(v.getType().getSize());
@@ -580,13 +582,16 @@ class MyParser extends parser
 				 myAsWriter.writeStatic(sto, label);
 				 this.globalCounter++;
 				 sto.setBase("%g0");
+				 myAsWriter.writeText();
+				 myAsWriter.flush(myAsWriter.writeAlignment(4));
+			  }else{
+				  m_symtab.addBytes(sto.getType().getSize());
+				  //Local variables negative offsets
+				  sto.setOffset("-" + m_symtab.getBytes());
+				  sto.setBase("%fp");
+				  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
+				  globalCounter++;
 			  }
-			  m_symtab.addBytes(sto.getType().getSize());
-			  //Local variables negative offsets
-			  sto.setOffset("-" + m_symtab.getBytes());
-			  sto.setBase("%fp");
-			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
-			  globalCounter++;
 			}
 		}
 		//Global scope
@@ -690,6 +695,8 @@ class MyParser extends parser
 				myAsWriter.writeStatic(sto, label);
 				this.globalCounter++;
 				sto.setBase("%g0");
+				myAsWriter.writeText();
+				myAsWriter.flush(myAsWriter.writeAlignment(4));
 			  }else{
 				  m_symtab.addBytes(sto.getType().getSize());
 		      	//Local variables negative offsets
