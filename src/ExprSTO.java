@@ -13,6 +13,7 @@ class ExprSTO extends STO
 		super (strName);
                 // You may want to change the isModifiable and isAddressable                      
                 // fields as necessary
+		this.HoldAddress = false;
 	}
 
 	public 
@@ -21,6 +22,7 @@ class ExprSTO extends STO
 		super (strName, typ);
                 // You may want to change the isModifiable and isAddressable                      
                 // fields as necessary
+		this.HoldAddress = false;
 	}
 
 	//----------------------------------------------------------------
@@ -31,4 +33,13 @@ class ExprSTO extends STO
 	{
 		return	true;
 	}
+	public void setHoldAddress(boolean b){
+		this.HoldAddress = b;
+	}
+	public boolean getHoldAddress(){
+		return this.HoldAddress;
+	}
+	//This is for indicating whether this ExprSTO's base & offset is 
+	//holding an address rather than an actual value
+	private boolean HoldAddress;
 }

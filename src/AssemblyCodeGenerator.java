@@ -427,27 +427,24 @@ public class AssemblyCodeGenerator {
     	  }
       }
       else if(sto.isExpr()){
-    	  if(sto.getName().equals("array_doDesignator2")){
-  			return;
-  		  }
-  		  else if(sto.getName().equals("dodes_dot")){
-  			return;
-  	 	  }
-    	  if(sto.getType().isFloat()){
-      		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
-    		template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-    		template += indentString() + "ld\t" + "[%l0], %f0\n";
-  		    template += indentString() + "ld\t" + "[%l0], %l0\n\n";
-      	  }else{
-      	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
-  		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-  		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
-      	  }
-    	  //Check if it's reference, if so, need to do another load
+    	  template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+		  template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+		  //Check if it's reference, if so, need to do another load
     	  if(sto.getType().isReference()){	  
     		  template += "! " + sto.getName() + " reference variable, need to load one more time\n";
     		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }else if (((ExprSTO)sto).getHoldAddress()){
+    		  template += "! ExprSTO: " + sto.getName() + " hold address, one more load\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
     	  }
+    	  if(sto.getType().isFloat()){
+    		template += "! load float to %f0\n";
+    		template += indentString() + "ld\t" + "[%l0], %f0\n";
+  		    template += indentString() + "ld\t" + "[%l0], %l0\n\n";
+      	  }else{
+  		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
+      	  }
+    	 
       }
       
       flush(template);
@@ -1860,7 +1857,12 @@ public class AssemblyCodeGenerator {
     			template += "! Doing assignment, Reference variable, need to load one more time\n";
 	    		template += indentString() + "ld\t[%l0], %l0\n";
 	    		flush(template);
-    		}
+    		}else if(right.isExpr()){
+				if (((ExprSTO)right).getHoldAddress()){
+					template += "! exprSTO hold address, one more load\n";
+					template += indentString() + "ld\t[%l0], %l0\n";
+				}
+			}
     	}
     	//Check if need promption
     	if(left.getType().isFloat() && right.getType().isInt()){
@@ -1869,34 +1871,29 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
     		//Prompt an int to float
     		template += indentString() + "fitos\t %f0, %f0\n";
-    		if(left.getName().equals("array_doDesignator2")){
-    			template += indentString() + "mov\t%l2, %l0\n";
-    		}
-    		else if(left.getName().equals("dodes_dot")){
-	    		template += indentString() + "mov\t%l2, %l0\n";
-	    	}
-    		else{
-    			template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
-    			template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+
+    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+    		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+    		if(left.isExpr() && ((ExprSTO)left).getHoldAddress()){
+    			template += "! left side is exprSTO & hold address\n";
+    			template += indentString() + "ld\t[%l0], %l0\n";
     		}
 	    	template += indentString() + "st\t%f0, [%l0]\n\n";
     	}else{
 	    	template += "! moving the right side value to %l1\n";
 	    	template += indentString() + "mov\t%l0, %l1\n";
 	    	template += "! Doing Assignment, getting the left side location\n";
-	    	if(left.getName().equals("array_doDesignator2")){
-	    		template += indentString() + "mov\t%l2, %l0\n";
-	    	}
-	    	else if(left.getName().equals("dodes_dot")){
-	    		template += indentString() + "mov\t%l2, %l0\n";
-	    	}
-	    	else{
-	    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
-	    		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
-	    	}
+
+	    	template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+	    	template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
 			if(left.getType().isReference()){
 				template += "! reference type left, need to load one more time to store\n";
 				template += indentString() + "ld\t[%l0], %l0\n";
+			}else if(left.isExpr()){
+				if (((ExprSTO)left).getHoldAddress()){
+					template += "! exprSTO hold address, one more load\n";
+					template += indentString() + "ld\t[%l0], %l0\n";
+				}
 			}
 	    	template += indentString() + "st\t%l1, [%l0]\n";
     	}
@@ -1959,7 +1956,7 @@ public class AssemblyCodeGenerator {
      * @param arrayName
      * @param indexExpr
      */
-    public void writeDoArrayDes(STO arrayName, STO indexExpr){
+    public void writeDoArrayDes(STO arrayName, STO indexExpr, int offset){
     	flush("! doing array dereference\n");
     	//Move the index value into %l0
     	if(indexExpr.isConst()){
@@ -1978,11 +1975,12 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
 		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
     	template += indentString() + "add\t%l0, %o0, %l0\n";
-    	if(((ArrayType)(arrayName.getType())).getElementType().isFloat()){
-    		template += indentString() + "ld\t[%l0], %f0\n";
-    	}
-    	template += indentString() + "mov\t%l0, %l2\n";
-    	template += indentString() + "ld\t[%l0], %l0\n";
+    	
+    	template += "! Store the address into a tmp\n";
+        template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    	
+    	//template += indentString() + "mov\t%l0, %l2\n";
+    	//template += indentString() + "ld\t[%l0], %l0\n";
     	template += "! done with do array des\n";
     	flush(template);
     }
@@ -1991,14 +1989,18 @@ public class AssemblyCodeGenerator {
      * @param sto
      * @param fieldOffset
      */
-    public void writeStructField(STO sto, int fieldOffset){
+    public void writeStructField(STO sto, int fieldOffset, int offset){
     	String template = "\n! doing struct field & put into %l2\n";
     	template += indentString() + "set\t" +  sto.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-    	template += indentString() + "set\t" + fieldOffset + ", %l1\n";
+    	if(sto.isExpr() && ((ExprSTO)sto).getHoldAddress()){
+    		template += "! struct expr, one more load\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
+    	}
+     	template += indentString() + "set\t" + fieldOffset + ", %l1\n";
     	template += indentString() + "add\t%l0, %l1, %l0\n";
-    	template += "! put the address of the field into %l2\n";
-    	template += indentString() + "mov\t%l0, %l2\n";
+    	template += "! put the address of the field into a tmp\n";
+    	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     	template += "! load the value of the field and put into %l0\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
     	flush(template);

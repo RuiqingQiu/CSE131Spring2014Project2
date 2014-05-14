@@ -1222,14 +1222,8 @@ class MyParser extends parser
 	  }
 	  //If the cout is an expression
 	  else if(s.isExpr()){
-		if(s.getName().equals("array_doDesignator2")){
-			
-		}
-		else if(s.getName().equals("dodes_dot")){
-			
-		}
-		else
-			myAsWriter.writeDoDesID(s);
+
+		myAsWriter.writeDoDesID(s);
 		//These assumes do des put the correct value into %l0
 		if(s.getType().isInt()){
 		  myAsWriter.writeCoutInt();
@@ -1960,13 +1954,15 @@ class MyParser extends parser
 		    return new ErrorSTO("ERROR");
 		}
 		//To write the field of the struct and pass in the struct sto and fieldoffset
-		//TODO
-		myAsWriter.writeStructField(sto,fieldOffset);
+		m_symtab.addBytes(4);
+		myAsWriter.writeStructField(sto,fieldOffset, m_symtab.getBytes());
 		//no error occur, return the StructSTO
 		ExprSTO ret = new ExprSTO("dodes_dot", target.getType());
 		ret.setIsModifiable(true);
 		ret.setIsAddressable(true);
-		//ret.setBase(sto.getBase());
+		ret.setBase("%fp");
+		ret.setOffset("-" + m_symtab.getBytes());
+		ret.setHoldAddress(true);
         
 		//int offset = Integer.parseInt(sto.getOffset()) + fieldOffset;
 		
@@ -2049,7 +2045,11 @@ class MyParser extends parser
 		ExprSTO e = new ExprSTO("array_doDesignator2", ((CompositeType)nameSto.getType()).getElementType());
 		e.setIsAddressable(true);
 		e.setIsModifiable(true);
-		myAsWriter.writeDoArrayDes(nameSto, indexExpr);
+		m_symtab.addBytes(4);
+		myAsWriter.writeDoArrayDes(nameSto, indexExpr, m_symtab.getBytes());
+		e.setOffset("-" + m_symtab.getBytes());
+		e.setBase("%fp");
+		e.setHoldAddress(true);
 		//Correct usage of array, dereference the array and get its element type
 		return e;
 	}
