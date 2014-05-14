@@ -217,7 +217,7 @@ public class AssemblyCodeGenerator {
       template += "_boolT:\t\t.asciz \"true\"\n";
       template += "_boolF:\t\t.asciz \"false\"\n\n";
       flush(template);
-      template = indentString() + ".section \".text\"\n";
+      template = indentString() + ".section \".data\"\n";
       template += indentString() + ".align 4\n";
       template += "value_one:\t.single 0r1.0\n";
       flush(template);
@@ -341,9 +341,9 @@ public class AssemblyCodeGenerator {
 	    else if(sto.getInit().isVar()){
 	      if(sto.getInit().getIsGlobal() == true){
 	    	STO init = sto.getInit();
-	    	template += indentString() + "set\t" + init.getOffset() + ", " + "%l0\n";
-		    template += indentString() + "add\t" + init.getBase() + ", %l0, %l0\n";
-		    template += indentString() + "ld\t" + "[%l0], %l1" + "\n";
+	    	flush(template);
+	    	writeDoDesID(init);
+	    	template = indentString() + "mov\t%l0, %l1\n";
 	        template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 	        template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
 	        template += indentString() + "st\t" + "%l1, [%l0]\n\n";
@@ -351,9 +351,9 @@ public class AssemblyCodeGenerator {
 	      //Not a global
 	      else{
 	    	STO init = sto.getInit();
-		    template += indentString() + "set\t" + init.getOffset() + ", " + "%l0\n";
-			template += indentString() + "add\t" + init.getBase() + ", %l0, %l0\n";
-			template += indentString() + "ld\t" + "[%l0], %l1" + "\n";
+	    	flush(template);
+	    	writeDoDesID(init);
+	    	template = indentString() + "mov\t%l0, %l1\n";
 		    template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 		    template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
 		    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
@@ -362,9 +362,9 @@ public class AssemblyCodeGenerator {
 	    else if(sto.getInit().isExpr()){
 	      flush("! init is an expression\n");
 	      STO init = sto.getInit();
-	      template += indentString() + "set\t" + init.getOffset() + ", " + "%l0\n";
-	      template += indentString() + "add\t" + init.getBase() + ", %l0, %l0\n";
-		  template += indentString() + "ld\t" + "[%l0], %l1" + "\n";
+	      flush(template);
+	      writeDoDesID(init);
+	      template = indentString() + "mov\t%l0, %l1\n";
 		  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 		  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
 		  template += indentString() + "st\t" + "%l1, [%l0]\n\n";
@@ -638,7 +638,17 @@ public class AssemblyCodeGenerator {
     				  writeDoDesID(arguments.elementAt(i));
     		  }
     		  template = "! " + i + "th argument of this function\n";
-    		  template += indentString() + "mov\t%l0, %o" + i + "\n";
+    		  if(arguments.elementAt(i).getType().isInt() && params.elementAt(i).getType().isFloat()){
+    			  template += "! need do int to float promption\n";
+    			  template += indentString() + "st\t[%fp-" + offset + "]\n";
+    			  template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    			  template += "! prompt int to float & store back\n";
+    			  template += indentString() + "fitos\t%f0, %f0\n";
+    			  template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+    			  template += indentString() + "ld\t[%fp-" + offset +"], %o" + i + "\n";
+    		  }
+    		  else
+    			  template += indentString() + "mov\t%l0, %o" + i + "\n";
     		  flush(template);
     		  template = "";
     	  }
@@ -1661,12 +1671,20 @@ public class AssemblyCodeGenerator {
     	if(sto.getType().isInt()){
 	    	template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
 	        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	        if(sto.getType().isReference()){
+	        	template += "! " + sto.getName() + " is a reference, one more load\n";
+	        	template += indentString() + "ld\t[%l0], %l0\n";
+	        }
 		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
 		    flush (template);
 		}
     	else if(sto.getType().isFloat()){
     		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
 	        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	        if(sto.getType().isReference()){
+	        	template += "! " + sto.getName() + " is a reference, one more load\n";
+	        	template += indentString() + "ld\t[%l0], %l0\n";
+	        }
 		    template += indentString() + "st\t" + "%f0, " + "[%l0]\n\n";	
 		    flush (template);
     		
