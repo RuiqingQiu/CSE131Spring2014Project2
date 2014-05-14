@@ -237,7 +237,7 @@ public class AssemblyCodeGenerator {
 	    template += indentString();
         template += ".global\t";
         template += sto.getName() + "\n";
-        template += writeAlignment(sto.getType().getSize());
+        template += writeAlignment(4);
         template += writeGlobalLabel(sto);
         flush(template);
       }
@@ -245,14 +245,14 @@ public class AssemblyCodeGenerator {
         template += indentString();
 	    template += ".global\t";
 	    template += sto.getName() + "\n";
-	    template += writeAlignment(sto.getType().getSize());
+	    template += writeAlignment(4);
 	    template += writeGlobalLabel(sto);
 	    flush(template);
       }
     }
     public void writeStatic(STO sto){
       String template = "";
-      template += writeAlignment(sto.getType().getSize());
+      template += writeAlignment(4);
       template += writeGlobalLabel(sto);
       flush(template);
     }
@@ -1903,6 +1903,9 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
 		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
     	template += indentString() + "add\t%l0, %l1, %l0\n";
+    	if(((ArrayType)(arrayName.getType())).getElementType().isFloat()){
+    		template += indentString() + "ld\t[%l0], %f0\n";
+    	}
     	template += indentString() + "ld\t[%l0], %l0\n";
     	template += "! done with do array des\n";
     	flush(template);
