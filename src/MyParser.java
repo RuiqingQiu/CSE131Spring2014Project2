@@ -214,6 +214,7 @@ class MyParser extends parser
 				 myAsWriter.writeStatic(v, label);
 				 this.globalCounter++;
 				 v.setBase("%g0");
+				 v.setOffset(label);	
 				 myAsWriter.writeText();
 				 myAsWriter.flush(myAsWriter.writeAlignment(4));
 		  }
@@ -582,6 +583,7 @@ class MyParser extends parser
 				 myAsWriter.writeStatic(sto, label);
 				 this.globalCounter++;
 				 sto.setBase("%g0");
+				 sto.setOffset(label);
 				 myAsWriter.writeText();
 				 myAsWriter.flush(myAsWriter.writeAlignment(4));
 			  }else{
@@ -695,6 +697,7 @@ class MyParser extends parser
 				myAsWriter.writeStatic(sto, label);
 				this.globalCounter++;
 				sto.setBase("%g0");
+				sto.setOffset(label);
 				myAsWriter.writeText();
 				myAsWriter.flush(myAsWriter.writeAlignment(4));
 			  }else{
