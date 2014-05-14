@@ -1523,7 +1523,9 @@ class MyParser extends parser
 			return result;
 		}
 		ExprSTO result = new ExprSTO(leftHandSide.getName() + " = " + rightHandSide.getName());
-		result.setType(leftHandSide.getType().clone());
+		Type left_type = leftHandSide.getType().clone();
+		left_type.setReference(leftHandSide.getType().isReference());
+		result.setType(left_type);
 		result.setIsAddressable(false);
 		result.setIsModifiable(false);
 		if(leftHandSide.getType().isFloat() && rightHandSide.getType().isInt()){

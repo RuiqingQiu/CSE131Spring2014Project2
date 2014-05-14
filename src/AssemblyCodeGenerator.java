@@ -405,6 +405,11 @@ public class AssemblyCodeGenerator {
   		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
   		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
       	  }
+    	  //Check if it's reference, if so, need to do another load
+    	  if(sto.getType().isReference()){	  
+    		  template += "! " + sto.getName() + " reference variable, need to load one more time\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }
       }
       
       flush(template);
