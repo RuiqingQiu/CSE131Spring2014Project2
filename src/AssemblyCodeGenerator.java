@@ -1691,6 +1691,16 @@ public class AssemblyCodeGenerator {
 		    flush (template);
     		
     	}
+    	else if(sto.getType().isPointer()){
+    		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+	        template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	        if(sto.getType().isReference()){
+	        	template += "! " + sto.getName() + " is a reference, one more load\n";
+	        	template += indentString() + "ld\t[%l0], %l0\n";
+	        }
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+		    flush (template);
+    	}
     }
     /* 1.3 */
     public void writePreIncOp(String offset, STO a){
@@ -1714,6 +1724,19 @@ public class AssemblyCodeGenerator {
 	   	  	template += indentString() + "st\t%f0, [%fp" + offset + "]\n";
     		flush(template);
 	   	  	storeValueBack(a);
+    	}
+    	//doing pointer arithmetic
+    	else if(a.getType().isPointer()){
+    		String template = "! PreIncOp pointer first operand : " + a.getName() + " to %l1\n";
+    		//%l0 stores the addreses of the pointer
+    		template += indentString() + "mov\t%l0, %l1\n\n";
+    		//Need to increment by the size of the type it points to
+    		int size = ((PointerType)a.getType()).getElementType().getSize();
+    		template += indentString() + "set\t" + size + ", %l0\n";
+    		template += indentString() + "add\t%l1, %l0, %l1\n";
+    		template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
+    		flush(template);
+    		storeValueBack(a);
     	}
     }
     public void writePreDecOp(String offset, STO a){
