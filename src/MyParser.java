@@ -856,6 +856,11 @@ class MyParser extends parser
 			ExprSTO sto = new ExprSTO("pointer dereference", t);
 			sto.setIsAddressable(true);
 			sto.setIsModifiable(true);
+			sto.setBase("%fp");
+			m_symtab.addBytes(4);
+			sto.setOffset("-" + m_symtab.getBytes());
+			sto.setHoldAddress(true);
+			myAsWriter.writeDereferenceOp(deref, m_symtab.getBytes());
 			return sto;
 		}
 	}
@@ -879,7 +884,12 @@ class MyParser extends parser
 				m_errors.print (Formatter.toString(ErrorMsg.error15_ReceiverArrow, ptr.getType().getName()));
 				return new ErrorSTO("struct pointer arrow error");
 			}else{
-				VarSTO sto = new VarSTO("tmp", ((PointerType)ptr.getType()).getElementType());
+				m_symtab.addBytes(4);
+				myAsWriter.writeDereferenceOp(ptr, m_symtab.getBytes());
+				ExprSTO sto = new ExprSTO("tmp", ((PointerType)ptr.getType()).getElementType());
+				sto.setBase("%fp");
+				sto.setOffset("-" + m_symtab.getBytes());
+				sto.setHoldAddress(true);
 				STO s = (DoDesignator2_Dot(sto, fieldName));
 				Type t;
 				if(s.isError())
@@ -888,6 +898,9 @@ class MyParser extends parser
 				ExprSTO ret = new ExprSTO("pointer to struct arrow", t);
 				ret.setIsAddressable(true);
 				ret.setIsModifiable(true);
+				ret.setBase(s.getBase());
+				ret.setOffset(s.getOffset());
+				ret.setHoldAddress(true);
 				return ret;
 			}
 		}
@@ -905,11 +918,15 @@ class MyParser extends parser
 		}
 		Type newType = new PointerType(target.getType().getName()+"*", 4);
 		((PointerType)newType).setElementType(target.getType());
-		ExprSTO ret = new ExprSTO("pointer to struct arrow", newType);
+		ExprSTO ret = new ExprSTO("AddressOfOp", newType);
 		ret.setType(newType.clone());
 		//Addressof results in a R-value
 		ret.setIsAddressable(false);
 		ret.setIsModifiable(false);
+		m_symtab.addBytes(4);
+		myAsWriter.writeAddressOfOp(target, m_symtab.getBytes());
+		ret.setBase("%fp");
+		ret.setOffset("-" + m_symtab.getBytes());
 		return ret;
 	}
 	

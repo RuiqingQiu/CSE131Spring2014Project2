@@ -446,7 +446,7 @@ public class AssemblyCodeGenerator {
       	  }
     	 
       }
-      
+      template += "! end of DoDesID\n";
       flush(template);
     }
     
@@ -1853,21 +1853,27 @@ public class AssemblyCodeGenerator {
     public void writeAssignment(STO left, STO right, int globalCounter, int offset){
     	String template = "";
     	flush("! Doing Assignment, getting the right side value\n");
+    	if(right.getType().isStruct() && left.getType().isStruct()){
+    		template += "! getting the address of the right side struct\n";
+    		template += indentString() + "set\t" + right.getOffset() + ", " + "%l0\n";
+    		template += indentString() + "add\t" + right.getBase() + ", %l0, %l0\n";
+    		template += indentString() + "mov\t%l0, %o1\n";
+    		template += "! getting the address of the left side struct\n";
+    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+    		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+    		template += indentString() + "mov\t%l0, %o0\n";
+    		template += indentString() + "set\t" + left.getType().getSize() + ", %o2\n";
+    		template += "! making memcpy function call\n";
+    		template += indentString() + "call\tmemcpy\n";
+    		template += indentString() + "nop\n";
+    		flush(template);
+    		return;
+    	}
     	if(right.isConst()){
     		setConst(left.getName() + "_assign_right", (ConstSTO)right, globalCounter);
     	}
     	else{
     		writeDoDesID(right);
-    		if(right.getType().isReference()){
-    			template += "! Doing assignment, Reference variable, need to load one more time\n";
-	    		template += indentString() + "ld\t[%l0], %l0\n";
-	    		flush(template);
-    		}else if(right.isExpr()){
-				if (((ExprSTO)right).getHoldAddress()){
-					template += "! exprSTO hold address, one more load\n";
-					template += indentString() + "ld\t[%l0], %l0\n";
-				}
-			}
     	}
     	//Check if need promption
     	if(left.getType().isFloat() && right.getType().isInt()){
@@ -1984,8 +1990,6 @@ public class AssemblyCodeGenerator {
     	template += "! Store the address into a tmp\n";
         template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     	
-    	//template += indentString() + "mov\t%l0, %l2\n";
-    	//template += indentString() + "ld\t[%l0], %l0\n";
     	template += "! done with do array des\n";
     	flush(template);
     }
@@ -2010,7 +2014,32 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "ld\t[%l0], %l0\n";
     	flush(template);
     }
+    
+    /**
+     * 3.1 AddressOf operator
+     * @param target
+     * @param offset
+     */
+    public void writeAddressOfOp(STO target, int offset){
+    	String template = "\n! Doing address of operation\n";
+    	template += indentString() + "set\t" + target.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + target.getBase() + ", %l0, %l0\n";
+    	template += "! Store the address onto tmp\n";
+    	template += indentString() + "st\t" + "%l0, [%fp-" + offset + "]\n";
+    	flush(template);
+    }
 
+    public void writeDereferenceOp(STO s, int offset){
+    	String template = "\n ! Doing dereference operation\n";
+    	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	template += "! Dereference, load one more time\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	template += "! Store the address of the dereferenced value into tmp\n";
+    	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    	template += "! End of DoDereference\n";
+    	flush(template);
+    }
     
     // 9
     public void writeAssembly(String template, String ... params) {
