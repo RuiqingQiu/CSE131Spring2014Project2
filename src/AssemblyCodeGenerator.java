@@ -1761,6 +1761,19 @@ public class AssemblyCodeGenerator {
     		flush(template);
 	   	  	storeValueBack(a);
     	}
+    	//doing pointer arithmetic
+    	else if(a.getType().isPointer()){
+    		String template = "! PreDecOp pointer first operand : " + a.getName() + " to %l1\n";
+    		//%l0 stores the addreses of the pointer
+    		template += indentString() + "mov\t%l0, %l1\n\n";
+    		//Need to increment by the size of the type it points to
+    		int size = ((PointerType)a.getType()).getElementType().getSize();
+    		template += indentString() + "set\t" + size + ", %l0\n";
+    		template += indentString() + "sub\t%l1, %l0, %l1\n";
+    		template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
+    		flush(template);
+    		storeValueBack(a);
+    	}
     }
     
     public void writePostIncOp(String offset, STO a){
@@ -1790,6 +1803,24 @@ public class AssemblyCodeGenerator {
     		flush(template);
 	   	  	storeValueBack(a);
     	}
+    	//doing pointer arithmetic
+    	else if(a.getType().isPointer()){
+    		String template = "! PostIncOp pointer first operand : " + a.getName() + " to %l1\n";
+    		//%l0 stores the addreses of the pointer
+    		template += indentString() + "mov\t%l0, %l1\n\n";
+    		
+    		template += "! Store the previous value before post inc to a tmp location\n";
+	    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+	        template += indentString() + "add\t%fp, %l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+		    
+    		//Need to increment by the size of the type it points to
+    		int size = ((PointerType)a.getType()).getElementType().getSize();
+    		template += indentString() + "set\t" + size + ", %l0\n";
+    		template += indentString() + "add\t%l1, %l0, %l1\n";
+    		flush(template);
+    		storeValueBack(a);
+    	}
     }
     
     public void writePostDecOp(String offset, STO a){
@@ -1818,6 +1849,24 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
     		flush(template);
 	   	  	storeValueBack(a);
+    	}
+    	//doing pointer arithmetic
+    	else if(a.getType().isPointer()){
+    		String template = "! PostDecOp pointer first operand : " + a.getName() + " to %l1\n";
+    		//%l0 stores the addreses of the pointer
+    		template += indentString() + "mov\t%l0, %l1\n\n";
+    		
+    		template += "! Store the previous value before post inc to a tmp location\n";
+	    	template += indentString() + "set\t" + offset + ", " + "%l0\n";
+	        template += indentString() + "add\t%fp, %l0, %l0\n";
+		    template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+		    
+    		//Need to increment by the size of the type it points to
+    		int size = ((PointerType)a.getType()).getElementType().getSize();
+    		template += indentString() + "set\t" + size + ", %l0\n";
+    		template += indentString() + "sub\t%l1, %l0, %l1\n";
+    		flush(template);
+    		storeValueBack(a);
     	}
     }
     
