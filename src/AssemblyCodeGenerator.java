@@ -2038,6 +2038,10 @@ public class AssemblyCodeGenerator {
     	String template = "\n! Doing address of operation\n";
     	template += indentString() + "set\t" + target.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + target.getBase() + ", %l0, %l0\n";
+    	if(target.getType().isReference() || (target.isExpr() && ((ExprSTO)target).getHoldAddress())){
+    		template += "! addressof, targetSTO holds address, one more load\n";
+    		template += "ld\t[%l0], %l0\n";
+    	}
     	template += "! Store the address onto tmp\n";
     	template += indentString() + "st\t" + "%l0, [%fp-" + offset + "]\n";
     	flush(template);
