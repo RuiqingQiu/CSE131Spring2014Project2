@@ -2105,7 +2105,11 @@ public class AssemblyCodeGenerator {
     	template += "! the actual offset in %o0\n";
     	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
 		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
-		if( (arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
+		if(arrayName.getType().isPointer()){
+			template += "! pointer type array dereference\n";
+			template += indentString() + "ld\t[%l0], %l0\n";
+		}
+		if((arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
 			template += "! array des, expr hold address\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}
@@ -2150,7 +2154,7 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "add\t" + target.getBase() + ", %l0, %l0\n";
     	if(target.getType().isReference() || (target.isExpr() && ((ExprSTO)target).getHoldAddress())){
     		template += "! addressof, targetSTO holds address, one more load\n";
-    		template += "ld\t[%l0], %l0\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
     	}
     	template += "! Store the address onto tmp\n";
     	template += indentString() + "st\t" + "%l0, [%fp-" + offset + "]\n";
