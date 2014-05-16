@@ -581,19 +581,27 @@ public class AssemblyCodeGenerator {
      * @param s
      * @param globalCounter
      */
-    public void writeReturnStmt(String funcName, STO s, int globalCounter){
-      if(s.getType().isVoid()){
-    	  System.out.println("return void");
-    	  return;
-      }
-      if(s.isConst()){
-    	setConst(funcName, (ConstSTO)s, globalCounter);
+    public void writeReturnStmt(String funcName, STO s, int globalCounter, Type returnType){
+      String template ="";
+      if(returnType.isReference()){
+    	  template = "\n! Return by reference need to return address\n";
+    	  template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
+    	  template += indentString() + "add\t" + s.getBase() + " ,%l0, %l0\n";
+    	  flush(template);
       }
       else{
-    	writeDoDesID(s);
+	      if(s.getType().isVoid()){
+	    	  return;
+	      }
+	      if(s.isConst()){
+	    	setConst(funcName, (ConstSTO)s, globalCounter);
+	      }
+	      else{
+	    	writeDoDesID(s);
+	      }
       }
       flush("! return stmt\n");
-      String template = indentString() + "mov\t%l0, %i0\n";
+      template = indentString() + "mov\t%l0, %i0\n";
       flush(template);
     }
     
@@ -680,6 +688,36 @@ public class AssemblyCodeGenerator {
       flush(template);
       writeText();
       flush(writeAlignment(4)+"\n");
+    }
+    
+    /*
+     * This function is used to write new statement
+     * Use memcopy to allocate a new space in the heap
+     * calloc(number of elements need to allocate , size of the element)
+     */
+    public void writeNewStmt(STO sto){
+    	String template  = "! doing new statement \n";
+    	template += indentString() + "set\t1,%o0\n";
+    	template += indentString() + "set\t" + ((PointerType)(sto.getType())).getElementType().getSize() + ", %o1\n";
+    	template += indentString () + "call\tcalloc\n";
+    	template += indentString () + "nop\n";
+    	
+    	template += "! need to store the newly allocated mem to the pointer\n";
+    	template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "st\t%o0, [%l0]\n";  
+    	flush(template);
+    }
+    
+    public void writeDeleteStmt(STO sto){
+    	String template  = "! doing delete statement \n";
+    	template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+    	template += "! %l0 stores the address of the pointer\n";
+    	template += indentString() + "mov\t%l0,%o0\n";
+    	template += indentString() + "call\tfree\n";
+    	template += indentString () + "nop\n";
+    	flush(template);
     }
     
     public void writeEndl(){
@@ -2088,7 +2126,7 @@ public class AssemblyCodeGenerator {
     	String template = "\n! doing struct field & put into %l2\n";
     	template += indentString() + "set\t" +  sto.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
-    	if(sto.isExpr() && ((ExprSTO)sto).getHoldAddress()){
+    	if(sto.getType().isReference() || (sto.isExpr() && ((ExprSTO)sto).getHoldAddress())){
     		template += "! struct expr, one more load\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
@@ -2125,7 +2163,7 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
     	template += "! Dereference, load one more time\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
-    	if(s.isExpr() && ((ExprSTO)s).getHoldAddress()){
+    	if( s.getType().isReference() ||(s.isExpr() && ((ExprSTO)s).getHoldAddress())){
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}

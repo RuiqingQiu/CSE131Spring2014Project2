@@ -285,6 +285,7 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error16_New,sto.getType().getName()));
 		}
+		myAsWriter.writeNewStmt(sto);
 	}
 	
 	void
@@ -309,6 +310,7 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error16_Delete,sto.getType().getName()));
 		}
+		myAsWriter.writeDeleteStmt(sto);
 	}
 	
 	//Check#20 pass in the string and STO 
@@ -1191,7 +1193,7 @@ class MyParser extends parser
 				}
 			}
 		}
-		myAsWriter.writeReturnStmt(m_symtab.getFunc().getName(), s, this.globalCounter);
+		myAsWriter.writeReturnStmt(m_symtab.getFunc().getName(), s, this.globalCounter, m_symtab.getFunc().getReturnType());
 		myAsWriter.writeRetRestore();
 		this.globalCounter++;
 		return;
@@ -1853,7 +1855,7 @@ class MyParser extends parser
 				ret.setBase("%fp");
 				//Return by reference, return a mod l-val
 				if(tmp.getReturnType().isReference()){
-					
+					ret.setHoldAddress(true);
 					ret.setIsAddressable(true);
 					ret.setIsModifiable(true);
 					return ret;
