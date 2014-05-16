@@ -2177,6 +2177,22 @@ public class AssemblyCodeGenerator {
     	flush(template);
     }
     
+    /**
+     * 3.2 Type cast
+     * @param offset
+     * @param sto
+     */
+    public void writeTypeCast(int offset, STO sto){
+    	String template = "! Doing type cast\n";
+    	flush(template);
+    	writeDoDesID(sto);
+    	template = "! Store the value into a tmp\n";
+    	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    	template += "! End of type cast\n\n";
+    	flush(template);
+    	
+    }
+    
     // 9
     public void writeAssembly(String template, String ... params) {
         StringBuilder asStmt = new StringBuilder();

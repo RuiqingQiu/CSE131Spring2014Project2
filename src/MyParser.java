@@ -401,9 +401,13 @@ class MyParser extends parser
 		}
 		//If not, return ExprSTO with type t
 		else{
-			ExprSTO sto = new ExprSTO("type cast",castToType.clone());
+			ExprSTO sto = new ExprSTO("type cast", castToType.clone());
 			sto.setIsAddressable(false);
 			sto.setIsModifiable(false);
+			m_symtab.addBytes(4);
+			myAsWriter.writeTypeCast(m_symtab.getBytes(), target);
+			sto.setBase("%fp");
+			sto.setOffset("-" + m_symtab.getBytes());
 			return sto;
 		}
 	}
