@@ -2168,6 +2168,7 @@ public class AssemblyCodeGenerator {
     	template += "! Dereference, load one more time\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
     	if( s.getType().isReference() ||(s.isExpr() && ((ExprSTO)s).getHoldAddress())){
+
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}

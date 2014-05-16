@@ -2072,7 +2072,12 @@ class MyParser extends parser
 		myAsWriter.writeDoArrayDes(nameSto, indexExpr, m_symtab.getBytes());
 		e.setOffset("-" + m_symtab.getBytes());
 		e.setBase("%fp");
-		e.setHoldAddress(true);
+		if(((CompositeType)nameSto.getType()).getElementType().isPointer()){
+			e.setHoldAddress(false);
+		}
+		else{
+			e.setHoldAddress(true);
+		}
 		//Correct usage of array, dereference the array and get its element type
 		return e;
 	}
