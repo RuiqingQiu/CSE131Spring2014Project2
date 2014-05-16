@@ -2067,7 +2067,7 @@ public class AssemblyCodeGenerator {
     	template += "! the actual offset in %o0\n";
     	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
 		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
-		if(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress())){
+		if( (arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
 			template += "! array des, expr hold address\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}

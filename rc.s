@@ -1,5 +1,5 @@
 /*
- * Generated Wed May 14 19:21:13 PDT 2014
+ * Generated Thu May 15 19:25:10 PDT 2014
  */
 
 	.section ".rodata"
@@ -14,44 +14,35 @@ _boolF:		.asciz "false"
 value_one:	.single 0r1.0
 	.section ".text"
 	.align 4
-	.global main
-main:
-	set	SAVE.main, %g1
+	.global sum
+sum:
+	set	SAVE.sum, %g1
 	save	%sp, %g1, %sp
-! init variable: x
-	set	1, %l1
-	set	-4, %l0
-	add	%fp, %l0, %l0
-	st	%l1, [%l0]
 
-! indodesID : x
+
+! storing 0th element onto stack
+	set	68, %l0
+	add	%fp, %l0, %l0
+	st	%i0, [%l0]
+! doing array dereference
+	set	1, %l0
+	set	4, %o0
+	mov	%l0, %o1
+	call	.mul
+	nop
+
+! the actual offset in %o0
+	set	68, %l0
+	add	%fp, %l0, %l0
+	add	%l0, %o0, %l0
+! Store the address into a tmp
+	st	%l0, [%fp-4]
+! done with do array des
+! indodesID : array_doDesignator2
 	set	-4, %l0
 	add	%fp, %l0, %l0
+! ExprSTO: array_doDesignator2 hold address, one more load
 	ld	[%l0], %l0
-
-! end of DoDesID
-
-! Doing address of operation
-	set	-4, %l0
-	add	%fp, %l0, %l0
-! Store the address onto tmp
-	st	%l0, [%fp-8]
-! init variable: y
-! init is an expression
-! indodesID : AddressOfOp
-	set	-8, %l0
-	add	%fp, %l0, %l0
-	ld	[%l0], %l0
-
-! end of DoDesID
-	mov	%l0, %l1
-	set	-12, %l0
-	add	%fp,%l0, %l0
-	st	%l1, [%l0]
-
-! indodesID : pointer dereference
-	set	null, %l0
-	add	null, %l0, %l0
 	ld	[%l0], %l0
 
 ! end of DoDesID
@@ -67,4 +58,30 @@ main:
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 12) & -8
+	SAVE.sum = -(92 + 4) & -8
+	.section ".text"
+	.align 4
+	.global main
+main:
+	set	SAVE.main, %g1
+	save	%sp, %g1, %sp
+! local variable:   a    without init, just add offset
+
+
+! making function call :sum
+! moving all the arguments into %o registers
+! argument pass by reference, get the address
+	set	-40, %l0
+	add	%fp, %l0, %l0
+! 0th argument of this function
+	mov	%l0, %o0
+	call	sum
+	nop
+! Store return to a local tmp
+	st	%o0, [%fp-44]
+
+	ret
+	restore
+
+! from DoFuncDecl2
+	SAVE.main = -(92 + 44) & -8
