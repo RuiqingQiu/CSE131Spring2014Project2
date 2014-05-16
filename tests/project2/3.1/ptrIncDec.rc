@@ -1,0 +1,23 @@
+function : int main(){
+   const int c = 100;
+   int [c] a, i = 0;
+   
+   i = 0; while (i < c){
+      a[i] = c-i;
+   i++;}
+   
+   int *p = a;
+   
+   i = 0; while (i < c){
+      cout << *p++;
+   i++;}
+   
+   i = 0; while (i < c){
+      cout << *--p;
+   i++;}
+   
+   cout << endl;
+   
+   return 0;
+}
+

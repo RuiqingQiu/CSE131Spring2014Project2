@@ -1,0 +1,40 @@
+structdef S{
+   float f0; float f1; float f2;
+   float f3; float f4; float f5;
+   };
+S a;
+
+function : void printa(){
+   cout << a.f0 << ", ";
+   cout << a.f1 << ", ";
+   cout << a.f2 << ", ";
+   cout << a.f3 << ", ";
+   cout << a.f4 << ", ";
+   cout << a.f5 << endl;
+}
+
+function : int main(){
+   const int c = 6;
+   float [c] f;
+   int i = -1; while (++i < c){
+      f[i] = i;
+      (&a.f0)[i] = c-i-1;
+   }
+   i = -1; while (++i < c){
+      cout << f[i] << " ";
+      cout << (&a.f0)[i] << " ";
+   }
+   cout << endl;
+
+   printa();
+   a.f0 = a.f1 = a.f2 = a.f3 = a.f4 = a.f5 = -123;
+   printa();
+
+   float * fp;
+   new fp;
+   *fp = 1;
+   cout << *fp << endl;
+   delete fp;
+
+   return 0;
+}

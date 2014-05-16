@@ -1,0 +1,18 @@
+
+function : int main(){
+   static int *p;
+   static int a = 3;
+
+   new p;
+
+   if (--a == 0){
+      return a;
+   }
+   else{
+      int ret =  main();
+      new p;
+      return ret;
+   }
+
+   return a;
+}

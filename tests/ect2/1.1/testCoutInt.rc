@@ -1,0 +1,33 @@
+//This file is to test cout int expressions
+const int test1 = 10;
+static int test2 = 20;
+const int test4 = -test1;
+function : void main(){
+    const int test1 = 40;
+
+    cout << "test1 is 40 :" << test1 << endl;
+    
+    cout << "::test1 is 10 : " << ::test1 << endl;
+
+    cout << "neg of -test2 is -20 : " << -test2 << endl;
+    //should print out 60
+    cout << test1 + test2 << endl;
+    
+    int test5 = sizeof(bool);
+    cout << "cout sizeof bool " << test5 << endl;
+
+    cout << "complex one : "<< +(-(+test1)) << endl;
+    cout << "complex two: " << -(+(-test2)) << endl;
+    cout << "complex three: " << (+test1) - (-test2) << endl; 
+    
+    cout << "complex four: " << (-(::test1)) + (-(-test2)) + -10 << endl; 
+    
+    int test6 = 3;
+    int test7 = 5;
+    cout << "complex five : " << -(test6 + test7) << endl;
+    cout << "complex six : " << (-test6) * (+test7) << endl;
+    cout << "complex seven: " << test6/test6 << endl;
+    cout << "complex eight : " << test6 % test6 << endl;
+    cout << "most complex : " << test7 % (((-test6) + (+test7)) * test7) << endl;
+           
+}

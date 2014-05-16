@@ -1,0 +1,36 @@
+function : int * good(bool alloc) {
+static int y = 5;
+    int * yy;
+ 
+    if (alloc) {
+        new yy;
+        return yy;
+    }
+ 
+    return &y;
+}
+
+function : int * bad() {
+    int z;
+    return &z;   // This is bad
+}
+ 
+function : int **** goodBad(int *** zz) {
+    *zz;    // Okay ­ when goodBad is called by main below, zz contains
+            // the address of ipp (in main), which points to
+            // an address in an existing stack frame
+    return &zz;   // But this is bad
+}
+int * ip;         // global var allocated in BSS
+function : void main() {
+    int ** ipp = &ip;
+    *ipp;         //Okay ­ ipp has the value &ip, which points into the BSS
+    *&ipp;        //Okay ­ &ipp points into the current stack frame
+    *good(true);  //Okay ­ good returns a pointer into the Heap
+    *good(false); //Okay ­ good returns a pointer into the Data segment
+ 
+    //*bad();         // Error ­ bad returns a pointer to a local variable
+                    // in deallocated stack space
+    *goodBad(&ipp); // Error ­ goodBad returns a pointer to a
+                    // formal parameter in deallocated stack space
+}

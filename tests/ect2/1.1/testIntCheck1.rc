@@ -1,0 +1,33 @@
+//Test int itertals, constants and variables
+
+structdef MYS{
+  MYS* ms;
+  float a;
+};
+//int variables , .bss
+int test1; 
+//constant int, .data
+const int test2 = 10;
+//global static int, .bss 
+static int test3;
+//global static const .data
+static const int test4 = test2;
+//global static const .data
+static const int test5 = 30;
+
+function: void main(){
+  //print out int literals
+  cout << 0x20 << endl;
+  cout<< 0234 << endl;
+  cout << -10 << endl;
+  //shoud print out global const 10
+  cout << test2 << endl;  
+  //should print out gloabl static without init -> 0
+  cout << test3 << endl;
+  //cout for global static const does not showing at all
+  cout << test4 << endl;
+  cout << test5 << endl;
+  cout << sizeof(test1) << endl;          
+  cout << sizeof(MYS)<<endl;          
+}
+

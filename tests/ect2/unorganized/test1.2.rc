@@ -1,0 +1,10 @@
+
+function : void main(){
+   int a = 10, c = 5, [100] d;
+   decltype (a--) b = 10;
+   float f = 10.55555;
+   cout << a + b << " " << c / 2 << a + 10.5 * 99  << endl;
+   cout << f + 10 << endl;
+   
+   cout << (a < 10) << endl;
+}

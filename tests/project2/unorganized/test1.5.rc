@@ -1,0 +1,10 @@
+function : void main(){
+   int a = 10, b = -1;
+   float f = 10.5, c = -1.1111111;
+
+   cout << ++a << " " << a-- << " " << b++ << " " << ++b << endl;
+   
+   cout << ++f << " " << f-- << " " << c++ << " " << ++c << endl;
+
+   exit(10+5+6);
+}

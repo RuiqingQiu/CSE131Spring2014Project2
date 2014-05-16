@@ -1,0 +1,46 @@
+function : void _printHex(int h, bool negative){
+   if (h > 15){
+      _printHex(h/16, negative);
+      h = h % 16;
+   }
+   else{
+      h = h % 16;
+      if (negative){
+         h = h | 0xA;
+      }
+   }
+   if (h < 10){ cout << h;}
+   if (h == 10){ cout << "A";}
+   if (h == 11){ cout << "B";}
+   if (h == 12){ cout << "C";}
+   if (h == 13){ cout << "D";}
+   if (h == 14){ cout << "E";}
+   if (h == 15){ cout << "F";}
+}
+
+function : void printHex(int h){
+   if (h >= 0) {
+      cout << "0x";
+      _printHex(h, false);
+      cout << endl;
+   }
+   else {
+      int signBit = 0x50000000;
+      signBit = 2 * signBit;
+      h = h ^ signBit;
+      
+      cout << "0x";
+      _printHex(h, true);
+      cout << endl;
+   }
+}
+
+function : int main(){
+   printHex(0x12);
+   printHex(0xABCDEF);
+   printHex(012345);
+   printHex(-1);
+   printHex(-2);
+   printHex(-0xF);
+   return 0;
+}

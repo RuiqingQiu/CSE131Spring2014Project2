@@ -1,0 +1,20 @@
+function : int main(){
+   const int r = 20, c = 10;
+   int [r] rows, i, j;
+   decltype(rows) [c] matrix;
+   
+   i = -1; while (++i < c){
+      j = -1; while (++j < r){
+         matrix[i][j] = (i + j) & 1;
+      }
+   }
+
+   i = -1; while (++i < c){
+      j = -1; while (++j < r){
+         cout << matrix[i][j];
+      }
+      cout << endl;
+   }
+
+   return 0;
+}

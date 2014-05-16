@@ -1,0 +1,19 @@
+const int c = 10;
+
+function : bool bar(){
+   static int i;
+   cout << "b" << i;
+   return ++i < c;
+}
+
+function : int main(){
+   static int f;
+   while (bar()){
+      cout << " ";
+      if (++f > c) { exit(1); }
+      
+      main();
+   }
+   cout << endl;
+   return 0;
+}

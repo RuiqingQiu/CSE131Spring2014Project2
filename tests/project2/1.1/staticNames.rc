@@ -1,0 +1,20 @@
+static float a;
+int b;
+const auto c = true;
+
+function : void foo(){
+   static float a;
+   static int b;
+   static bool c;
+}
+
+function : void main(){
+   static auto a = 0xFF;
+   static float b;
+   static bool[10] c;
+   
+   cout << sizeof(c) << " " << sizeof(::c) << " ";
+   cout << a << " " << ::a << " ";
+   cout << b << " " << ::b << " ";
+   cout << c[0] << " " << c[5] << " " << ::c << endl;
+}

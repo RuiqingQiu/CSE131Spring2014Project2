@@ -1,0 +1,12 @@
+extern function : void linky (int a, float b, bool c);
+
+const int c = 10;
+function : int main(){  
+    int i = 0;
+    while (i < c){
+        linky(i, i*858.75, i % 5 == 0);
+    i++;
+    }
+
+    return 0;
+}

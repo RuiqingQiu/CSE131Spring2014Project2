@@ -1,0 +1,66 @@
+int * table;
+int tableCapacity = 0;
+int tableSize = 0;
+
+extern function : int *realloc(int *a, int b);
+extern function : int *calloc(int num, int size);
+
+function : bool Remove(int x){
+   int i = 0;
+   bool valid = false;
+   
+   // look for x
+   while (i < tableSize){
+      if (table[i++] == x){
+         valid = true;
+         tableSize--;
+         break;
+      }
+   }
+   
+   // shift left
+   while (i < tableSize){
+      table[i-1] = table[i];
+      i++;
+   }
+   return valid;
+}
+
+function : void Insert(int x){
+   tableSize++; // increment the table Size
+   if (tableSize > tableCapacity){
+   
+      if (tableCapacity <= 0){
+         tableCapacity = 1024;
+         table = calloc(tableCapacity, 4);
+      }
+      else{
+         tableCapacity = 2 * tableCapacity;   
+         table = realloc(table, tableCapacity * 4);
+      }
+   }
+   table[tableSize-1] = x;
+}
+
+function : int main(){  
+   Insert             (0x1234);
+   cout << (int)Remove(0x1234) << endl;
+   cout << (int)Remove(0x1234) << endl;
+   Insert             (0xFFFF);
+   cout << (int)Remove(0x1234) << endl;
+   cout << (int)Remove(0xFFFF) << endl;
+   
+   int i = 0;
+   while ( i < 5000){
+      Insert(++i);
+   }
+
+   Insert        (0xFFF1234);
+   cout << Remove(0xFFF1234) << endl;
+   cout << Remove(0xFFF1234) << endl;
+   Insert        (0xFFFFFFF);
+   cout << Remove(0xFFF1234) << endl;
+   cout << Remove(0xFFFFFFF) << endl;
+   
+   return 0;
+}

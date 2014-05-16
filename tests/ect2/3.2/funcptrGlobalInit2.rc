@@ -1,0 +1,30 @@
+function : void foo() { 
+   static int i;
+   if (i == 0){ cout << "fe" << endl; }
+   if (i == 1){ cout << "fi" << endl; }
+   if (i == 2){ cout << "fo" << endl; }
+   if (i == 3){ cout << "fum" << endl; i = -1; }
+   i++;
+}
+
+auto fp = foo;
+funcptr : void () fp4 = foo;
+
+function : int main(){
+   static auto fp2 = foo;
+   auto fp3 = foo;
+   
+   static funcptr : void () fp5 = foo;
+   funcptr : void () fp6 = foo;
+   
+   foo();
+   fp();
+   fp2();
+   fp3();
+   cout << endl;
+   fp4();
+   fp5();
+   fp6();
+   foo();
+   return 0;
+}

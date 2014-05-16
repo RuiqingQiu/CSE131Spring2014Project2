@@ -1,0 +1,18 @@
+structdef S{int a;};
+
+function : S copy(S &a){
+   return a;
+}
+
+
+function : int main(){
+   S a, b;
+   a.a = 0;
+   b = copy(a);
+   cout << a.a-- << " " << b.a++ << endl;
+   cout << a.a++ << " " << b.a << endl;
+   a = b = copy(a);
+   cout << ++a.a << " " << b.a++ << endl;
+
+   return 0;
+}

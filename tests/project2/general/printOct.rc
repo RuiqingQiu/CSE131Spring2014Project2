@@ -1,0 +1,25 @@
+function : void _printOct(int h, bool negative){
+   if (h > 7){
+      _printOct(h/8, negative);
+      h = h % 8;
+   }
+   else{ if (negative){ h = h | 0x8; } }
+
+   cout << h;
+}
+
+function : void printOct(int h){
+   cout << "0";
+   _printOct(h & 0x7FFFFFFF, h < 0);
+   cout << endl;
+}
+
+function : int main(){
+   printOct(0x12);
+   printOct(0xABCDEF);
+   printOct(012345);
+   printOct(-1);
+   printOct(-2);
+   printOct(-0xF);
+   return 0;
+}

@@ -1,0 +1,10 @@
+bool _endl = false;
+bool _strFmt;
+bool _intFmt;
+bool _boolT;
+
+function : void main(){
+	if (true) {
+		cout << "Use . before internal vars" << endl;
+	}
+}

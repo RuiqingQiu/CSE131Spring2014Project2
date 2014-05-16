@@ -1,0 +1,19 @@
+function : int * foo(int x){
+   static int *p;
+   if (p != nullptr){
+      delete p;
+   }
+
+   new p;
+   *p = x;
+   return p;
+}
+
+function : int main(){
+   cout << *foo(10) << endl;
+   cout << *foo(5) << endl;
+   int *p = foo(0);
+   delete p;
+
+   return 0;
+}

@@ -1,0 +1,34 @@
+function : float Add (int a, int b){ return (float)a + b;}
+function : float Sub (int a, int b){ return (float)a - b;}
+function : float Mul (int a, int b){ return (float)a * b;}
+function : float Div (int a, int b){ return (float)a / b;}
+
+function : int main(){
+   typedef funcptr : float (int a, int b) OP;
+   OP [5]ops;
+   ops[0] = Add;
+   ops[1] = Sub;
+   ops[2] = Mul;
+   ops[3] = Div;
+
+   const int c = 10;
+   int o = 0; while (o < 4){
+      int i = 1; while (i < 3*c){
+         cout << "-";
+      i++;}
+      cout << endl;
+
+      i = 1; while (i < c){
+         int j = 1; while (j < c){
+            cout << ops[o](i,j) << " ";
+            if (i - j * (i/j) != i % j){
+               cout << "failed" << endl;
+               exit(1);
+            }
+         ++j;}
+         cout << endl;
+      ++i;}
+   o++;}
+
+   return 0;
+}

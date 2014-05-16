@@ -1,0 +1,12 @@
+auto np = nullptr;
+static auto np2 = nullptr;
+const auto np3 = nullptr;
+static const auto np4 = np3;
+
+function : int main(){
+   cout << np == nullptr << " " << np2 != nullptr << endl;
+   cout << np3 == nullptr << " " << np4 != nullptr << endl;
+   cout << nullptr == np << " " << nullptr != nullptr << endl;
+   cout << np3 == np << " " << np4 != np2 << endl;
+   return 0;
+}

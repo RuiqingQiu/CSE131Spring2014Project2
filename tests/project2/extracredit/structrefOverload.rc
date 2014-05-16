@@ -1,0 +1,51 @@
+structdef S1 {int a; float b; bool c;};
+structdef S2 {S1 a; S1 b;};
+structdef S3 {S2 a; S1 b;};
+structdef S4 {S3 a; S2 b;};
+structdef S5 {S4 a; S3 b;};
+structdef S6 {S5 a; S4 b;};
+structdef S7 {S6 a; S5 b;};
+
+S7 meh;
+
+function : void idk(S7 &meh){
+   static int i = 1;
+   meh.a.a.a.a.a.a.a = i++;
+   meh.a.a.a.a.a.a.b = 9.45*i;
+   meh.a.a.a.a.a.a.c = (i%2==1);
+}
+
+function : void _print(S1 &s){
+   static int i = 0;
+   cout << s.a << ", " << s.b << ", " << s.c << endl;
+   s.a = i++;
+   s.b = i;
+   s.c = !s.c;
+}
+function : void _print(S2 &s){ _print(s.a); _print(s.b);}
+function : void _print(S3 &s){ _print(s.a); _print(s.b);}
+function : void _print(S4 &s){ _print(s.a); _print(s.b);}
+function : void _print(S5 &s){ _print(s.a); _print(s.b);}
+function : void _print(S6 &s){ _print(s.a); _print(s.b);}
+function : void _print(S7 &s){ _print(s.a); _print(s.b);}
+
+function : int main(){
+   _print(meh.a.a.a.a.a.a);
+   idk(meh);
+   _print(meh.a.a.a.a.a.a);
+   idk(meh);
+   _print(meh.a.a.a.a.a.a);
+   cout << endl;
+   
+   _print(meh);
+   cout << endl;
+
+   _print(meh);
+   cout << endl;
+   
+   _print(meh);
+   cout << endl;
+
+
+   return 0;
+}

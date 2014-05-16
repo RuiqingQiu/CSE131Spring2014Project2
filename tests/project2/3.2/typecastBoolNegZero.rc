@@ -1,0 +1,12 @@
+function : int main(){
+   auto f = 0.0;
+   cout << *(int*)&f << endl;
+   cout << (bool)(*(int*)&f) << endl;
+   cout << (bool)f << endl;
+   f = -f;
+   cout << *(int*)&f << endl;
+   cout << (bool)(*(int*)&f) << endl;
+   cout << (bool)f << endl;
+   
+   return 0;
+}

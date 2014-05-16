@@ -1,0 +1,24 @@
+const int c = 10;
+
+function : void foo (int [c] &a){
+   int i = -1; while (++ i < c){
+      cout << a[i] << "\t";
+      a[i]++;
+   }
+   cout << endl;
+}
+
+function : int main(){
+   int [c] a, i = -1;
+   while (++i < c){
+      a[i] = 3*i;
+   }
+
+   foo(a);
+   foo(a);
+   foo(a);
+   foo(a);
+
+   
+   return 0;
+}

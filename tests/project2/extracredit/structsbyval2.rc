@@ -1,0 +1,51 @@
+const int c = 15;
+
+structdef S { int [c] a; };
+
+function : void foo (S x, S y, S z){
+
+   int i = 0;
+   
+   i = 0;
+   while (i < c){
+      cout << x.a[i] << "." << y.a[i] << "." <<  z.a[i++] << endl;
+   }
+
+   cout << endl;
+   i = 0;
+   while (i < c){
+      y.a[i] = (z.a[i] = x.a[i]  + 10000) + 100;
+   i++;}
+   
+   i = 0;
+   while (i < c){
+      cout << x.a[i] << "." << y.a[i] << "." <<  z.a[i++] << endl;
+   }
+    cout << endl;
+}
+
+function : int main(){  
+   S x, y, z;
+   
+   int i = 0; 
+   
+   while (i < c){
+      x.a[i] = (y.a[i] = (z.a[i] = i) + 1) + 1;
+   i++;}
+   
+   i = 0;
+   while (i < c){
+      cout << x.a[i] << "." << y.a[i] << "." <<  z.a[i++] << endl;
+   }
+   
+   cout << endl;
+   
+   foo(x,y,z);
+   
+   i = 0;
+   while (i < c){
+      cout << x.a[i] << "." << y.a[i] << "." <<  z.a[i++] << endl;
+   }
+
+   return 0;
+}

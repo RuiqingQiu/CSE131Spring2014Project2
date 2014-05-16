@@ -1,0 +1,14 @@
+//This file is to use test bool literals, consts, global and static
+bool test1;
+const bool test2 = true;
+static const bool test3 = false;
+
+function : void main(){
+  //local variables are not automatically initialized
+  bool test4;
+  cout << test1 << endl;           
+  cout << test2 << endl;           
+  cout << test3 << endl; 
+  cout << test4 << endl;
+}
+

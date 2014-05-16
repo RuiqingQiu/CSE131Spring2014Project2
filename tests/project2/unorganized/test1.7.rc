@@ -1,0 +1,7 @@
+
+function : void main(){
+   int a = 10 + 5 + 4;
+   float f = 10.55 - 100.33/a;
+   
+   cout << -a << " " << -f << endl;
+}

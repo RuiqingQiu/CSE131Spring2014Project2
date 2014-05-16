@@ -1,0 +1,18 @@
+bool failed = false;
+function : int sideF(){
+   static int x = 1;
+   cout << "failed xD " << x++ << endl;
+   failed = true;
+   return x;
+}
+
+function : int main(){  
+
+   decltype( (decltype(sideF())) 100) x;
+
+   if (!failed) {
+      cout << "passed :) " << endl;
+   }
+
+   return 0;
+}

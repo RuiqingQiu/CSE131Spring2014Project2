@@ -1,0 +1,20 @@
+function : int main(){
+   static bool fail;
+   auto b = true || (fail = true);
+   if (!b || fail){ exit(1);}
+   
+   b = (!b || fail) && (fail = true);
+   if (b || fail){ exit(2);}
+
+   b = !(b && (!b || true && true && (fail = true))) || !(fail = true) && (fail = true);
+   if (!b || fail){ exit(3);}
+   
+   b = false || b && !b || !b && !(b && (!b || true && true && (fail = true))) || b || !(fail = true) && (fail = true);
+   if (!b || fail){ exit(4);}
+
+   b = false || !(!b && (fail = true) && (fail = true) && (fail = true)) || !(fail = true) || !(fail = true) || !(fail = true) && (fail = true);
+   if (!b || fail){ exit(5);}
+
+   cout << "passed\n";
+   return 0;
+}

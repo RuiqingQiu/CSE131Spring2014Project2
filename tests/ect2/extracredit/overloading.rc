@@ -1,0 +1,12 @@
+function : int foo (int a){
+   return -a;
+}
+
+function : int foo (int a, int b){
+   return a-b;
+}
+
+function : int main(){  
+   cout << foo(10) << " " << foo (10,15) << endl;
+   return 0;
+}

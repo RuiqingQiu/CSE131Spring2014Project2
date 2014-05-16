@@ -1,0 +1,13 @@
+int k = 100;
+
+function : int fobi (){
+   if (--k == 0) {
+      return k;
+   }
+   cout << k;
+   return k + fobi();
+}
+
+function : void main(){
+   cout << fobi() << endl;
+}

@@ -1,0 +1,7 @@
+function : int main(){
+   static bool failed;
+   auto a = true || (failed = true) || (failed = true);
+
+   cout << "passed: " << !failed << endl;
+   return 0;
+}

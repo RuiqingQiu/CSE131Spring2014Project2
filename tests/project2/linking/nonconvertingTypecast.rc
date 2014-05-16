@@ -1,0 +1,17 @@
+extern function : void printHex(int h);
+
+function : int main(){
+   float f = 2.17;
+   const int c = 10;
+   int i = 0;
+   while ( i++ < c){
+      cout << f << endl;
+      printHex((int)f);
+      cout << endl;
+      printHex(* (int*)&f);
+      f = f*i;
+      cout << endl << "----" << endl;
+   }
+
+   return 0;
+}

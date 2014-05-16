@@ -1,0 +1,6 @@
+function : int main(){
+   cout << (bool)0.0 << endl;
+   cout << (bool)(-0.0) << endl;
+
+   return 0;
+}

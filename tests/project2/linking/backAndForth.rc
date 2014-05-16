@@ -1,0 +1,26 @@
+const int c = 10;
+extern function : void back();
+
+function : void forth(){
+   static bool t = true;
+   static int i = 0;
+   if (i == c) {
+      return;
+   }
+
+   if (t){
+      t = !t;
+      back();
+   }
+   else{
+      t = !t;
+      cout << " and forth" << endl;
+      i++;
+      forth();
+   }
+}
+
+function : int main(){
+   forth();
+   return 0;
+}

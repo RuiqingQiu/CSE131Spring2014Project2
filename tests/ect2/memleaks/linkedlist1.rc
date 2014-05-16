@@ -1,0 +1,16 @@
+structdef NODE {
+   NODE * prev;
+   NODE * next;
+   int val;
+};
+
+function : int main(){
+   NODE * head;
+   new head;
+   
+   head->val = 10;
+   cout << head->val << endl;
+
+   return 0;
+}
+

@@ -1,0 +1,11 @@
+function : int main(){
+   int *a, *b;
+   new b;
+   a = b;
+   delete b;
+   int c = *a;
+   new b;
+   *b = c;
+   delete b;
+   return 0;
+}

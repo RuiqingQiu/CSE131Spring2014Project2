@@ -1,0 +1,17 @@
+function : int main(){
+   typedef int [40]IA;
+   typedef float [50]FA;
+   typedef bool [60]BA;
+   structdef S{IA a; FA b; BA c;};
+   structdef S2{S a; S2 *b; S c;};
+   structdef S3{S2 a; S3 *b; S [5]c;};
+   int a; float b; bool c;
+   int[10] a2; float[20] b2; bool[30] c2;
+   cout << sizeof(a) << " " << sizeof(b) << " " << sizeof(c) << endl;
+   cout << sizeof(int) << " " << sizeof(float) << " " << sizeof(bool) << endl;
+   cout << sizeof(a2) << " " << sizeof(b2) << " " << sizeof(c2) << endl;
+   cout << sizeof(IA) << " " << sizeof(FA) << " " << sizeof(BA) << endl;
+   cout << sizeof(S) << " " << sizeof(S2) << " " << sizeof(S3) << endl;
+
+   return 0;
+}

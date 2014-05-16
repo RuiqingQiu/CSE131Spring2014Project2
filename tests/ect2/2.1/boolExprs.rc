@@ -1,0 +1,36 @@
+function : int main(){
+   int i, j; float f,g; bool a,b;
+   i = 1; j = 1;
+   cout << i >= j << i <= j << i > j << i < j << i == j << i != j << endl;
+   i = 0; 
+   cout << i >= j << i <= j << i > j << i < j << i == j << i != j << endl;
+   i = 2;
+   cout << i >= j << i <= j << i > j << i < j << i == j << i != j << endl;
+   cout << endl;
+   
+   f = 2;
+   cout << i >= f << i <= f << i > f << i < f << i == f << i != f << endl;
+   cout << f >= i << f <= i << f > i << f < i << f == i << f != i << endl;
+   f = 4;
+   cout << i >= f << i <= f << i > f << i < f << i == f << i != f << endl;
+   cout << f >= i << f <= i << f > i << f < i << f == i << f != i << endl;
+   cout << endl;
+
+   g = 3.0;
+   cout << g >= f << g <= f << g > f << g < f << g == f << g != f << endl;
+   cout << f >= g << f <= g << f > g << f < g << f == g << f != g << endl;
+   g = 4.0;
+   cout << g >= f << g <= f << g > f << g < f << g == f << g != f << endl;
+   cout << f >= g << f <= g << f > g << f < g << f == g << f != g << endl;
+   cout << endl;
+
+   a = b = false;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;
+   b = true;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;
+   a = true;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;
+   b = false;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;
+   return 0;
+}

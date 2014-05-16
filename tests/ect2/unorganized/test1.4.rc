@@ -1,0 +1,11 @@
+function : void main(){
+   int k = 10, c = 5;
+   if (k < 5) {
+      cout << "test" << endl;
+   }
+   
+   while (k > 0){
+      k = k - 1;
+      cout << k << endl;
+   }
+}

@@ -1,0 +1,13 @@
+function : int foo(int x){
+   static auto this = foo;
+   if (x > 0){
+      cout << x;
+      return 1 + this(--x);
+   }
+
+   return 0;
+}
+function : int main(){
+   cout << foo(15) << endl;
+   return 0;
+}

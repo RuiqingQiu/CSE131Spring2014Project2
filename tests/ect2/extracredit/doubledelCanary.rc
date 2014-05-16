@@ -1,0 +1,9 @@
+function : int main(){
+   int *a, *b;
+   new a; new b;
+   delete b;
+   *a = *(int *)((int)a + 16);
+   delete a;
+
+   return 0;
+}

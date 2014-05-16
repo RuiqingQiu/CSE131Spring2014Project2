@@ -1,0 +1,32 @@
+structdef NODE {
+   NODE *prev;
+   NODE *next;
+   int val;
+};
+
+const int c = 10;
+
+function : int main(){
+   NODE *head, *node;
+   new head;
+   
+   head->val = 0;
+   
+   
+   node = head;
+   int i = 0; while (i < c){
+      new node->next;
+      node->next->val = node->val + 1;
+      node->next->prev = node;
+      node = node->next;
+   i++;}
+   
+   i = 0; while (i < c){
+      cout << node->val << " ";
+      node = node->prev;
+   i++;}
+   cout << endl;
+
+   return 0;
+}
+

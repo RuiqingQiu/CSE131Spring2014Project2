@@ -1,0 +1,31 @@
+const int p = 10000;
+int [p-2] sieve, i, j;
+
+function : int main(){
+   // sieve
+   i = 1; while (++i < p){
+      int prime = sieve[i-2];
+      if (prime == -1) { continue;}
+
+      j = i + i; while ( j < p){
+         sieve[j-2] = -1;
+         j = j + i;
+      }
+   }
+
+   // output
+   int row = 0;
+   i = 1; while (++i < p){
+      int prime = sieve[i-2];
+      if (prime != -1){
+         cout << i << "\t";
+         if (row++ >= 7){
+            cout << endl;
+            row = 0;
+         }
+      }
+   }
+   cout << endl;
+
+   return 0;
+}

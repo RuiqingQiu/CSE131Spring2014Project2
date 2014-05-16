@@ -1,0 +1,17 @@
+//This file is trying to test float literals, constants, varibles
+float test1;
+const float test2 =  10.0;
+static const float test3 = test2;
+
+function  : void main(){
+    float test4 = +-23.9;
+    float test5;
+    cout << 1000.000 << endl;
+    cout << -98.238 << endl;
+    cout << test1 << endl;
+    cout << test2 << endl;
+    cout << test3 << endl;
+    cout << test4 << endl;
+    cout << test5 << endl;
+}
+

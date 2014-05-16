@@ -1,0 +1,17 @@
+function : int main(){
+   const int c = 1025;
+   typedef int *IPTR;
+   IPTR [c] p;
+
+   int i = 0; while (i < c){
+      new p[i];
+   i++; }
+  
+   i = 0; while (i < c){
+      delete p[i];
+   i++; }
+
+   cout << "passed :3 " << endl;
+
+   return 0;
+}

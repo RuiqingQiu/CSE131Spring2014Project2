@@ -1,0 +1,20 @@
+function : int main(){
+   const int r = 10, c = 10;
+   int [r] rows;
+   decltype(rows) [c] matrix;
+   
+   int i = -1; while (++i < r){
+      int j = -1; while (++j < r){
+         matrix[i][j] = i + j * 10 * c;
+      }
+   }
+
+   i = -1; while (++i < r){
+      int j = -1; while (++j < r){
+         cout << matrix[i][j] << " ";
+      }
+      cout << endl;
+   }
+
+   return 0;
+}

@@ -1,0 +1,55 @@
+function : float Add (int a, int b){ return (float)a + b;}
+function : float Sub (int a, int b){ return (float)a - b;}
+function : float Mul (int a, int b){ return (float)a * b;}
+function : float Div (int a, int b){ return (float)a / b;}
+function : void AddName() { cout << "add" << endl; }
+function : void SubName() { cout << "sub" << endl; }
+function : void MulName() { cout << "mul" << endl; }
+function : void DivName() { cout << "div" << endl; }
+   
+typedef funcptr : float (int a, int b) OP;
+typedef funcptr : void () OPNAME;
+
+structdef OPERATOR{
+   OP op;
+   OPNAME name;
+};
+
+function : int main(){
+   OPERATOR [5]ops;
+   ops[0].op = Add;
+   ops[1].op = Sub;
+   ops[2].op = Mul;
+   ops[3].op = Div;
+   ops[0].name = AddName;
+   ops[1].name = SubName;
+   ops[2].name = MulName;
+   ops[3].name = DivName;
+
+   const int c = 10;
+   int o = 0; while (o < 4){
+      ops[o].name();
+      int i = 1; while (i < 3*c){
+         cout << "-";
+      i++;}
+      cout << endl;
+
+      i = 1; while (i < c){
+         int j = 1; while (j < c){
+            cout << ops[o].op(i,j) << "\t";
+            if (i - j * (i/j) != i % j){
+               cout << "failed" << endl;
+               exit(1);
+            }
+         ++j;}
+         cout << endl;
+      ++i;}
+      
+      i = 1; while (i < 3*c){
+         cout << "-";
+      i++;}
+      cout << endl;
+   o++;}
+
+   return 0;
+}

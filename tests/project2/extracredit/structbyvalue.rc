@@ -1,0 +1,17 @@
+structdef TEST{ int x; };
+
+function : void foo (TEST a, TEST b, TEST c, TEST d, TEST e, TEST f, TEST g, TEST h, TEST i){
+   a.x = b.x = c.x = d.x = e.x = f.x = g.x = h.x = i.x = 10000;
+   cout <<a.x << b.x << c.x << d.x << e.x << f.x << g.x << h.x << i.x << endl;
+}
+
+function : int main(){
+   TEST a, b, c, d, e, f, g, h, i;
+   
+   a.x = b.x = c.x = d.x = e.x = f.x = g.x = h.x = i.x = 300;
+   cout <<a.x << b.x << c.x << d.x << e.x << f.x << g.x << h.x << i.x << endl;
+   foo(a, b, c, d, e, f, g, h, i);
+   cout <<a.x << b.x << c.x << d.x << e.x << f.x << g.x << h.x << i.x << endl;
+   
+   return 0;
+}

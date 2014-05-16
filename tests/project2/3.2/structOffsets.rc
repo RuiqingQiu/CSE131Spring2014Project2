@@ -1,0 +1,19 @@
+structdef FOO { int a; int[2] b; bool c;};
+structdef FUBAR { float d; int e; bool [5]f; FOO g; int h, i;};
+
+function : int main(){
+   cout << sizeof(FOO) << endl;
+   cout << sizeof(FUBAR) << endl;
+   cout << (int)(&(((FUBAR *) 1)->d)) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->e)) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->f[0])) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->f[3])) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->g.a)) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->g.b[0])) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->g.b[1])) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->g.c)) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->h)) - 1 << endl;
+   cout << (int)(&(((FUBAR *) 1)->i)) - 1 << endl;
+
+   return 0;
+}

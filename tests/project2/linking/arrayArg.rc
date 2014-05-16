@@ -1,0 +1,22 @@
+const int c = 10;
+
+extern function : void foo(int [c] a);
+
+function : int main(){
+   int [c] a;
+   int i = 0; while (i < c){
+      a[i] = i;
+   i++;}
+
+   i = 0; while (i < c){
+      cout << a[i++] << "\t";
+   }  cout << endl;
+
+   foo(a);
+   
+   i = 0; while (i < c){
+      cout << a[i++] << "\t";
+   }  cout << endl;
+
+   return 0;
+}

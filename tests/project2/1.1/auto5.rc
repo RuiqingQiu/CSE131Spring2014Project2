@@ -1,0 +1,22 @@
+const auto c = 123456;
+static const auto c2 = c;
+const auto f2 = c + 10.5;
+
+function : int main(){
+   auto f = -801.3;
+   auto i = -0xFAFA;
+   auto b = true;
+   
+   cout << b << " " << f << " " << i << endl;
+   f = i;
+   b = false;
+   i = +10;
+   cout << b << " " << f << " " << i << endl;
+   cout << c << " " << c2 << " " << f2 << endl;
+   f = f2;
+   i = c2;
+   cout << f << " " << i << endl;
+
+
+   return 0;
+}

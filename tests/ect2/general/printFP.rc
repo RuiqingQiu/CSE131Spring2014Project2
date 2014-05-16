@@ -1,0 +1,22 @@
+function : void printFP(int fp){
+   int sign = (int)(fp < 0);
+   int exp = (fp & 0x7F800000) / 0x800000;
+   int significand = fp & 0x7FFFFF;
+
+   cout << sign << " " << exp << " " << significand << endl;
+}
+
+function : void printFP(float fp){
+   printFP(*(int*)&fp);
+}
+
+function : int main(){
+   printFP(100.0);
+   printFP(139.75);
+   printFP(-1.0);
+   printFP(1.2345);
+   printFP(0.0);
+   printFP(-0.0);
+   printFP(0);
+   return 0;
+}

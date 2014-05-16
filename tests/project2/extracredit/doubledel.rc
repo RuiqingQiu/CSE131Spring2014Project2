@@ -1,0 +1,8 @@
+int *x, *y;
+function : int main(){  
+   new x;
+   y = x;
+   delete x;
+   delete y;
+   return 0;
+}

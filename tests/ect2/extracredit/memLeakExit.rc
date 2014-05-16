@@ -1,0 +1,13 @@
+function : void Exit(int x){
+   exit(x);
+   cout << "fail" << endl;
+}
+
+function : int main(){
+   int *p, a = 12;
+   while (--a > 0) { new p; }
+   
+   Exit(a);
+   cout << "fail" << endl;
+   return 0;
+}

@@ -1,0 +1,15 @@
+function : int foo (int x, int y){
+   return x + y;
+}
+
+typedef funcptr : int (int a, int b)  FUNC;
+
+function : int main(){
+   FUNC x = foo;
+   
+   FUNC y = x;
+   
+   cout << y (10, 5) << endl;
+   
+   return 0;
+}

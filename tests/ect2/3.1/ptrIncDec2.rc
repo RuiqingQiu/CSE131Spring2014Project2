@@ -1,0 +1,15 @@
+typedef int [2] DOUBLE;
+
+function : int main(){
+   DOUBLE d;
+   auto p = &d;
+   auto b = p;
+   cout << (int)p++ - (int)b << endl;
+   cout << sizeof(DOUBLE) << endl;
+   cout << (int)p - (int)b << endl;
+   cout << (int)++p - (int)b << endl;
+   cout << (int)--p - (int)b << endl;
+   cout << (int)p-- - (int)b << endl;
+   cout << (int)p - (int)b << endl;
+   return 0;
+}

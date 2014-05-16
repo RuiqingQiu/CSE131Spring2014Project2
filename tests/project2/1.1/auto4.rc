@@ -1,0 +1,7 @@
+function : int main(){
+   static const auto f = -801.3;
+   static const auto i = -0xFAFA;
+   static const auto b = true;
+   cout << b << f << i << endl;
+   return 0;
+}

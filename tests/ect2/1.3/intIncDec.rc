@@ -1,0 +1,11 @@
+function : void main(){
+   static int a,b,c = 010;
+   cout << a++ + +b++ << ", ";
+   cout << a << ", " << b << endl;
+
+   cout << ++a + ++b + c-- << ", ";
+   cout << a << ", " << b << ", " << c << endl;
+
+   cout << --a + --b + c++ << ", ";
+   cout << -a << ", " << +b << ", " << c << endl;
+}

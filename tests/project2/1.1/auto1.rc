@@ -1,0 +1,7 @@
+function : int main(){
+   auto f = -10.5;
+   auto i = -10;
+   auto b = false;
+   cout << b << f << i << endl;
+   return 0;
+}

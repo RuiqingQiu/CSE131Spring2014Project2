@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ -e rc.s ]; then
+	rm rc.s
+fi
+if [ -e a.out ]; then
+	rm a.out
+fi
+./RC $1
+
+exts=""
+
+cext="`dirname $1`/`basename $1 .rc`_externs.c"
+rcext="`dirname $1`/`basename $1 .rc`_externs.rc"
+sext="`dirname $1`/`basename $1 .rc`_externs.s"
+
+if [ -e $cext ]; then
+	exts="$exts $cext"
+fi
+
+if [ -e $rcext ]; then
+	exts="$exts $rcext"
+fi
+
+if [ -e $sext ]; then
+	exts="$exts $sext"
+fi
+
+if [ -e rc.s ]; then 
+	make compile LINKOBJ="$exts"
+fi

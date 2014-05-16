@@ -1,0 +1,15 @@
+structdef S{
+   int [5] c;
+   S *****a;
+};
+
+function : int main(){
+   S a;
+   cout << sizeof(decltype(a.a)) << endl;
+   cout << sizeof(decltype(*a.a)) << endl;
+   cout << sizeof(decltype(**a.a)) << endl;
+   cout << sizeof(decltype(***a.a)) << endl;
+   cout << sizeof(decltype(****a.a)) << endl;
+   cout << sizeof(decltype(*****a.a)) << endl;
+   return 0;
+}

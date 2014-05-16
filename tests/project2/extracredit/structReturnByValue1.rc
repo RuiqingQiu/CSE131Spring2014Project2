@@ -1,0 +1,17 @@
+structdef S{int a;};
+
+function : S foo(){
+   static int a;
+   S b;
+   b.a = a++;
+   return b;
+}
+
+
+function : int main(){
+   auto meh = foo();
+   auto feh = foo();
+   auto zzz = foo();
+   cout << meh.a << " " << feh.a << " " << zzz.a << " " << foo().a << endl;
+   return 0;
+}

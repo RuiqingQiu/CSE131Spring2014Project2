@@ -1,0 +1,110 @@
+Failed ect2/1.1/auto1.rc
+===========================================
+1c1
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> false-10.50-10
+===========================================
+
+
+Failed ect2/1.1/auto2.rc
+===========================================
+1c1
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> true-801.30-64250
+===========================================
+
+
+Failed ect2/1.1/auto3.rc
+===========================================
+1c1
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> false-10.50-10
+===========================================
+
+
+Failed ect2/1.1/auto4.rc
+===========================================
+1c1
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> true-801.30-64250
+===========================================
+
+
+Failed ect2/1.1/auto5.rc
+===========================================
+1c1,4
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> true -801.30 -64250
+> false -64250.00 10
+> 123456 123456 123466.50
+> 123466.50 123456
+===========================================
+
+
+Failed ect2/1.1/coutStrings.rc
+===========================================
+1c1,7
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> mehhhh
+> 
+> 
+> 
+> 
+> 
+> booooooooooooooring test
+===========================================
+
+
+Failed ect2/1.1/floatLocalVar.rc
+===========================================
+1c1,4
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> 10.00
+> 1.00
+> 10.50
+> 3.30
+===========================================
+
+
+Failed ect2/1.1/foldingBool.rc
+===========================================
+1c1
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> truefalsetruetruetruefalse
+===========================================
+
+
+Failed ect2/1.1/foldingBool2.rc
+===========================================
+1c1,18
+< ./runTestsP2.sh: line 55: ./rcc: Permission denied
+---
+> truetruefalsefalsetruefalse
+> falsetruefalsetruefalsetrue
+> truefalsetruefalsefalsetrue
+> 
+> truetruefalsefalsetruefalse
+> truetruefalsefalsetruefalse
+> falsetruefalsetruefalsetrue
+> truefalsetruefalsefalsetrue
+> 
+> falsetruefalsetruefalsetrue
+> truefalsetruefalsefalsetrue
+> truetruefalsefalsetruefalse
+> truetruefalsefalsetruefalse
+> 
+> truefalsefalsefalsetruetrue
+> falsetruefalsetruetruefalse
+> truefalsetruetruefalsefalse
+> falsetruefalsetruefalsetrue
+===========================================
+
+

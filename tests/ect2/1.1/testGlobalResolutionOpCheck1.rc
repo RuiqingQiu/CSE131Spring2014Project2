@@ -1,0 +1,15 @@
+//This file is to check global scope resolution operator
+int test1 = 29;
+const float test4 = 100.0;
+
+function : void main(){
+  bool test1 = true;
+  int test2 = ::test1;
+  cout << test2 << endl;
+  
+  bool test3 = test1;
+  cout << test3<<endl;
+  
+  float test4 = 10;
+  
+}

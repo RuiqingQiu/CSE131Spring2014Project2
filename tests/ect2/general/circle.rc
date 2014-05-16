@@ -1,0 +1,31 @@
+function : float sqrt(float n){
+   float f = 1;
+   int i = 0; while (i++ < 20){
+      f = (f + n/f)/2;
+   }
+   return f;
+}
+function : float sqr(float n) { return n * n;}
+
+function : int main(){
+   const int r = 51, c = 26;
+   const float a = r/2, b = c/2;
+   const float epsilon = 0.01;
+   int [r] rows, i, j;
+   decltype(rows) [c] matrix;
+
+   i = -1; while (++i < c){
+      j = -1; while (++j < r){
+         matrix[i][j] = (int)(sqr((i-b)/b) + sqr((j-a)/a) - 1 <= epsilon);
+      }
+   }
+
+   i = -1; while (++i < c){
+      j = -1; while (++j < r){
+         cout << matrix[i][j];
+      }
+      cout << endl;
+   }
+
+   return 0;
+}

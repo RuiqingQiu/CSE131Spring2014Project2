@@ -1,0 +1,29 @@
+// n^p
+function : float exp(float n, int p){
+   float x = 1;
+   int i = 0; while (i++ < p){
+      x = x * n;
+   }
+   return x;
+}
+
+// n^(1/p)
+function : float root(float n, int p){
+   float x = 1;
+   int i = 0; while (i++ < 5){
+      x = x - x/p + n/(p * exp(x,p-1));
+   }
+   return x;
+}
+
+function : int main(){
+   const int c = 10;
+   int p = 0; while (++p <= c){
+      int i = 0 ; while (++i <= c){
+         cout << root(i,p) << " ";
+      }
+      cout << endl;
+   }
+
+   return 0;
+}

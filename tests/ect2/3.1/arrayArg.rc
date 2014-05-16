@@ -1,0 +1,25 @@
+const int c = 10;
+
+function : void foo (int [c]a){
+   int i = 0; while (i < c){
+      cout << a[i++] << "\t";
+   }
+   
+   i = 0; while (i < c){
+      a[i] = 300-i;
+   i++;}
+   cout << endl;
+}
+
+int [c] a;
+
+function : int main(){
+   foo(a);
+   
+   int i = 0; while (i < c){
+      cout << a[i++] << "\t";
+   }
+   cout << endl;
+
+   return 0;
+}

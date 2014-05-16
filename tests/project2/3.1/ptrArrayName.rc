@@ -1,0 +1,11 @@
+function : int main(){
+   const int c = 50;
+   int [c] a;
+   int *p = a;
+   int i = -1; while (++i < c){
+      a[i] = i;
+      cout << p[i++] << " ";
+   } cout << endl;
+
+   return 0;
+}

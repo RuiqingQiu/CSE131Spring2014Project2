@@ -1,0 +1,11 @@
+function : int main(){
+   static auto b = nullptr == nullptr;
+   const auto b2 = nullptr != nullptr;
+   const bool b3 = b2 || true;
+   static bool b4 = b3 && true && true && 10.5 > 10 || false;
+   const auto t = sizeof(bool) == 4 && sizeof(int) == sizeof(float) && sizeof(int) == 4;
+   const bool f = !t || false || false || true && true && false;
+
+   cout << b << b2 << b3 << b4 << t << f << endl;
+   return 0;
+}

@@ -1,0 +1,26 @@
+function : void printBinary(int h){
+   if (h < 0){
+      cout << 1;
+   }
+   else{
+      cout << 0;
+   }
+   int mask = 0x40000000;
+   while (mask > 0){
+      cout << (int)((mask & h) != 0);
+      mask = mask / 2;
+   }
+
+   cout << endl;
+}
+
+function : int main(){
+   printBinary(0x12);
+   printBinary(0xABCDEF);
+   printBinary(012345);
+   printBinary(-1);
+   printBinary(-2);
+   printBinary(-0xF);
+   printBinary(0x70ABCDEF);
+   return 0;
+}

@@ -1,0 +1,6 @@
+static int a = 1;
+static int b = 2;
+function : int main(){  
+   cout << a + b << endl;
+   return 0;
+}

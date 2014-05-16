@@ -1,0 +1,47 @@
+function : void foo() { 
+   static int i;
+   if (i == 0){ cout << "fe" << endl; }
+   if (i == 1){ cout << "fi" << endl; }
+   if (i == 2){ cout << "fo" << endl; }
+   if (i == 3){ cout << "fum" << endl; i = -1; }
+   i++;
+}
+
+auto fp = foo;
+funcptr : void () fp4 = foo;
+funcptr : void () fp7;
+
+function : int main(){
+   static auto fp2 = foo;
+   static funcptr : void () fp5 = foo;
+   
+   auto fp3 = foo;
+   funcptr : void () fp6 = foo;
+
+   foo();
+   fp();
+   fp2();
+   fp3();
+   cout << endl;
+
+   fp4();
+   fp5();
+   fp6();
+   foo();
+   cout << endl;
+
+   static funcptr : void () fp8;
+   funcptr : void () fp9;
+   
+   if (!(fp7 == nullptr)){ cout << "failure7" << endl;}
+   if (fp8 != nullptr){ cout << "failure8" << endl;}
+
+   fp7 = fp8 = fp9 = fp6;
+   
+   fp6();
+   fp7();
+   fp8();
+   fp9();
+
+   return 0;
+}

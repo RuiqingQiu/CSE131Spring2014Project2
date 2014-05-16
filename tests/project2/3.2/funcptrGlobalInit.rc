@@ -1,0 +1,19 @@
+function : void foo() { 
+   static int i;
+   if (i == 0){ cout << "fe" << endl; }
+   if (i == 1){ cout << "fi" << endl; }
+   if (i == 2){ cout << "fo" << endl; }
+   if (i == 3){ cout << "fum" << endl; i = -1; }
+   i++;
+}
+
+auto fp = foo;
+function : int main(){
+   static auto fp2 = foo;
+   auto fp3 = foo;
+   foo();
+   fp();
+   fp2();
+   fp3();
+   return 0;
+}

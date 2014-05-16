@@ -1,0 +1,11 @@
+function : int main(){
+   int i = 0;
+   int *p;
+   while (++i < 100000){
+      new p;
+      delete p;
+   }
+   cout << "passed :3 " << endl;
+
+   return 0;
+}

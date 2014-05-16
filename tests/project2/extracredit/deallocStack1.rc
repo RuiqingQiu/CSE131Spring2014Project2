@@ -1,0 +1,8 @@
+function : int *boring(){
+    int x;
+    return &x;
+}
+function : int main(){
+    cout << *boring();
+    return 0;
+}

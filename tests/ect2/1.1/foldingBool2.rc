@@ -1,0 +1,36 @@
+function : int main(){
+   {const int i = 1, j = 1;
+   cout << i >= j << i <= j << i > j << i < j << i == j << i != j << endl;}
+   {const int i = 0, j = 1;
+   cout << i >= j << i <= j << i > j << i < j << i == j << i != j << endl;}
+   const int i = 2, j = 1;
+   cout << i >= j << i <= j << i > j << i < j << i == j << i != j << endl;
+   cout << endl;
+   
+   {const float f = 2;
+   cout << i >= f << i <= f << i > f << i < f << i == f << i != f << endl;
+   cout << f >= i << f <= i << f > i << f < i << f == i << f != i << endl;
+   }
+   const float f = 4;
+   cout << i >= f << i <= f << i > f << i < f << i == f << i != f << endl;
+   cout << f >= i << f <= i << f > i << f < i << f == i << f != i << endl;
+   cout << endl;
+
+   {const float g = 3.0;
+   cout << g >= f << g <= f << g > f << g < f << g == f << g != f << endl;
+   cout << f >= g << f <= g << f > g << f < g << f == g << f != g << endl;}
+   const float g = 4.0;
+   cout << g >= f << g <= f << g > f << g < f << g == f << g != f << endl;
+   cout << f >= g << f <= g << f > g << f < g << f == g << f != g << endl;
+   cout << endl;
+
+   {const bool a = false, b = false;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;}
+   {const auto a = false; const auto b = true;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;}
+   {const bool a = true, b = true;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;}
+   const auto a = true; const auto b = false;
+   cout << a == b << a != b << a && b << a || b << !a << !b << endl;
+   return 0;
+}

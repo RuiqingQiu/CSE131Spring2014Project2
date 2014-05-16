@@ -1,0 +1,12 @@
+function : int main(){
+   structdef S{int a; int b; int c;};
+   int[3] a;
+   a[0] = a[1] = a[2] = 5;
+   cout << a[0] << ", " << a[1] << ", " << a[2] << endl;
+   ((S*)(&a[0]))->a = 10;
+   cout << a[0] << ", " << a[1] << ", " << a[2] << endl;
+   ((S*)(&a[0]))->b = ((S*)(&a[0]))->c = 3;
+   cout << a[0] << ", " << a[1] << ", " << a[2] << endl;
+
+   return 0;
+}

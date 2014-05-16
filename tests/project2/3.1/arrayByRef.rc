@@ -1,0 +1,25 @@
+const int c = 200;
+typedef int[c] A;
+
+function : void foo (A &a){
+   static int t = 0;
+
+   int i = 0; while (i < c){
+      a[i] = t++;
+   i++;}
+}
+
+A a;
+function : int main(){
+   A a;
+   foo(a);
+   foo(::a);
+   
+   int i = 0; while (i < c){
+      cout << a[i] ^ ::a[i] ;
+   i++;}
+   cout << endl;
+   
+   return 0;
+}
+

@@ -1,0 +1,18 @@
+const auto a = 0x1F;
+static const auto b = a - 012;
+const int c = a * 5;
+static const int d = a + b + c;
+
+function : int main(){
+   const auto e = d / a;
+   static const auto f = e % 4;
+   const int g = e | a;
+   static const int h = g & 0x1;
+
+   cout << a << ", " << b << ", " << c << ", " << d << ", ";
+   cout << e << ", " << f << ", " << g << ", " << h << ", ";
+   cout << e^a << ", " << e^e << ", " << -1|e << ", " << e&0 << ", ";
+   cout << -a << ", " << +a << ", " << a-b-(c+d-e) << ", " << d/a/f << endl;
+
+   return 0;
+}

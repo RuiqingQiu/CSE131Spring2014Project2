@@ -1,0 +1,19 @@
+function : int fib(int n, int depth){
+   
+   int r = 1;
+   
+   if (n > 1){
+      r = fib(n-1, depth+1) + fib(n-2, depth+1);
+   }
+   int i = -1; while (i++ < depth){
+      cout << "-";
+   }
+   cout << r << endl;
+   return r;
+}
+
+function : int main(){
+   cout << fib(7, 0) << endl;
+
+   return 0;
+}

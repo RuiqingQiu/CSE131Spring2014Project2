@@ -1,0 +1,12 @@
+function : int &foo(){
+   int *p;
+   new p;
+   *p = 101010;
+   return *p;
+}
+
+function : int main(){
+   cout << foo() << endl;
+   
+   return 0;
+}
