@@ -782,6 +782,14 @@ class MyParser extends parser
 	}
 	void 
 	DoStructdefDeclEnd(){
+		StructType tmp = (StructType)m_symtab.access(m_symtab.getStruct().getName()).getType();
+		Vector<STO> structFields = tmp.getField();
+		for(STO s : structFields){
+			if(s.getType().isPointer() && 
+			((PointerType)s.getType()).getElementType().getName().equals(m_symtab.getStruct().getName())){
+				s.getType().setSize(m_symtab.getStruct().getType().getSize());
+			}
+		}
 		m_symtab.setStruct(null);
 		m_symtab.setStructDefineComplete(true);		
 	}

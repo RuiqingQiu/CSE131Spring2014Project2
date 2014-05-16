@@ -38,18 +38,18 @@ public class NotEqualOp extends ComparisonOp{
 				return tmp;
 			}
 			else if(aType.isGeneralPointer() && bType.isNullPointer()){
-				ExprSTO tmp = new ExprSTO(aType.getName() + " != " +bType.getName(), new BoolType("bool", 4));
+				ExprSTO tmp = new ExprSTO("NotEqualOp", new BoolType("bool", 4));
 				return tmp;
 			}
 			else if(bType.isGeneralPointer() && aType.isNullPointer()){
-				ExprSTO tmp = new ExprSTO(aType.getName() + " != " +bType.getName(), new BoolType("bool", 4));
+				ExprSTO tmp = new ExprSTO("NotEqualOp", new BoolType("bool", 4));
 				return tmp;
 			}
 			//There won't be a case where a is nullptr
 			else if(aType.isGeneralPointer() && bType.isGeneralPointer())
 			{
 				if(aType.isEquivalentTo(bType)){
-					ExprSTO tmp = new ExprSTO(aType.getName() + " != " +bType.getName(), new BoolType("bool", 4));
+					ExprSTO tmp = new ExprSTO("NotEqualOp", new BoolType("bool", 4));
 					return tmp;
 				}else{
 					return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr,"!=",aType.getName(), bType.getName()));
