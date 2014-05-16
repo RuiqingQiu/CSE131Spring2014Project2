@@ -787,9 +787,10 @@ class MyParser extends parser
 		for(STO s : structFields){
 			if(s.getType().isPointer() && 
 			((PointerType)s.getType()).getElementType().getName().equals(m_symtab.getStruct().getName())){
-				s.getType().setSize(m_symtab.getStruct().getType().getSize());
+				((PointerType)s.getType()).getElementType().setSize(m_symtab.getStruct().getType().getSize());
 			}
 		}
+		m_symtab.access(m_symtab.getStruct().getName()).setType(tmp);
 		m_symtab.setStruct(null);
 		m_symtab.setStructDefineComplete(true);		
 	}
