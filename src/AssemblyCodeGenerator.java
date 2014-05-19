@@ -699,15 +699,16 @@ public class AssemblyCodeGenerator {
     public void writeCout(String funcName, int x, String str){
       String template = "";
       template += indentString() + "set\t_strFmt, %o0\n";
+      String label = "._str_fmt_" + funcName + (x-1);
       //x represent the number of string it is in the list, which we will put in
       //the .rodata later
-      template += indentString() + "set\t" + funcName + (x-1) + ", %o1\n";
+      template += indentString() + "set\t" + label + ", %o1\n";
       template += indentString() + "call\tprintf\n";
       template += indentString() + "nop\n\n";
       
       template += indentString() + ".section \".rodata\"\n";
       template += writeAlignment(4);
-      template += funcName + (x-1) + ":\t" + ".asciz " + "\"" + str + "\"\n\n";
+      template += label + ":\t" + ".asciz " + "\"" + str + "\"\n\n";
       flush(template);
       writeText();
       flush(writeAlignment(4)+"\n");
