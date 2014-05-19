@@ -1616,11 +1616,19 @@ class MyParser extends parser
 			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
 			result.setBase(leftHandSide.getBase());
 			result.setOffset(leftHandSide.getOffset());
+			if((leftHandSide.isExpr() &&  ((ExprSTO)leftHandSide).getHoldAddress())){
+				result.setHoldAddress(true);
+			}
+			
 		}
 		else{
 			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, 0);
 			result.setBase(leftHandSide.getBase());
 			result.setOffset(leftHandSide.getOffset());
+			if((leftHandSide.isExpr() &&  ((ExprSTO)leftHandSide).getHoldAddress())){
+				result.setHoldAddress(true);
+			}
+			
 		}
 		globalCounter++;
 		return result;

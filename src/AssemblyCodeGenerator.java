@@ -360,25 +360,23 @@ public class AssemblyCodeGenerator {
 	    }//Check if init is const
 	    //Enter here if init is not const
 	    else if(sto.getInit().isVar()){
-	      if(sto.getInit().getIsGlobal() == true){
 	    	STO init = sto.getInit();
 	    	flush(template);
-	    	writeDoDesID(init);
+	    	//Case where pointer to array name
+	    	if(sto.getType().isPointer() && init.getType().isArray()){
+	    		template ="! Array name assign to pointer\n";
+	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
+	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
+	 	        flush(template);
+	    	}
+	    	else{
+	    		writeDoDesID(init);
+	    	}
 	    	template = indentString() + "mov\t%l0, %l1\n";
 	        template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 	        template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
 	        template += indentString() + "st\t" + "%l1, [%l0]\n\n";
-	      }
-	      //Not a global
-	      else{
-	    	STO init = sto.getInit();
-	    	flush(template);
-	    	writeDoDesID(init);
-	    	template = indentString() + "mov\t%l0, %l1\n";
-		    template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
-		    template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
-		    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
-	      }
+	        
 	    }
 	    else if(sto.getInit().isExpr()){
 	      flush("! init is an expression\n");
@@ -608,6 +606,10 @@ public class AssemblyCodeGenerator {
     	  template = "\n! Return by reference need to return address\n";
     	  template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
     	  template += indentString() + "add\t" + s.getBase() + " ,%l0, %l0\n";
+    	  if( (s.isExpr() && ((ExprSTO)s).getHoldAddress()) || s.getType().isReference()){
+    		  template += "! return by reference, target holds address, load\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }
     	  flush(template);
       }
       else{
@@ -2005,7 +2007,7 @@ public class AssemblyCodeGenerator {
 
     		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
-    		if(left.isExpr() && ((ExprSTO)left).getHoldAddress()){
+    		if(left.getType().isReference() || (left.isExpr() && ((ExprSTO)left).getHoldAddress())){
     			template += "! left side is exprSTO & hold address\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
