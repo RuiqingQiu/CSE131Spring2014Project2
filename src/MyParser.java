@@ -576,6 +576,7 @@ class MyParser extends parser
 			  sto.setBase("%g0");
 			  if(sto.isStatic()){
 				label = ".globalStatic" + sto.getName() + globalCounter;
+				sto.setOffset(label);
 				globalCounter++;
 			    myAsWriter.writeStatic(sto, label);
 			  }
@@ -696,6 +697,7 @@ class MyParser extends parser
 			 
 			  if(STOlst.elementAt(i).isStatic()){
 				label = ".AutoConstGlobalScope_" + sto.getName() + this.globalCounter;
+				sto.setOffset(label);
 				this.globalCounter++;
 			    myAsWriter.writeStatic(sto, label);
 			  }
