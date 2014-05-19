@@ -225,7 +225,8 @@ public class AssemblyCodeGenerator {
       template += "_intFmt:\t.asciz \"%d\"\n";
       template += "_strFmt:\t.asciz \"%s\"\n";
       template += "_boolT:\t\t.asciz \"true\"\n";
-      template += "_boolF:\t\t.asciz \"false\"\n\n";
+      template += "_boolF:\t\t.asciz \"false\"\n";
+      template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0, %d).\\n\"\n\n";
       flush(template);
       template = indentString() + ".section \".data\"\n";
       template += indentString() + ".align 4\n";
@@ -2085,19 +2086,50 @@ public class AssemblyCodeGenerator {
       flush(template);
     }
     
+    public void writeArrayBoundCheck(STO arrayName, STO indexExpr, int globalCounter){
+    	flush("! get the index value into %l0\n");
+    	writeDoDesID(indexExpr);
+    	String template = "! Move the value to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n";
+    	template += indentString() + "cmp\t%l1, " + ((ArrayType)arrayName.getType()).getArraySize() + "\n";
+    	String label = ".array_bound_check_" + arrayName.getName() + "_" + globalCounter;
+    	String label_end = label + "_end";
+    	template += indentString() + "bge\t" + label + "\n";
+    	template += indentString() + "nop\n";
+    	template += "! No error\n";
+    	template += indentString() + "ba\t" + label_end + "\n";
+    	template += indentString() + "nop\n";
+    	template += "! Index Out Of Bound\n";
+    	template += label + ": \n";
+    	template += indentString() + "set\t_indexOutOfBoundMsg, %o0\n";
+    	template += indentString() + "mov\t%l1, %o1\n";
+    	template += indentString() + "set\t" + ((ArrayType)arrayName.getType()).getArraySize() + ", %o2\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += "! Calling Exit 1\n";
+    	template += indentString() + "set\t1, %o0\n";
+    	template += indentString() + "call\texit\n";
+    	template += indentString() + "nop\n";
+    	template += label_end + ": \n";
+    	flush(template);
+    }
     /**
      * 
      * @param arrayName
      * @param indexExpr
      */
-    public void writeDoArrayDes(STO arrayName, STO indexExpr, int offset){
+    public void writeDoArrayDes(STO arrayName, STO indexExpr, int offset, int globalCounter){
     	flush("! doing array dereference\n");
     	//Move the index value into %l0
     	if(indexExpr.isConst()){
     		flush(indentString() + "set\t" + ((ConstSTO)indexExpr).getIntValue() + ", %l0\n");
     	}
-    	else
-    		writeDoDesID(indexExpr);
+    	else{
+    		//3.2 Runtime Array Bound Check
+        	writeArrayBoundCheck(arrayName, indexExpr, globalCounter);
+        	writeDoDesID(indexExpr);
+    	}
+
     	//Store index value to %l1
     	String template = "";
     	template += indentString() + "set\t" + ((CompositeType)arrayName.getType()).getElementType().getSize() + ", %o0\n";

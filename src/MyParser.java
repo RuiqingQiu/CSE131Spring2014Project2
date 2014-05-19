@@ -2100,7 +2100,8 @@ class MyParser extends parser
 		e.setIsAddressable(true);
 		e.setIsModifiable(true);
 		m_symtab.addBytes(4);
-		myAsWriter.writeDoArrayDes(nameSto, indexExpr, m_symtab.getBytes());
+		myAsWriter.writeDoArrayDes(nameSto, indexExpr, m_symtab.getBytes(), this.globalCounter);
+		globalCounter++;
 		e.setOffset("-" + m_symtab.getBytes());
 		e.setBase("%fp");
 		if(((CompositeType)nameSto.getType()).getElementType().isPointer()){
