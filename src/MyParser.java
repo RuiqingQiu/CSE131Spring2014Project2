@@ -571,11 +571,12 @@ class MyParser extends parser
 			m_symtab.insert(sto);
 
 			if(m_symtab.getLevel() == 1){
-			  String label = ".globalScope_" + sto.getName() + this.globalCounter;
-			  globalCounter++;
+			  String label = sto.getName();
 			  sto.setOffset(label);	  
 			  sto.setBase("%g0");
 			  if(sto.isStatic()){
+				label = ".globalStatic" + sto.getName() + globalCounter;
+				globalCounter++;
 			    myAsWriter.writeStatic(sto, label);
 			  }
 			  else
@@ -610,8 +611,12 @@ class MyParser extends parser
 	//
 	//----------------------------------------------------------------
 	void
-	DoExternDecl (Vector<String> lstIDs)
+	DoExternDecl (Vector<VarSTO> lst, Type t)
 	{
+		Vector<String> lstIDs = new Vector<String>();
+		for(STO s : lst){
+			lstIDs.addElement(s.getName());
+		}
 		for (int i = 0; i < lstIDs.size (); i++)
 		{
 			String id = lstIDs.elementAt (i);
@@ -623,6 +628,9 @@ class MyParser extends parser
 			}
 
 			VarSTO 		sto = new VarSTO (id);
+			sto.setType(t);
+			sto.setBase("%g0");
+			sto.setOffset(id);
 			m_symtab.insert (sto);
 		}
 	}
@@ -682,13 +690,13 @@ class MyParser extends parser
 			if(m_symtab.getLevel() == 1)
 			{
 			  //Global variable, offset is its name label
-			  String label = ".const_global_" + sto.getName() + this.globalCounter;
-			  this.globalCounter++;
+			  String label = sto.getName();
 		      sto.setOffset(label);
 			  sto.setBase("%g0");	
 			 
 			  if(STOlst.elementAt(i).isStatic()){
 				label = ".AutoConstGlobalScope_" + sto.getName() + this.globalCounter;
+				this.globalCounter++;
 			    myAsWriter.writeStatic(sto, label);
 			  }
 			  else{
