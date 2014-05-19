@@ -195,11 +195,15 @@ class MyParser extends parser
 		
 		v.setInit(sto);
 		if(m_symtab.getLevel() == 1){
-			String label = ".AutoGlobalScope_" + sto.getName() + this.globalCounter;
-			this.globalCounter++;
+			String label = sto.getName();
+			
 			v.setOffset(label);
 			v.setBase("%g0");
 			if(isStatic!= null){
+				label = ".AutoGlobalStatic_" + v.getName() + globalCounter;
+				this.globalCounter++;
+				v.setOffset(label);
+				this.globalCounter++;
 				v.setStatic(true);
 			    myAsWriter.writeStatic(v, label);
 			}

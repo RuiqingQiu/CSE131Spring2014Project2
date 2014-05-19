@@ -19,6 +19,7 @@ SOURCES = \
 	MyParser.java \
 	RC.java \
 	RCdbg.java
+CC = cc
 
 new:
 	make clean
