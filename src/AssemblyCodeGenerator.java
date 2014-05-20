@@ -672,6 +672,17 @@ public class AssemblyCodeGenerator {
     		template += "! Function held address, load one more time\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	flush(template);
+    	//%l0 stores the value of the derefence result
+    	writeDerefenceNullPtrCheck(globalCounter);
+    	
+    	template = indentString() + "set\t" + function.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + function.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	if(function.getType().isReference() || (function.isExpr() && ((ExprSTO)function).getHoldAddress())){
+    		template += "! Function held address, load one more time\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
+    	}
     	template += "! Moving the function call address to %l1\n";
     	template += indentString() + "mov\t%l0, %l1\n";
     	if(arguments.size() == 0){
@@ -1535,9 +1546,47 @@ public class AssemblyCodeGenerator {
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
-    	else if(a.getType().isFuncPointer() || b.getType().isFuncPointer()){
+    	else if(a.getType().isFuncPointer() && b.getType().isNullPointer()
+    			|| a.getType().isNullPointer() && b.getType().isFuncPointer()){
     		String template = "! Function Pointer comparison\n";
+    		flush(template);
+    		template = "! EqualOP first operand:" + a.getName() + " to %l1\n";
+    		if(a.getType().isFuncPointer()){
+    			writeDoDesID(a);
+    	    	template += indentString() + "mov\t%l0, %l1\n\n";
+    		}
+    		else{
+    			template += indentString() + "mov\t%g0, %l1\n\n";
+    		}
+	   	  	flush(template);
+	   	  	
+	   	  	template = "! EqualOP second operand:" + b.getName() + " to %l2\n";
+	   	  	if(b.getType().isFuncPointer()){
+	   	  		writeDoDesID(a);
+	   	  		template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	}else{
+	   	  		template += indentString() + "mov\t%g0, %l2\n\n";
+	   	  	}
+	   	  	flush(template);
     		
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = ".equalEqual_" + globalCounter;
+	   	  	String label_end = label + "_done";
+	   	  	template += indentString() + "be\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! equalOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label_end + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! equalOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label_end + ":\n\n";
+	   	  	flush(template);
     	}
     }
     
@@ -1569,25 +1618,26 @@ public class AssemblyCodeGenerator {
 	   	  	flush(template);
 	   	  	
 	   	  	template = indentString() + "cmp\t%l1, %l2\n";
-	   	  	String label = "notEqualTo" + globalCounter;
+	   	  	String label = ".notEqualTo_" + globalCounter;
+	   	  	String label_end = label + "_done";
 	   	  	template += indentString() + "bne\t" + label + "\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! notEqualOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
 	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-	   	  	template += indentString() + "ba\t" + label + "_done\n";
+	   	  	template += indentString() + "ba\t" + label_end + "\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! notEqualOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
 	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-	   	  	template += label+"_done:\n\n";
+	   	  	template += label_end + ":\n\n";
 	   	  	flush(template);
     	}
     	//If one of the operand is float
-    	else{ 		
+    	else if(a.getType().isFloat() || b.getType().isFloat()){ 		
     		getValueIntof1(a, globalCounter, offset);
     		getValueIntof2(b, globalCounter, offset);
     		String template = "! cmp %f1 & %f2\n";
@@ -1612,6 +1662,48 @@ public class AssemblyCodeGenerator {
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
+    	else if(a.getType().isFuncPointer() && b.getType().isNullPointer()
+    			|| a.getType().isNullPointer() && b.getType().isFuncPointer()){
+    		String template = "! Function Pointer comparison\n";
+    		flush(template);
+    		template = "! notEqualOP first operand:" + a.getName() + " to %l1\n";
+    		if(a.getType().isFuncPointer()){
+    			writeDoDesID(a);
+    	    	template += indentString() + "mov\t%l0, %l1\n\n";
+    		}
+    		else{
+    			template += indentString() + "mov\t%g0, %l1\n\n";
+    		}
+	   	  	flush(template);
+	   	  	
+	   	  	template = "! notEqualOP second operand:" + b.getName() + " to %l2\n";
+	   	  	if(b.getType().isFuncPointer()){
+	   	  		writeDoDesID(a);
+	   	  		template += indentString() + "mov\t%l0, %l2\n\n";
+	   	  	}else{
+	   	  		template += indentString() + "mov\t%g0, %l2\n\n";
+	   	  	}
+	   	  	flush(template);
+    		
+	   	  	template = indentString() + "cmp\t%l1, %l2\n";
+	   	  	String label = ".notEqual_" + globalCounter;
+	   	  	String label_end = label + "_done";
+	   	  	template += indentString() + "bne\t" + label + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If not greater than, than store false value to the tmp
+	   	  	template += "! equalOp set false\n";
+	   	  	template += indentString() + "set\t0, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "ba\t" + label_end + "\n";
+	   	  	template += indentString() + "nop\n\n";
+	   	  	//If greater than store true value to the tmp
+	   	  	template += label + ":\t\n";
+	   	  	template += "! equalOp set true\n";
+	   	  	template += indentString() + "set\t1, %l0\n";
+	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += label_end + ":\n\n";
+	   	  	flush(template);
+    	}
     }
     
     /**
@@ -2062,7 +2154,15 @@ public class AssemblyCodeGenerator {
     			template += "! struct assignment, right hold address, one more load\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
+    		template += "! Store the elements in the struct to a tmp\n";
     		template += indentString() + "mov\t%l0, %o1\n";
+    		template += indentString() + "add\t%fp, -" + offset + ", %o0\n";
+    		template += indentString() + "set\t" + right.getType().getSize() + ", %o2\n";
+    		template += indentString() + "call\tmemcpy\n";
+    		template += indentString() + "nop\n";
+    		
+    		template += "! Using the tmp as our copy source\n";
+    		template += indentString() + "add\t%fp, -" + offset + ", %o1\n";
     		template += "! getting the address of the left side struct\n";
     		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
@@ -2429,6 +2529,13 @@ public class AssemblyCodeGenerator {
 			template += "! prompt int to float & store back\n";
 			template += indentString() + "fitos\t%f0, %f0\n";
 			template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+    	}
+    	else if(sto.getType().isFloat() && castToType.isInt()){
+    		template = "! Convert float to int\n";
+    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    		template += indentString() + "fstoi\t%f0, %f0\n";
+    		template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";		
     	}
     	else{
     		template = "! Store the value into a tmp\n";
