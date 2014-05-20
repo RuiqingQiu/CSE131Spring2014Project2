@@ -2155,26 +2155,26 @@ public class AssemblyCodeGenerator {
     	String label = ".array_bound_check_" + globalCounter;
     	String label_end = label + "_end";
     	template += indentString() + "bge\t" + label + "\n";
-    	template += indentString() + "nop\n";
+    	template += indentString() + "nop\n\n";
     	template += "! No error\n";
     	template += "! Check less than 0\n";
     	template += indentString() + "cmp\t%l1, %g0\n";
     	template += indentString() + "bl\t" + label + "\n";
-    	template += indentString() + "nop\n";
+    	template += indentString() + "nop\n\n";
     	
     	template += indentString() + "ba\t" + label_end + "\n";
-    	template += indentString() + "nop\n";
+    	template += indentString() + "nop\n\n";
     	template += "! Index Out Of Bound\n";
     	template += label + ": \n";
     	template += indentString() + "set\t_indexOutOfBoundMsg, %o0\n";
     	template += indentString() + "mov\t%l1, %o1\n";
     	template += indentString() + "set\t" + ((ArrayType)arrayName.getType()).getArraySize() + ", %o2\n";
     	template += indentString() + "call\tprintf\n";
-    	template += indentString() + "nop\n";
+    	template += indentString() + "nop\n\n";
     	template += "! Calling Exit 1\n";
     	template += indentString() + "set\t1, %o0\n";
     	template += indentString() + "call\texit\n";
-    	template += indentString() + "nop\n";
+    	template += indentString() + "nop\n\n";
     	template += label_end + ": \n";
     	flush(template);
     }
@@ -2298,9 +2298,10 @@ public class AssemblyCodeGenerator {
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	flush(template);
     	//%l0 stores the value of the derefence result
     	writeDerefenceNullPtrCheck(globalCounter);
-    	template += "! Store the address of the dereferenced value into tmp\n";
+    	template = "! Store the address of the dereferenced value into tmp\n";
     	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     	template += "! End of DoDereference\n";
     	flush(template);
@@ -2340,11 +2341,12 @@ public class AssemblyCodeGenerator {
     	template += "! %l0 stores the address of the pointer\n";
     	template += "! need to check if delete a nullptr\n";
     	//call writeNullPtrDereferenceCheck
+    	flush(template);
     	writeDerefenceNullPtrCheck(globalCounter);
     	
-    	template += indentString() + "mov\t%l0,%o0\n";
+    	template = indentString() + "mov\t%l0,%o0\n";
     	template += indentString() + "call\tfree\n";
-    	template += indentString () + "nop\n";
+    	template += indentString () + "nop\n\n";
     	template += "! set pointer to null\n";
     	template += indentString() + "st\t%g0, [%l0]\n";
     	flush(template);
