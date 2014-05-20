@@ -2298,10 +2298,20 @@ public class AssemblyCodeGenerator {
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	template += indentString() + "ld\t[%l0], %l0\n";
     	flush(template);
     	//%l0 stores the value of the derefence result
     	writeDerefenceNullPtrCheck(globalCounter);
-    	template = "! Store the address of the dereferenced value into tmp\n";
+    	template = indentString() + "set\t" + s.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	template += "! Dereference, load one more time\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	if( s.getType().isReference() ||(s.isExpr() && ((ExprSTO)s).getHoldAddress())){
+
+    		template += "! Dereference expr hold address\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
+    	}
+    	template += "! Store the address of the dereferenced value into tmp\n";
     	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     	template += "! End of DoDereference\n";
     	flush(template);
@@ -2338,13 +2348,20 @@ public class AssemblyCodeGenerator {
     		template += "! delete statement, is reference or address, load one more time\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	template += indentString() + "ld\t[%l0], %l0\n";
     	template += "! %l0 stores the address of the pointer\n";
     	template += "! need to check if delete a nullptr\n";
     	//call writeNullPtrDereferenceCheck
     	flush(template);
     	writeDerefenceNullPtrCheck(globalCounter);
     	
-    	template = indentString() + "mov\t%l0,%o0\n";
+    	template = indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+    	if(sto.getType().isReference() || (sto.isExpr() && ((ExprSTO)sto).getHoldAddress())){
+    		template += "! delete statement, is reference or address, load one more time\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
+    	}
+    	template += indentString() + "mov\t%l0,%o0\n";
     	template += indentString() + "call\tfree\n";
     	template += indentString () + "nop\n\n";
     	template += "! set pointer to null\n";
