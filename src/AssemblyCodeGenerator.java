@@ -2291,10 +2291,7 @@ public class AssemblyCodeGenerator {
     	String template = "\n ! Doing dereference operation\n";
     	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
-    	template += "! Dereference, load one more time\n";
-    	template += indentString() + "ld\t[%l0], %l0\n";
     	if( s.getType().isReference() ||(s.isExpr() && ((ExprSTO)s).getHoldAddress())){
-
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
@@ -2307,10 +2304,10 @@ public class AssemblyCodeGenerator {
     	template += "! Dereference, load one more time\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
     	if( s.getType().isReference() ||(s.isExpr() && ((ExprSTO)s).getHoldAddress())){
-
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+
     	template += "! Store the address of the dereferenced value into tmp\n";
     	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     	template += "! End of DoDereference\n";
