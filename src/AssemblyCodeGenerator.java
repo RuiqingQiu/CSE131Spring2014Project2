@@ -226,7 +226,7 @@ public class AssemblyCodeGenerator {
       template += "_strFmt:\t.asciz \"%s\"\n";
       template += "_boolT:\t\t.asciz \"true\"\n";
       template += "_boolF:\t\t.asciz \"false\"\n";
-      template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0, %d).\\n\"\n\n";
+      template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n\n";
       flush(template);
       template = indentString() + ".section \".data\"\n";
       template += indentString() + ".align 4\n";
@@ -2097,6 +2097,11 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "bge\t" + label + "\n";
     	template += indentString() + "nop\n";
     	template += "! No error\n";
+    	template += "! Check less than 0\n";
+    	template += indentString() + "cmp\t%l1, %g0\n";
+    	template += indentString() + "bl\t" + label + "\n";
+    	template += indentString() + "nop\n";
+    	
     	template += indentString() + "ba\t" + label_end + "\n";
     	template += indentString() + "nop\n";
     	template += "! Index Out Of Bound\n";
