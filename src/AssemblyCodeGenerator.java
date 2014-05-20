@@ -189,6 +189,9 @@ public class AssemblyCodeGenerator {
 	    	  template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
 	    	  template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
 	      }
+	      else if(tmp.getType().isFuncPointer()){
+	    	  template += tmp.getOffset() + ":" + SEPARATOR + ".word " + tmp.getInit().getName() + "\n\n";
+	      }
         }
         //No init
         else{
@@ -226,7 +229,8 @@ public class AssemblyCodeGenerator {
       template += "_strFmt:\t.asciz \"%s\"\n";
       template += "_boolT:\t\t.asciz \"true\"\n";
       template += "_boolF:\t\t.asciz \"false\"\n";
-      template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n\n";
+      template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n";
+      template += "_nullPtrDereferenceMsg:\t.asciz \"Attempt to dereference NULL pointer.\\n\"\n\n";
       flush(template);
       template = indentString() + ".section \".data\"\n";
       template += indentString() + ".align 4\n";
@@ -641,6 +645,62 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "st\t%i" + index + ", [%l0]\n";
     	flush(template);
     }
+    
+    public void writeMakeFuncPtrCall(Vector<STO> arguments, STO function, int offset, int globalCounter, Vector<STO> params){
+    	String template = "\n\n! Making Function Ptr Call : " + function.getName() + "\n";
+    	template += indentString() + "set\t" + function.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + function.getBase() + ", %l0, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	template += "! Moving the function call address to %l1\n";
+    	template += indentString() + "mov\t%l0, %l1\n";
+    	if(arguments.size() == 0){
+    		template += indentString() + "call\t%l1\n";
+        	template += indentString() + "nop\n";
+    	}
+    	//Argument is not 0
+    	else{
+    	  template += "! moving all the arguments into %o registers\n";
+      	  flush(template);
+      	  for(int i = 0; i < arguments.size(); i++){
+      		  if(arguments.elementAt(i).isConst()){
+      			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
+      		  }  		 
+      		  else{
+      			  //Check if it's reference, if so, pass the address of that variable
+      			  if(params.elementAt(i).getType().isReference()){
+      				  template = "! argument pass by reference, get the address\n";
+      				  template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
+      			  	  template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
+      			  	  if(arguments.elementAt(i).getType().isReference() || (arguments.elementAt(i).isExpr() && ((ExprSTO)arguments.elementAt(i)).getHoldAddress())){
+      			  		  template += "! argument is also reference, need one more load \n";
+      			  		  template += indentString() + "ld\t[%l0], %l0\n";
+      			  	  }
+      			  	  flush(template);
+      			  }
+      			  else
+      				  writeDoDesID(arguments.elementAt(i));
+      		  }
+      		  template = "! " + i + "th argument of this function\n";
+      		  if(arguments.elementAt(i).getType().isInt() && params.elementAt(i).getType().isFloat()){
+      			  template += "! need do int to float promption\n";
+      			  template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+      			  template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+      			  template += "! prompt int to float & store back\n";
+      			  template += indentString() + "fitos\t%f0, %f0\n";
+      			  template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+      			  template += indentString() + "ld\t[%fp-" + offset +"], %o" + i + "\n";
+      		  }
+      		  else
+      			  template += indentString() + "mov\t%l0, %o" + i + "\n";
+      		  flush(template);
+      		  template = "";
+      	  }
+    	}
+    	template += "! Store return to a local tmp\n";
+        template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
+    	flush(template);
+    }
+    
     public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset, int globalCounter, Vector<STO> params){
       //No argument function call
       String template = "\n\n! making function call :" + function.getName() + "\n";
@@ -2201,8 +2261,33 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "st\t" + "%l0, [%fp-" + offset + "]\n";
     	flush(template);
     }
+    
+    /*
+     * write function to check if the derefenced result is nullptr
+     */
+    public void writeDerefenceNullPtrCheck(int globalCounter){
+    	String template = "! Check if the dereferenced result is nullptr.\n";
+    	template += indentString() + "cmp\t%l0,%g0\n";
+    	String label = ".nullptr_dereference_check_" + globalCounter;
+    	String label_end = ".nullptr_dereference_check_end_" + globalCounter;
+    	template += indentString() + "be\t" + label + "\n";
+    	template += indentString() + "nop\n";
+    	template += " ! dereferenced result is not nullptr.\n";
+    	template += indentString() + "ba\t" + label_end + "\n";
+    	template += indentString() + "nop\n";
+    	template += "! dereferenced result if nullptr \n";
+    	template += label + ": \n";
+    	template += indentString() + "set\t_nullPtrDereferenceMsg,%o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "set\t1,%o0\n";
+    	template += indentString() + "call\texit\n";
+    	template += indentString() + "nop\n";
+    	template += label_end + ": \n";
+    	flush(template);
+    }
 
-    public void writeDereferenceOp(STO s, int offset){
+    public void writeDereferenceOp(STO s, int offset,int globalCounter){
     	String template = "\n ! Doing dereference operation\n";
     	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
@@ -2213,6 +2298,8 @@ public class AssemblyCodeGenerator {
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	//%l0 stores the value of the derefence result
+    	writeDerefenceNullPtrCheck(globalCounter);
     	template += "! Store the address of the dereferenced value into tmp\n";
     	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
     	template += "! End of DoDereference\n";
@@ -2242,15 +2329,19 @@ public class AssemblyCodeGenerator {
     	flush(template);
     }
     
-    public void writeDeleteStmt(STO sto){
+    public void writeDeleteStmt(STO sto,int globalCounter){
     	String template  = "! doing delete statement \n";
     	template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
     	if(sto.getType().isReference() || (sto.isExpr() && ((ExprSTO)sto).getHoldAddress())){
-    		template += "! new statement, is reference or address, load one more time\n";
+    		template += "! delete statement, is reference or address, load one more time\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
     	template += "! %l0 stores the address of the pointer\n";
+    	template += "! need to check if delete a nullptr\n";
+    	//call writeNullPtrDereferenceCheck
+    	writeDerefenceNullPtrCheck(globalCounter);
+    	
     	template += indentString() + "mov\t%l0,%o0\n";
     	template += indentString() + "call\tfree\n";
     	template += indentString () + "nop\n";

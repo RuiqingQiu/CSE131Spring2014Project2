@@ -314,7 +314,8 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error16_Delete,sto.getType().getName()));
 		}
-		myAsWriter.writeDeleteStmt(sto);
+		myAsWriter.writeDeleteStmt(sto,this.globalCounter);
+		globalCounter++;
 	}
 	
 	//Check#20 pass in the string and STO 
@@ -891,7 +892,8 @@ class MyParser extends parser
 			m_symtab.addBytes(4);
 			sto.setOffset("-" + m_symtab.getBytes());
 			sto.setHoldAddress(true);
-			myAsWriter.writeDereferenceOp(deref, m_symtab.getBytes());
+			myAsWriter.writeDereferenceOp(deref, m_symtab.getBytes(),this.globalCounter);
+			globalCounter++;
 			return sto;
 		}
 	}
@@ -916,7 +918,8 @@ class MyParser extends parser
 				return new ErrorSTO("struct pointer arrow error");
 			}else{
 				m_symtab.addBytes(4);
-				myAsWriter.writeDereferenceOp(ptr, m_symtab.getBytes());
+				myAsWriter.writeDereferenceOp(ptr, m_symtab.getBytes(),this.globalCounter);
+				globalCounter++;
 				ExprSTO sto = new ExprSTO("tmp", ((PointerType)ptr.getType()).getElementType());
 				sto.setBase("%fp");
 				sto.setOffset("-" + m_symtab.getBytes());
@@ -1948,15 +1951,25 @@ class MyParser extends parser
 						}
 					}
 				}
-			    //The function evaluates to return type
+				
+				 //The function evaluates to return type
+				//Project 2, generate code for making function call
+				ExprSTO ret = new ExprSTO("FuncCall", t.getReturnType());
+				m_symtab.addBytes(t.getReturnType().getSize());
+				
+				myAsWriter.writeMakeFuncPtrCall(arguments, sto, m_symtab.getBytes(), this.globalCounter, params);
+				globalCounter++;
+				ret.setOffset("-" + m_symtab.getBytes());
+				ret.setBase("%fp");
+				 //The function evaluates to return type
 				//Return by reference, return a mod l-val
 				if(t.getReturnType().isReference()){
-					ExprSTO ret = new ExprSTO("FuncCall", t.getReturnType());
+					ret.setHoldAddress(true);
 					ret.setIsAddressable(true);
 					ret.setIsModifiable(true);
 					return ret;
 				}
-			    return new ExprSTO("FuncCall", t.getReturnType());
+			    return ret;
 			}
 			else{
 				m_nNumErrors++;
