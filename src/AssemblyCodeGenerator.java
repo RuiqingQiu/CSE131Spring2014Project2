@@ -2092,7 +2092,7 @@ public class AssemblyCodeGenerator {
     	String template = "! Move the value to %l1\n";
     	template += indentString() + "mov\t%l0, %l1\n";
     	template += indentString() + "cmp\t%l1, " + ((ArrayType)arrayName.getType()).getArraySize() + "\n";
-    	String label = ".array_bound_check_" + arrayName.getName() + "_" + globalCounter;
+    	String label = ".array_bound_check_" + globalCounter;
     	String label_end = label + "_end";
     	template += indentString() + "bge\t" + label + "\n";
     	template += indentString() + "nop\n";
@@ -2126,7 +2126,8 @@ public class AssemblyCodeGenerator {
     	}
     	else{
     		//3.2 Runtime Array Bound Check
-        	writeArrayBoundCheck(arrayName, indexExpr, globalCounter);
+    		if(arrayName.getType().isArray())
+    			writeArrayBoundCheck(arrayName, indexExpr, globalCounter);
         	writeDoDesID(indexExpr);
     	}
 

@@ -635,6 +635,8 @@ class MyParser extends parser
 			VarSTO 		sto = new VarSTO (id);
 			sto.setType(t);
 			sto.setBase("%g0");
+			sto.setIsAddressable(true);
+			sto.setIsModifiable(true);
 			sto.setOffset(id);
 			m_symtab.insert (sto);
 		}
