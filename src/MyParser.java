@@ -195,30 +195,29 @@ class MyParser extends parser
 		
 		v.setInit(sto);
 		if(m_symtab.getLevel() == 1){
-			String label = sto.getName();
-			
+			String label = v.getName();	
 			v.setOffset(label);
 			v.setBase("%g0");
 			if(isStatic!= null){
 				label = ".AutoGlobalStatic_" + v.getName() + globalCounter;
 				this.globalCounter++;
 				v.setOffset(label);
-				this.globalCounter++;
 				v.setStatic(true);
 			    myAsWriter.writeStatic(v, label);
 			}
 			else
-		  	    myAsWriter.writeGlobal(v); 
+				myAsWriter.writeGlobal(v); 
 		}
 		//Local variable
 		else{
-		  if(v.isStatic()){
+		  if(isStatic!= null){
 				 String label = ".AutoInternalStatic_" + v.getName() + this.globalCounter;
 				 this.globalCounter++;
-				 myAsWriter.writeStatic(v, label);
-				 this.globalCounter++;
+				 v.setStatic(true);
 				 v.setBase("%g0");
-				 v.setOffset(label);	
+				 v.setOffset(label);
+				 myAsWriter.writeStatic(v, label);
+	
 				 myAsWriter.writeText();
 				 myAsWriter.flush(myAsWriter.writeAlignment(4));
 		  }
@@ -410,7 +409,7 @@ class MyParser extends parser
 			sto.setIsAddressable(false);
 			sto.setIsModifiable(false);
 			m_symtab.addBytes(4);
-			myAsWriter.writeTypeCast(m_symtab.getBytes(), target);
+			myAsWriter.writeTypeCast(m_symtab.getBytes(), target, castToType);
 			sto.setBase("%fp");
 			sto.setOffset("-" + m_symtab.getBytes());
 			return sto;
@@ -593,10 +592,11 @@ class MyParser extends parser
 			  if(sto.isStatic()){
 				 String label = ".internalStatic_" + sto.getName() + this.globalCounter;
 				 this.globalCounter++;
-				 myAsWriter.writeStatic(sto, label);
-				 this.globalCounter++;
 				 sto.setBase("%g0");
 				 sto.setOffset(label);
+				 myAsWriter.writeStatic(sto, label);
+				 this.globalCounter++;
+
 				 myAsWriter.writeText();
 				 myAsWriter.flush(myAsWriter.writeAlignment(4));
 			  }else{
@@ -1001,7 +1001,8 @@ class MyParser extends parser
 		}
 	
 		FuncSTO sto = new FuncSTO (id);//initialize here so that we can insert parameter into the FuncSTO
-		
+		sto.setBase("%g0");
+		sto.setOffset(id);
 		//FunctSTO are always FunctionPointerType
 		FunctionPointerType type = new FunctionPointerType("funcptr", 4);
 	   
@@ -1584,6 +1585,11 @@ class MyParser extends parser
 					//if has equivalent type
 					ExprSTO result = new ExprSTO(leftHandSide.getName() + " = " + rightHandSide.getName());
 					result.setType(leftHandSide.getType().clone());
+					
+					m_symtab.addBytes(4);
+					myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
+					result.setBase("%fp");
+					result.setOffset("-" + m_symtab.getBytes());
 					result.setIsAddressable(false);
 					result.setIsModifiable(false);
 					return result;
@@ -1627,7 +1633,8 @@ class MyParser extends parser
 			
 		}
 		else{
-			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, 0);
+			m_symtab.addBytes(rightHandSide.getType().getSize());
+			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
 			result.setBase(leftHandSide.getBase());
 			result.setOffset(leftHandSide.getOffset());
 			if((leftHandSide.isExpr() &&  ((ExprSTO)leftHandSide).getHoldAddress())){

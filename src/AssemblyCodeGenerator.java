@@ -286,6 +286,11 @@ public class AssemblyCodeGenerator {
 		      template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
 		      template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
 		  }
+	      else if(tmp.getType().isFuncPointer()){
+	    	template = "! init is a function\n";
+	    	template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
+		    template += tmp.getInit().getName() + "\n\n"; 
+	      }
         }
         //No init
         else{
@@ -307,9 +312,8 @@ public class AssemblyCodeGenerator {
 	    else if(tmp.getType().isPointer()){
 		  template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
 		  template += tmp.getIntValue() + "\n\n"; 
-		}
-	    
-      }    
+		}    
+      }
       flush(template);
       writeText();
       flush(writeAlignment(4));
@@ -392,7 +396,17 @@ public class AssemblyCodeGenerator {
 		  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 		  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
 		  template += indentString() + "st\t" + "%l1, [%l0]\n\n";
-	      
+	    }
+	    //FuncPtr init
+	    else if(sto.getInit().isFunc()){
+	    	template = "! init is a function\n";
+	    	STO init = sto.getInit();
+		    flush(template);
+		    writeDoDesID(init);
+		    template = indentString() + "mov\t%l0, %l1\n";
+			template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+			template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+			template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	    }
       }
       flush(template);
@@ -467,8 +481,11 @@ public class AssemblyCodeGenerator {
   		    template += indentString() + "ld\t" + "[%l0], %l0\n\n";
       	  }else{
   		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
-      	  }
-    	 
+      	  }  	 
+      }
+      else if (sto.isFunc()){
+    	  template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+		  template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
       }
       template += "! end of DoDesID\n";
       flush(template);
@@ -651,6 +668,10 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "set\t" + function.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + function.getBase() + ", %l0, %l0\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
+    	if(function.getType().isReference() || (function.isExpr() && ((ExprSTO)function).getHoldAddress())){
+    		template += "! Function held address, load one more time\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
+    	}
     	template += "! Moving the function call address to %l1\n";
     	template += indentString() + "mov\t%l0, %l1\n";
     	if(arguments.size() == 0){
@@ -695,6 +716,8 @@ public class AssemblyCodeGenerator {
       		  flush(template);
       		  template = "";
       	  }
+      	  template += indentString() + "call\t%l1\n";
+      	  template += indentString() + "nop\n";
     	}
     	template += "! Store return to a local tmp\n";
         template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
@@ -2053,6 +2076,27 @@ public class AssemblyCodeGenerator {
     		flush(template);
     		return;
     	}
+    	//Function pointer assignment
+    	else if(right.getType().isFuncPointer() && left.getType().isFuncPointer()){
+    		template += "! Write Function pointer assignment\n";
+    		template += indentString() + "set\t" + right.getOffset() + ", " + "%l0\n";
+    		template += indentString() + "add\t" + right.getBase() + ", %l0, %l0\n";
+    		if(!right.isFunc()){
+    			template += "! right is function pointer type, load one more time\n";
+    			template += indentString() + "ld\t[%l0], %l0\n";
+    		}
+    		template += indentString() + "st\t%l0, [%fp-" + offset +"]\n";
+    		template += indentString() + "mov\t%l0, %l1\n";
+    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+    		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+    		if(left.getType().isReference() || (left.isExpr() && ((ExprSTO)left).getHoldAddress())){
+    			template += "! left side is exprSTO & hold address\n";
+    			template += indentString() + "ld\t[%l0], %l0\n";
+    		}
+    		template += indentString() + "st\t%l1, [%l0]\n";
+    		flush(template);
+    		return;
+    	}
     	if(right.isConst()){
     		setConst(left.getName() + "_assign_right", (ConstSTO)right, globalCounter);
     	}
@@ -2371,13 +2415,23 @@ public class AssemblyCodeGenerator {
      * @param offset
      * @param sto
      */
-    public void writeTypeCast(int offset, STO sto){
+    public void writeTypeCast(int offset, STO sto, Type castToType){
     	String template = "! Doing type cast\n";
     	flush(template);
     	writeDoDesID(sto);
-    	template = "! Store the value into a tmp\n";
-    	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    	if(sto.getType().isInt() && castToType.isFloat()){
+    		template = indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+			template += "! prompt int to float & store back\n";
+			template += indentString() + "fitos\t%f0, %f0\n";
+			template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+    	}
+    	else{
+    		template = "! Store the value into a tmp\n";
+    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    	}
     	template += "! End of type cast\n\n";
+    	
     	flush(template);
     	
     }
