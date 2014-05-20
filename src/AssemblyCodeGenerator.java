@@ -1510,7 +1510,7 @@ public class AssemblyCodeGenerator {
 	   	  	flush(template);
     	}
     	//If one of the operand is float
-    	else{ 		
+    	else if(a.getType().isFloat() || b.getType().isFloat()){ 		
     		getValueIntof1(a, globalCounter, offset);
     		getValueIntof2(b, globalCounter, offset);
     		String template = "! cmp %f1 & %f2\n";
@@ -1535,6 +1535,10 @@ public class AssemblyCodeGenerator {
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
+    	else if(a.getType().isFuncPointer() || b.getType().isFuncPointer()){
+    		String template = "! Function Pointer comparison\n";
+    		
+    	}
     }
     
     /*
