@@ -748,6 +748,8 @@ public class AssemblyCodeGenerator {
     	  template += "! moving all the arguments into %o registers\n";
     	  flush(template);
 		  int stack_space = 92;//Positive offset for greater than sixth arguments
+		  String extraArguments = ".SAVE_" + function.getName() + "_extra_argument_" + globalCounter;
+		  flush(indentString() + "add\t%sp, -(" + extraArguments + ") & -8, %sp\n");
     	  for(int i = 0; i < arguments.size(); i++){
     		  if(arguments.elementAt(i).isConst()){
     			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
@@ -792,9 +794,11 @@ public class AssemblyCodeGenerator {
     		  flush(template);
     		  template = "";
     	  }
+    	  template += indentString() + extraArguments + " = " +(stack_space - 92) + "\n";
     	  template += indentString() + "call\t" + function.getName() + "\n";
       	  template += indentString() + "nop\n";
-    	  
+    	  template += "! Deallocate stack space\n";
+    	  template += indentString() + "sub\t%sp, -(" + (stack_space-92)  + ")& -8, %sp\n"; 
       }
       template += "! Store return to a local tmp\n";
       template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
