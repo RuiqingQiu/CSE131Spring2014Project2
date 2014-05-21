@@ -1546,8 +1546,8 @@ public class AssemblyCodeGenerator {
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
-    	else if(a.getType().isFuncPointer() && b.getType().isNullPointer()
-    			|| a.getType().isNullPointer() && b.getType().isFuncPointer()){
+    	else if((a.getType().isFuncPointer() && b.getType().isNullPointer())
+    			|| (a.getType().isNullPointer() && b.getType().isFuncPointer())){
     		String template = "! Function Pointer comparison\n";
     		flush(template);
     		template = "! EqualOP first operand:" + a.getName() + " to %l1\n";
@@ -1662,8 +1662,8 @@ public class AssemblyCodeGenerator {
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
-    	else if(a.getType().isFuncPointer() && b.getType().isNullPointer()
-    			|| a.getType().isNullPointer() && b.getType().isFuncPointer()){
+    	else if((a.getType().isFuncPointer() && b.getType().isNullPointer())
+    			|| (a.getType().isNullPointer() && b.getType().isFuncPointer())){
     		String template = "! Function Pointer comparison\n";
     		flush(template);
     		template = "! notEqualOP first operand:" + a.getName() + " to %l1\n";
