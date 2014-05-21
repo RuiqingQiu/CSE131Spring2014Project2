@@ -234,7 +234,8 @@ public class AssemblyCodeGenerator {
       flush(template);
       template = indentString() + ".section \".data\"\n";
       template += indentString() + ".align 4\n";
-      template += "value_one:\t.single 0r1.0\n";
+      template += ".value_one:\t.single 0r1.0\n";
+      template += ".value_zero:\t.single 0r0.0\n";
       flush(template);
     }
 
@@ -746,6 +747,7 @@ public class AssemblyCodeGenerator {
       else{    	 
     	  template += "! moving all the arguments into %o registers\n";
     	  flush(template);
+		  int stack_space = 92;//Positive offset for greater than sixth arguments
     	  for(int i = 0; i < arguments.size(); i++){
     		  if(arguments.elementAt(i).isConst()){
     			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
@@ -773,10 +775,20 @@ public class AssemblyCodeGenerator {
     			  template += "! prompt int to float & store back\n";
     			  template += indentString() + "fitos\t%f0, %f0\n";
     			  template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
-    			  template += indentString() + "ld\t[%fp-" + offset +"], %o" + i + "\n";
+    			  if(i > 5){
+    				  template += indentString() + "st\t%f0, [%sp+" + stack_space + "]\n";
+    				  stack_space += 4;
+    			  }else{
+    				  template += indentString() + "ld\t[%fp-" + offset +"], %o" + i + "\n";
+    			  }
     		  }
-    		  else
-    			  template += indentString() + "mov\t%l0, %o" + i + "\n";
+    		  else{
+    			  if(i > 5){
+    				  template += template += indentString() + "st\t%l0, [%sp+" + stack_space + "]\n";
+    				  stack_space += 4;
+    			  }else
+    				  template += indentString() + "mov\t%l0, %o" + i + "\n";
+    		  }
     		  flush(template);
     		  template = "";
     	  }
@@ -1938,7 +1950,7 @@ public class AssemblyCodeGenerator {
     	}
     	else if(a.getType().isFloat()){
     		String template = "! PreIncOp float first operand: " + a.getName() + " to %f0\n";
-    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "set\t.value_one, %l0\n";
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fadds\t%f0, %f1, %f0\n";
     		template += "! Store the pre inc value into local tmp\n";
@@ -1974,7 +1986,7 @@ public class AssemblyCodeGenerator {
     	}
     	else if(a.getType().isFloat()){
     		String template = "! PreDecOp float first operand: " + a.getName() + " to %f0\n";
-    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "set\t.value_one, %l0\n";
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
     		template += "! Store the pre inc value into local tmp\n";
@@ -2018,7 +2030,7 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "set\t" + offset + ", " + "%l0\n";
     		template += indentString() + "add\t%fp, %l0, %l0\n";
     		template += indentString() + "st\t" + "%f0, " + "[%l0]\n\n";	
-    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "set\t.value_one, %l0\n";
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fadds\t%f0, %f1, %f0\n";
     		flush(template);
@@ -2065,7 +2077,7 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "set\t" + offset + ", " + "%l0\n";
     		template += indentString() + "add\t%fp, %l0, %l0\n";
     		template += indentString() + "st\t" + "%f0, " + "[%l0]\n\n";	
-    		template += indentString() + "set\tvalue_one, %l0\n";
+    		template += indentString() + "set\t.value_one, %l0\n";
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
     		flush(template);
@@ -2539,6 +2551,53 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
     		template += indentString() + "fstoi\t%f0, %f0\n";
     		template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";		
+    	}
+    	else if(sto.getType().isFloat() && castToType.isBool()){
+    		template = "! Convert float to bool\n";
+    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    		template += indentString() + "ld\t[%fp-" + offset + "], %f1\n";
+    		template += indentString() + "set\t.value_zero, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f0\n";
+    		template += indentString() + "fcmps\t%f1, %f0\n";
+    		template += indentString() + "nop\n";
+    		String label = ".float_to_bool_" + globalCounter;
+    		template += indentString() + "fbe\t" + label + "\n";
+    		template += indentString() + "nop\n";
+    		template += "! set true\n";
+    		template += indentString() + "set\t1, %l0\n";
+    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+    		String label_end = label + "_end";
+    		template += indentString() + "ba\t" + label_end + "\n";
+    		template += indentString() + "nop\n";
+    		template += indentString() + label + ": \n";
+    		template += "! set false\n";
+    		template += indentString() + "set\t0, %l0\n";
+    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";	
+    		template += indentString() + label_end + ": \n";
+    	}
+    	else if(sto.getType().isBool() && castToType.isFloat()){
+    		template = indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+			template += indentString() + "ld\t[%fp-" + offset + "], %l0\n";
+			template += indentString() + "cmp\t%l0, %g0\n";
+    		String label = ".bool_to_float_" + globalCounter;
+			template += indentString() + "be\t" + label + "\n";
+			
+			template += indentString() + "nop\n";
+    		template += "! set true\n";
+    		template += indentString() + "set\t.value_one, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f0\n";
+    		template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+    		String label_end = label + "_end";
+    		template += indentString() + "ba\t" + label_end + "\n";
+    		template += indentString() + "nop\n";
+    		template += indentString() + label + ": \n";
+    		template += "! set false\n";
+    		template += indentString() + "set\t.value_zero, %l0\n";
+    		template += indentString() + "ld\t[%l0], %f0\n";
+			template += "!store back\n";
+			template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+    		template += indentString() + label_end + ": \n";
+
     	}
     	else{
     		template = "! Store the value into a tmp\n";

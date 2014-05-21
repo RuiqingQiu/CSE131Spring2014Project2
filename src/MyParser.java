@@ -1254,7 +1254,12 @@ class MyParser extends parser
 				((FunctionPointerType)(m_symtab.getFunc().getType())).addParameter(s);
 				m_symtab.getFunc().addParameter(s);
 				m_symtab.insert(s);
-				myAsWriter.writeFormalParam(s, i);
+				//If it's greater than the first sixth argument, it's been put on the stack
+				if(i > 5){
+				}	
+				else{
+					myAsWriter.writeFormalParam(s, i);
+				}
 				offset = offset + s.getType().getSize();
 			}
 		}
