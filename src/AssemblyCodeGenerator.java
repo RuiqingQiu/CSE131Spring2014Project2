@@ -2387,8 +2387,8 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "add\t%l0, %l1, %l0\n";
     	template += "! put the address of the field into a tmp\n";
     	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    	template += "! load the value of the field and put into %l0\n";
-    	template += indentString() + "ld\t[%l0], %l0\n";
+    	//template += "! load the value of the field and put into %l0\n";
+    	//template += indentString() + "ld\t[%l0], %l0\n";
     	flush(template);
     }
     
@@ -2519,10 +2519,13 @@ public class AssemblyCodeGenerator {
      * @param offset
      * @param sto
      */
-    public void writeTypeCast(int offset, STO sto, Type castToType){
+    public void writeTypeCast(int offset, STO sto, Type castToType, int globalCounter){
     	String template = "! Doing type cast\n";
     	flush(template);
-    	writeDoDesID(sto);
+    	if(sto.isConst()){
+    		setConst("DoingTypeCast", (ConstSTO)sto, globalCounter);
+    	}else
+    		writeDoDesID(sto);
     	if(sto.getType().isInt() && castToType.isFloat()){
     		template = indentString() + "st\t%l0, [%fp-" + offset + "]\n";
 			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
