@@ -222,20 +222,21 @@ public class AssemblyCodeGenerator {
     
     public void writeStringFormat(){
       String template = "";
-      template += indentString();
-      template += ".section \".rodata\"\n";
+      template += indentString() + ".section \".rodata\"\n";
       template += "_endl:\t\t.asciz \"\\n\"\n";
       template += "_intFmt:\t.asciz \"%d\"\n";
       template += "_strFmt:\t.asciz \"%s\"\n";
       template += "_boolT:\t\t.asciz \"true\"\n";
       template += "_boolF:\t\t.asciz \"false\"\n";
       template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n";
-      template += "_nullPtrDereferenceMsg:\t.asciz \"Attempt to dereference NULL pointer.\\n\"\n\n";
+      template += "_nullPtrDereferenceMsg:\t.asciz \"Attempt to dereference NULL pointer.\\n\"\n";
+      template += ".deallocatedStackMsg:\t.asciz \"Attempt to dereference a pointer into deallocated stack space.\\n\"\n\n";
       flush(template);
       template = indentString() + ".section \".data\"\n";
       template += indentString() + ".align 4\n";
       template += ".value_one:\t.single 0r1.0\n";
       template += ".value_zero:\t.single 0r0.0\n";
+      template += ".lowest_stack_pointer:\t.word 0\n";
       flush(template);
     }
 
@@ -553,7 +554,7 @@ public class AssemblyCodeGenerator {
       }
 
     }
-    public void writeFunc(FuncSTO sto){
+    public void writeFunc(FuncSTO sto, int globalCounter){
       String template = "";
       //Function label
       template += indentString() + ".section \".text\"\n";
@@ -565,6 +566,24 @@ public class AssemblyCodeGenerator {
       template += "set\t" + "SAVE." + sto.getName() + ", " + "%g1\n";
       template += indentString();
       template += "save\t" + "%sp, " + "%g1, " + "%sp\n";
+      template += "! Store that stack pointer to the global variable if it's lowest\n";
+      template += indentString() + "set\t.lowest_stack_pointer, %l0\n";
+      template += indentString() + "add\t%g0, %l0, %l0\n";
+      template += indentString() + "ld\t[%l0], %l0\n";
+      //Comparing if the stored stack space is lower than the current one, if so, update
+      template += indentString() + "cmp\t%l0, %sp\n";
+      String label = "._DealloStack_" + sto.getName() + globalCounter;
+      String label_end = label + "_end";
+      template += indentString() + "bg\t" + label + "\n";
+      template += indentString() + "nop\n\n";
+      template += "! No update for stack pointer\n";
+      template += indentString() + "ba\t" + label_end + "\n";
+      template += indentString() + "nop\n\n";
+      template += label + ": \n";
+      template += "! Store the current stack pointer address to global\n";
+      template += indentString() + "set\t.lowest_stack_pointer, %l0\n";
+      template += indentString() + "st\t%sp, [%l0]\n\n";
+      template += label_end + ": \n";
       flush(template);
     }
     
@@ -694,6 +713,9 @@ public class AssemblyCodeGenerator {
     	else{
     	  template += "! moving all the arguments into %o registers\n";
       	  flush(template);
+      	  int stack_space = 92;//Positive offset for greater than sixth arguments
+		  String extraArguments = ".SAVE_" + function.getName() + "_extra_argument_" + globalCounter;
+		  flush(indentString() + "add\t%sp, -(" + extraArguments + ") & -8, %sp\n");
       	  for(int i = 0; i < arguments.size(); i++){
       		  if(arguments.elementAt(i).isConst()){
       			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
@@ -721,15 +743,29 @@ public class AssemblyCodeGenerator {
       			  template += "! prompt int to float & store back\n";
       			  template += indentString() + "fitos\t%f0, %f0\n";
       			  template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
-      			  template += indentString() + "ld\t[%fp-" + offset +"], %o" + i + "\n";
+      			  if(i > 5){
+      				  template += indentString() + "st\t%f0, [%sp+" + stack_space + "]\n";
+      				  stack_space += 4;
+      			  }else{
+      				  template += indentString() + "ld\t[%fp-" + offset +"], %o" + i + "\n";
+      			  }
       		  }
-      		  else
+      		  else{
+      			 if(i > 5){
+   				  template += template += indentString() + "st\t%l0, [%sp+" + stack_space + "]\n";
+   				  stack_space += 4;
+      			 }else
       			  template += indentString() + "mov\t%l0, %o" + i + "\n";
+      		  }
       		  flush(template);
       		  template = "";
       	  }
-      	  template += indentString() + "call\t%l1\n";
-      	  template += indentString() + "nop\n";
+      	  
+      	  template += indentString() + extraArguments + " = " +(stack_space - 92) + "\n";
+    	  template += indentString() + "call\t%l1\n";
+    	  template += indentString() + "nop\n";
+    	  template += "! Deallocate stack space\n";
+    	  template += indentString() + "sub\t%sp, -(" + (stack_space-92)  + ")& -8, %sp\n"; 
     	}
     	template += "! Store return to a local tmp\n";
         template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
@@ -2428,6 +2464,7 @@ public class AssemblyCodeGenerator {
     
     /*
      * write function to check if the derefenced result is nullptr
+     * Assumes the value of the pointer is in %l0
      */
     public void writeDerefenceNullPtrCheck(int globalCounter){
     	String template = "! Check if the dereferenced result is nullptr.\n";
@@ -2451,6 +2488,42 @@ public class AssemblyCodeGenerator {
     	flush(template);
     }
 
+    /**
+     * Extra credit, checking dereferencing pointer to deallocated stack space
+     * @param globalCounter
+     */
+    public void writeDerefDeallocatedStack(int globalCounter){
+    	String template = "! Check if the dereferenced result is in deallocated stack space.\n";
+    	template += indentString() + "mov\t%l0, %l1\n";
+    	template += "! Comparing current stack pointer & dereferenced pointer address\n";
+    	template += indentString() + "cmp\t%l1, %sp\n";
+    	String label = ".deallocated_stack_dereference_check_" + globalCounter;
+    	String label_end = label + "_end";
+    	//If the pointer address is above than current stack pointer, need more checks
+    	template += indentString() + "bl\t" + label + "\n";
+    	template += indentString() + "nop\n\n";
+    	template += "! Enter here if it's an okay pointer dereference\n";
+    	template += indentString() + "ba\t" + label_end + "\n";
+    	template += indentString() + "nop\n\n";
+    	template += label +": \n";
+    	
+    	template += "! Comparing this pointer to maximum stack pointer to see if it's actually in the stack space\n";
+    	//Comparing pointer address & the global variable
+    	template += indentString() + "set\t.lowest_stack_pointer, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	template += indentString() + "cmp\t%l1, %l0\n";
+    	//If the pointer is above the maximum stack space, then it's in heap or above
+    	template += indentString() + "bl\t" + label_end + "\n";
+    	template += indentString() + "nop\n\n";
+    	template += indentString() + "set\t.deallocatedStackMsg,%o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "set\t1,%o0\n";
+    	template += indentString() + "call\texit\n";
+    	template += indentString() + "nop\n";
+    	template += label_end + ": \n";
+    	flush(template);
+    }
     public void writeDereferenceOp(STO s, int offset,int globalCounter){
     	String template = "\n ! Doing dereference operation\n";
     	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
@@ -2459,10 +2532,23 @@ public class AssemblyCodeGenerator {
     		template += "! Dereference expr hold address\n";
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	//load pointer to get its value (the address it's pointing to)
+    	template += "! Load pointer to get its value, the address it's pointing to\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
     	flush(template);
     	//%l0 stores the value of the derefence result
+    	//3.2 checking nullptr dereference
     	writeDerefenceNullPtrCheck(globalCounter);
+    	
+    	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
+    	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	if( s.getType().isReference() ||(s.isExpr() && ((ExprSTO)s).getHoldAddress())){
+    		template += "! Dereference expr hold address\n";
+    		template += indentString() + "ld\t[%l0], %l0\n";
+    	}
+    	template += "! Load pointer to get its value, the address it's pointing to\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	writeDerefDeallocatedStack(globalCounter);
     	template = indentString() + "set\t" + s.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
     	template += "! Dereference, load one more time\n";

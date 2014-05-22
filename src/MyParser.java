@@ -1023,7 +1023,8 @@ class MyParser extends parser
 		m_symtab.setFunc (sto);
 		m_symtab.getFunc().setReturnType(returnType);
 		//Write out assembly code
-		myAsWriter.writeFunc(sto);
+		myAsWriter.writeFunc(sto, this.globalCounter);
+		globalCounter++;
 	}
 	
 	void
