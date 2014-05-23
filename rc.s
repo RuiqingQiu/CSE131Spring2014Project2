@@ -1,5 +1,5 @@
 /*
- * Generated Thu May 22 20:06:39 PDT 2014
+ * Generated Thu May 22 20:59:00 PDT 2014
  */
 
 	.section ".rodata"
@@ -83,7 +83,7 @@ main:
 ! moving all the arguments into %o registers
 	add	%sp, -(.SAVE_foo_extra_argument_3) & -8, %sp
 ! argument pass by reference, get the address
-	set	-4, %l0
+	set	-40, %l0
 	add	%fp, %l0, %l0
 ! 0th argument of this function
 	mov	%l0, %o0
@@ -93,10 +93,10 @@ main:
 ! Deallocate stack space
 	sub	%sp, -(0)& -8, %sp
 ! Store return to a local tmp
-	st	%o0, [%fp-8]
+	st	%o0, [%fp-44]
 
 	ret
 	restore
 
 ! from DoFuncDecl2
-	SAVE.main = -(92 + 8) & -8
+	SAVE.main = -(92 + 44) & -8

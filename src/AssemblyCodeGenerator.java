@@ -796,7 +796,8 @@ public class AssemblyCodeGenerator {
     				  template = "! argument pass by reference, get the address\n";
     				  template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
     			  	  template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
-    			  	  if(arguments.elementAt(i).getType().isReference() || (arguments.elementAt(i).isExpr() && ((ExprSTO)arguments.elementAt(i)).getHoldAddress())){
+    			  	  if(arguments.elementAt(i).getType().isReference() || 
+    			  		(arguments.elementAt(i).isExpr() && ((ExprSTO)arguments.elementAt(i)).getHoldAddress())){
     			  		  template += "! argument is also reference, need one more load \n";
     			  		  template += indentString() + "ld\t[%l0], %l0\n";
     			  	  }

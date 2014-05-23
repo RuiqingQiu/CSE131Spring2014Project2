@@ -585,7 +585,6 @@ class MyParser extends parser
 			sto.setInit(stoList.elementAt(i).getInit());
 			m_symtab.insert(sto);
 
-
 			if(m_symtab.getLevel() == 1){
 			  String label = sto.getName();
 			  sto.setOffset(label);	  
@@ -1110,7 +1109,9 @@ class MyParser extends parser
 		else{
 			//Add all the param to the symbal table and FuncSTO
 			for(int i = 0; i < params.size(); i++){
-				STO s = params.elementAt(i);
+				if(params.elementAt(i).getType().isArray())
+					params.elementAt(i).getType().setReference(true);
+				STO s = params.elementAt(i);		
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
 				s.setIsModifiable(true);
@@ -1250,6 +1251,8 @@ class MyParser extends parser
 			int offset = 68;
 			//Add all the param to the symbal table and FuncSTO
 			for(int i = 0; i < params.size(); i++){
+				if(params.elementAt(i).getType().isArray())
+					params.elementAt(i).getType().setReference(true);
 				STO s = params.elementAt(i);
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
@@ -1921,8 +1924,9 @@ class MyParser extends parser
 						//pass by reference, argument is not a modifiable L-value
 						else if(params.get(i).getType().isReference() && !arguments.get(i).isModLValue()){
 							//If it's an array name, should be a mod l-val
-							if(arguments.get(i).getType().isArray())
+							if(arguments.get(i).getType().isArray()){
 								count++;
+							}
 							else
 								break;
 						}
@@ -1957,16 +1961,6 @@ class MyParser extends parser
 				for(int i = 0; i < arguments.size(); i++)
 				{
 					if (params.get(i).getType().isReference()){
-						/*System.out.println(params.get(i).getType());
-						System.out.println(((PointerType)params.get(i).getType()).getElementType());
-						System.out.println( ((PointerType)((PointerType)params.get(i).getType()).getElementType()).getElementType());
-						
-						System.out.println(arguments.get(i).getName());
-						System.out.println(arguments.get(i).getType());
-						System.out.println(((PointerType)arguments.get(i).getType()).getElementType());
-						System.out.println(((PointerType)((PointerType)arguments.get(i).getType()).getElementType()).getElementType());
-						System.out.println(((PointerType)((PointerType)((PointerType)arguments.get(i).getType()).getElementType()).getElementType()));
-						*/
 						//pass by reference, argument type is not equivalent to the parameter type
 						if(!arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){						
 							m_nNumErrors++;
@@ -1998,12 +1992,18 @@ class MyParser extends parser
 						if(arguments.get(i).isError())
 							return (new ErrorSTO ("DoFuncCall, pass-by-value error"));
 						//If the type is not assignable
-						if(!arguments.get(i).getType().isAssignableTo(params.get(i).getType())){
-							m_nNumErrors++;
-							m_errors.print (Formatter.toString(ErrorMsg.error5a_Call, 
+						if(arguments.get(i).getType().isArray() && params.get(i).getType().isArray()
+							&&arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){
+							params.get(i).getType().setReference(true);
+						}
+						else{
+							if(!arguments.get(i).getType().isAssignableTo(params.get(i).getType())){
+								m_nNumErrors++;
+								m_errors.print (Formatter.toString(ErrorMsg.error5a_Call, 
 							  arguments.get(i).getType().getName(), params.get(i).getName(), params.get(i).getType().getName()));
-							errorArgument = true;
-							//return (new ErrorSTO ("DoFuncCall, pass-by-value error"));
+								errorArgument = true;
+								//return (new ErrorSTO ("DoFuncCall, pass-by-value error"));
+							}
 						}
 					}
 				}
@@ -2044,7 +2044,7 @@ class MyParser extends parser
 				for(int i = 0; i < arguments.size(); i++){
 					if (params.get(i).getType().isReference()){
 						//pass by reference, argument type is not equivalent to the parameter type
-						if(!arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){						
+						if(!arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){
 							m_nNumErrors++;
 							m_errors.print (Formatter.toString(ErrorMsg.error5r_Call, 
 							  arguments.get(i).getType().getName(), params.get(i).getName(), params.get(i).getType().getName()));
@@ -2069,6 +2069,7 @@ class MyParser extends parser
 					else{
 						//If the type is not assignable
 						if(!arguments.get(i).getType().isAssignableTo(params.get(i).getType())){
+							
 							m_nNumErrors++;
 							m_errors.print (Formatter.toString(ErrorMsg.error5a_Call, 
 							  arguments.get(i).getType().getName(), params.get(i).getName(), params.get(i).getType().getName()));
