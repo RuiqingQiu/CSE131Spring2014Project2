@@ -236,7 +236,7 @@ public class AssemblyCodeGenerator {
       template += indentString() + ".align 4\n";
       template += ".value_one:\t.single 0r1.0\n";
       template += ".value_zero:\t.single 0r0.0\n";
-      template += ".lowest_stack_pointer:\t.word 0\n";
+      template += ".lowest_stack_pointer:\t.word 0xFFFFFFFF\n";
       flush(template);
     }
 
@@ -574,7 +574,7 @@ public class AssemblyCodeGenerator {
       template += indentString() + "cmp\t%l0, %sp\n";
       String label = "._DealloStack_" + sto.getName() + globalCounter;
       String label_end = label + "_end";
-      template += indentString() + "bg\t" + label + "\n";
+      template += indentString() + "bgu\t" + label + "\n";
       template += indentString() + "nop\n\n";
       template += "! No update for stack pointer\n";
       template += indentString() + "ba\t" + label_end + "\n";
@@ -2518,11 +2518,12 @@ public class AssemblyCodeGenerator {
     	String template = "! Check if the dereferenced result is in deallocated stack space.\n";
     	template += indentString() + "mov\t%l0, %l1\n";
     	template += "! Comparing current stack pointer & dereferenced pointer address\n";
-    	template += indentString() + "cmp\t%l1, %sp\n";
+    	template += indentString() + "add\t%sp, 92, %l0\n";
+    	template += indentString() + "cmp\t%l1, %l0\n";
     	String label = ".deallocated_stack_dereference_check_" + globalCounter;
     	String label_end = label + "_end";
     	//If the pointer address is above than current stack pointer, need more checks
-    	template += indentString() + "bl\t" + label + "\n";
+    	template += indentString() + "blu\t" + label + "\n";
     	template += indentString() + "nop\n\n";
     	template += "! Enter here if it's an okay pointer dereference\n";
     	template += indentString() + "ba\t" + label_end + "\n";
@@ -2535,7 +2536,7 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "ld\t[%l0], %l0\n";
     	template += indentString() + "cmp\t%l1, %l0\n";
     	//If the pointer is above the maximum stack space, then it's in heap or above
-    	template += indentString() + "bl\t" + label_end + "\n";
+    	template += indentString() + "blu\t" + label_end + "\n";
     	template += indentString() + "nop\n\n";
     	template += indentString() + "set\t.deallocatedStackMsg,%o0\n";
     	template += indentString() + "call\tprintf\n";
