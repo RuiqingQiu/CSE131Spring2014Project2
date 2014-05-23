@@ -2411,7 +2411,7 @@ public class AssemblyCodeGenerator {
 			template += "! pointer type array dereference\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}
-		if((arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
+		if(arrayName.getType().isArray() || (arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
 			template += "! array des, expr hold address\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}

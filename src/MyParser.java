@@ -431,6 +431,7 @@ class MyParser extends parser
 	void
 	DoVarDecl (Vector<VarSTO> stoList, Type type)
 	{
+		//System.out.println(type.getName());
 		if(type.isError())
 			return;
 		Vector<String> lstIDs = new Vector<String>();
@@ -512,7 +513,8 @@ class MyParser extends parser
 					}
 				}
 			}
-			
+
+
 			//Check if the init type is assignable to Type
 			if(stoList.elementAt(i).getInit() != null){
 				//Check if STO is not modifiable value
@@ -620,6 +622,7 @@ class MyParser extends parser
 			  }
 			}
 		}
+		
 		//Global scope
 	}
 
@@ -897,7 +900,7 @@ class MyParser extends parser
 				STO s = m_symtab.access(t.getName());
 				t.setSize(s.getType().getSize());
 			}
-			ExprSTO sto = new ExprSTO("pointer dereference", t);
+			ExprSTO sto = new ExprSTO("pointer_dereference", t);
 			sto.setIsAddressable(true);
 			sto.setIsModifiable(true);
 			sto.setBase("%fp");
@@ -1135,6 +1138,12 @@ class MyParser extends parser
 	    return;
 	  }
 	  m_symtab.getFunc().getType().setName(((FunctionPointerType)(m_symtab.getFunc().getType())).getErrorName());
+	  Vector<STO> params = m_symtab.getFunc().getParameterSTO();
+	  for(STO s : params){
+		  if(s.getType().isArray() && !s.getType().isReference()){
+			  s.getType().setReference(true);
+		  }
+	  }
 	  m_symtab.closeScope ();//close scope(pops top scope off)
 	  //No top level return statement has been seen
 	  if (m_symtab.getFunc().getTopLevelReturn() == false && !(m_symtab.getFunc().getReturnType().isVoid())){
@@ -1251,8 +1260,6 @@ class MyParser extends parser
 			int offset = 68;
 			//Add all the param to the symbal table and FuncSTO
 			for(int i = 0; i < params.size(); i++){
-				if(params.elementAt(i).getType().isArray())
-					params.elementAt(i).getType().setReference(true);
 				STO s = params.elementAt(i);
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
@@ -1960,7 +1967,7 @@ class MyParser extends parser
 				Vector<STO> params = (Vector<STO>) tmp.getParameterSTO().clone();
 				for(int i = 0; i < arguments.size(); i++)
 				{
-					if (params.get(i).getType().isReference()){
+					if (params.get(i).getType().isReference() || params.get(i).getType().isArray()){
 						//pass by reference, argument type is not equivalent to the parameter type
 						if(!arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){						
 							m_nNumErrors++;
@@ -2042,7 +2049,7 @@ class MyParser extends parser
 			if(arguments.size() == t.getParameterNumbers()){
 				Vector<STO> params = (Vector<STO>) t.getParameters().clone();
 				for(int i = 0; i < arguments.size(); i++){
-					if (params.get(i).getType().isReference()){
+					if (params.get(i).getType().isReference() || params.get(i).getType().isArray()){
 						//pass by reference, argument type is not equivalent to the parameter type
 						if(!arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){
 							m_nNumErrors++;
