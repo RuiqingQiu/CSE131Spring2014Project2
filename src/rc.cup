@@ -1404,6 +1404,7 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
     |               T_ID:_1
                     {:
                         RESULT = ((MyParser) parser).DoDesignator3_ID (_1);
+                        
                     :}
     ;
 

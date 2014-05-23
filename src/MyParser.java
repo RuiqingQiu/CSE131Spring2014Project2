@@ -556,11 +556,13 @@ class MyParser extends parser
 					
 				}
 				else if(stoList.elementAt(i).getType().isPointer()){
-					((PointerType)stoList.elementAt(i).getType()).setElementType(type);
+				
+					//((PointerType)stoList.elementAt(i).getType()).setElementType(type);
 					//Get name of the pointer
 					((PointerType)stoList.elementAt(i).getType()).setName(
 							((PointerType)stoList.elementAt(i).getType()).getPrintedName() + "*");
 					sto.setType(stoList.elementAt(i).getType());
+		            
 					//Array is addressable but not modifiable
 					sto.setIsAddressable(true);
 					sto.setIsModifiable(true);
@@ -582,6 +584,7 @@ class MyParser extends parser
 			}
 			sto.setInit(stoList.elementAt(i).getInit());
 			m_symtab.insert(sto);
+
 
 			if(m_symtab.getLevel() == 1){
 			  String label = sto.getName();
@@ -766,6 +769,7 @@ class MyParser extends parser
 			TypedefSTO 	sto = new TypedefSTO (id);
 			
 			sto.setType(type.clone());
+
 			m_symtab.insert (sto);
 		}
 	}
@@ -1953,6 +1957,16 @@ class MyParser extends parser
 				for(int i = 0; i < arguments.size(); i++)
 				{
 					if (params.get(i).getType().isReference()){
+						/*System.out.println(params.get(i).getType());
+						System.out.println(((PointerType)params.get(i).getType()).getElementType());
+						System.out.println( ((PointerType)((PointerType)params.get(i).getType()).getElementType()).getElementType());
+						
+						System.out.println(arguments.get(i).getName());
+						System.out.println(arguments.get(i).getType());
+						System.out.println(((PointerType)arguments.get(i).getType()).getElementType());
+						System.out.println(((PointerType)((PointerType)arguments.get(i).getType()).getElementType()).getElementType());
+						System.out.println(((PointerType)((PointerType)((PointerType)arguments.get(i).getType()).getElementType()).getElementType()));
+						*/
 						//pass by reference, argument type is not equivalent to the parameter type
 						if(!arguments.get(i).getType().isEquivalentTo(params.get(i).getType())){						
 							m_nNumErrors++;
