@@ -1138,12 +1138,6 @@ class MyParser extends parser
 	    return;
 	  }
 	  m_symtab.getFunc().getType().setName(((FunctionPointerType)(m_symtab.getFunc().getType())).getErrorName());
-	  Vector<STO> params = m_symtab.getFunc().getParameterSTO();
-	  for(STO s : params){
-		  if(s.getType().isArray() && !s.getType().isReference()){
-			  s.getType().setReference(true);
-		  }
-	  }
 	  m_symtab.closeScope ();//close scope(pops top scope off)
 	  //No top level return statement has been seen
 	  if (m_symtab.getFunc().getTopLevelReturn() == false && !(m_symtab.getFunc().getReturnType().isVoid())){
@@ -1267,6 +1261,8 @@ class MyParser extends parser
 				s.setBase("%fp");
 				s.setOffset("" + offset);
 				((FunctionPointerType)(m_symtab.getFunc().getType())).addParameter(s);
+				//if(params.get(i).getType().isArray())
+					//s.getType().setReference(true);
 				m_symtab.getFunc().addParameter(s);
 				m_symtab.insert(s);
 				//If it's greater than the first sixth argument, it's been put on the stack
@@ -2248,7 +2244,14 @@ class MyParser extends parser
 		e.setIsAddressable(true);
 		e.setIsModifiable(true);
 		m_symtab.addBytes(4);
+		boolean previous_reference = nameSto.getType().isReference();
+		for (STO s : m_symtab.getFunc().getParameterSTO()){
+			if(s.getName().equals(nameSto.getName())){
+				nameSto.getType().setReference(true);
+			}
+		}
 		myAsWriter.writeDoArrayDes(nameSto, indexExpr, m_symtab.getBytes(), this.globalCounter);
+		nameSto.getType().setReference(previous_reference);
 		globalCounter++;
 		e.setOffset("-" + m_symtab.getBytes());
 		e.setBase("%fp");

@@ -33,13 +33,17 @@ public class FunctionPointerType extends PointerGroupType {
 				}
 				//Any parameters not matching, return false
 				else{
+					System.out.println(this.getParameters().elementAt(i).getType().isReference());
+					System.out.println(((FunctionPointerType)t).getParameters().elementAt(i).getType().isReference());
 					return false;
 				}
 			}
 			//Check return type as well as pass by reference or pass by value
 			if(((FunctionPointerType)t).getReturnType().isReference() == (this.getReturnType().isReference())){
-				if(((FunctionPointerType)t).getReturnType().isEquivalentTo(this.getReturnType()))
+				if(((FunctionPointerType)t).getReturnType().isEquivalentTo(this.getReturnType())){
 					return true;
+				
+				}
 				else
 					return false;
 			}else

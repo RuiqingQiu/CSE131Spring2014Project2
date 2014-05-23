@@ -732,6 +732,16 @@ public class AssemblyCodeGenerator {
       			  	  }
       			  	  flush(template);
       			  }
+      			  else if(params.elementAt(i).getType().isArray()){
+      				  template = "! argument array pass by reference, get the address\n";
+    				  template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
+    			  	  template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
+    			  	  if(arguments.elementAt(i).getType().isReference() || (arguments.elementAt(i).isExpr() && ((ExprSTO)arguments.elementAt(i)).getHoldAddress())){
+    			  		  template += "! argument is also reference, need one more load \n";
+    			  		  template += indentString() + "ld\t[%l0], %l0\n";
+    			  	  }
+    			  	  flush(template);
+      			  }
       			  else
       				  writeDoDesID(arguments.elementAt(i));
       		  }
@@ -803,6 +813,16 @@ public class AssemblyCodeGenerator {
     			  	  }
     			  	  flush(template);
     			  }
+    			  else if(params.elementAt(i).getType().isArray()){
+      				  template = "! argument array pass by reference, get the address\n";
+    				  template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
+    			  	  template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
+    			  	  if(arguments.elementAt(i).getType().isReference() || (arguments.elementAt(i).isExpr() && ((ExprSTO)arguments.elementAt(i)).getHoldAddress())){
+    			  		  template += "! argument is also reference, need one more load \n";
+    			  		  template += indentString() + "ld\t[%l0], %l0\n";
+    			  	  }
+    			  	  flush(template);
+      			  }
     			  else
     				  writeDoDesID(arguments.elementAt(i));
     		  }
@@ -2407,11 +2427,12 @@ public class AssemblyCodeGenerator {
     	template += "! the actual offset in %o0\n";
     	template += indentString() + "set\t" + arrayName.getOffset() + ", " + "%l0\n";
 		template += indentString() + "add\t" + arrayName.getBase() + ", %l0, %l0\n";
+		
 		if(arrayName.getType().isPointer()){
 			template += "! pointer type array dereference\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}
-		if(arrayName.getType().isArray() || (arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
+		if((arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
 			template += "! array des, expr hold address\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}
