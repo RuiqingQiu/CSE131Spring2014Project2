@@ -555,15 +555,22 @@ public class AssemblyCodeGenerator {
 
     }
     public void writeFunc(FuncSTO sto, int globalCounter){
+      String function_name = "";
+      if(sto.isOverloaded()){
+    	  function_name = sto.getNameMangling();
+      }
+      else{
+    	  function_name = sto.getName();
+      }
       String template = "";
       //Function label
       template += indentString() + ".section \".text\"\n";
       template += indentString() + ".align 4\n";
-      template += indentString() + ".global " + sto.getName() + "\n";
-      template += sto.getName() + ":\n";
+      template += indentString() + ".global " + function_name + "\n";
+      template += function_name + ":\n";
       //Indent the string
       template += indentString();
-      template += "set\t" + "SAVE." + sto.getName() + ", " + "%g1\n";
+      template += "set\t" + "SAVE." + function_name + ", " + "%g1\n";
       template += indentString();
       template += "save\t" + "%sp, " + "%g1, " + "%sp\n";
       template += "! Store that stack pointer to the global variable if it's lowest\n";
@@ -572,7 +579,7 @@ public class AssemblyCodeGenerator {
       template += indentString() + "ld\t[%l0], %l0\n";
       //Comparing if the stored stack space is lower than the current one, if so, update
       template += indentString() + "cmp\t%l0, %sp\n";
-      String label = "._DealloStack_" + sto.getName() + globalCounter;
+      String label = "._DealloStack_" + function_name + globalCounter;
       String label_end = label + "_end";
       template += indentString() + "bgu\t" + label + "\n";
       template += indentString() + "nop\n\n";
@@ -590,7 +597,13 @@ public class AssemblyCodeGenerator {
     public void writeSaveSpace(FuncSTO sto, int bytes){
       String template = "";
       template += "! from DoFuncDecl2\n";
-      template += indentString() + "SAVE." + sto.getName();
+      String function_name = "";
+      if(sto.isOverloaded()){
+    	  function_name = sto.getNameMangling();
+      }else{
+    	  function_name = sto.getName();
+      }
+      template += indentString() + "SAVE." + function_name;
       if(bytes == 0){
         template += " = -92 & -8\n";
       }
@@ -794,9 +807,15 @@ public class AssemblyCodeGenerator {
     
     public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset, int globalCounter, Vector<STO> params){
       //No argument function call
-      String template = "\n\n! making function call :" + function.getName() + "\n";
+      String function_name = "";
+      if(function.isOverloaded()){
+    	  function_name = function.getNameMangling();
+      }else{
+    	  function_name = function.getName();
+      }
+      String template = "\n\n! making function call :" + function_name + "\n";
       if(arguments.size() == 0){
-    	template += indentString() + "call\t" + function.getName() + "\n";
+    	template += indentString() + "call\t" + function_name + "\n";
     	template += indentString() + "nop\n";
       }
       //Argument is not 0
@@ -804,7 +823,7 @@ public class AssemblyCodeGenerator {
     	  template += "! moving all the arguments into %o registers\n";
     	  flush(template);
 		  int stack_space = 92;//Positive offset for greater than sixth arguments
-		  String extraArguments = ".SAVE_" + function.getName() + "_extra_argument_" + globalCounter;
+		  String extraArguments = ".SAVE_" + function_name + "_extra_argument_" + globalCounter;
 		  flush(indentString() + "add\t%sp, -(" + extraArguments + ") & -8, %sp\n");
     	  for(int i = 0; i < arguments.size(); i++){
     		  if(arguments.elementAt(i).isConst()){
@@ -872,7 +891,7 @@ public class AssemblyCodeGenerator {
     		  template = "";
     	  }
     	  template += indentString() + extraArguments + " = " +(stack_space - 92) + "\n";
-    	  template += indentString() + "call\t" + function.getName() + "\n";
+    	  template += indentString() + "call\t" + function_name + "\n";
       	  template += indentString() + "nop\n";
     	  template += "! Deallocate stack space\n";
     	  template += indentString() + "sub\t%sp, -(" + (stack_space-92)  + ")& -8, %sp\n"; 
@@ -2247,6 +2266,9 @@ public class AssemblyCodeGenerator {
     			template += "! struct assignment, right hold address, one more load\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
+    		template += indentString() + "mov\t%l0, %o1\n";
+    		
+    		/*
     		template += "! Store the elements in the struct to a tmp\n";
     		template += indentString() + "mov\t%l0, %o1\n";
     		template += indentString() + "add\t%fp, -" + offset + ", %o0\n";
@@ -2256,6 +2278,7 @@ public class AssemblyCodeGenerator {
     		
     		template += "! Using the tmp as our copy source\n";
     		template += indentString() + "add\t%fp, -" + offset + ", %o1\n";
+    		*/
     		template += "! getting the address of the left side struct\n";
     		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
@@ -2267,8 +2290,8 @@ public class AssemblyCodeGenerator {
     		
     		template += indentString() + "mov\t%l0, %o0\n";
     		template += indentString() + "set\t" + left.getType().getSize() + ", %o2\n";
-    		template += "! making memcpy function call\n";
-    		template += indentString() + "call\tmemcpy\n";
+    		template += "! making memmove function call\n";
+    		template += indentString() + "call\tmemmove\n";
     		template += indentString() + "nop\n";
     		flush(template);
     		return;

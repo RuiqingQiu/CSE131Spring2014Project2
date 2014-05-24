@@ -431,7 +431,6 @@ class MyParser extends parser
 	void
 	DoVarDecl (Vector<VarSTO> stoList, Type type)
 	{
-		//System.out.println(type.getName());
 		if(type.isError())
 			return;
 		Vector<String> lstIDs = new Vector<String>();
@@ -979,60 +978,6 @@ class MyParser extends parser
 		return ret;
 	}
 	
-	//----------------------------------------------------------------
-	//
-	//----------------------------------------------------------------
-	void
-	DoFuncDecl_1 (Type returnType, String id)
-	{
-		if(returnType.isError())
-			return;
-		//Check if the function is already in the symbol table
-		if (m_symtab.accessLocal (id) != null)
-		{
-			//Check if it's a valid overload
-			STO tmp = m_symtab.accessLocal(id);
-			
-			//Check if the id is a valid function
-			if(tmp.isFunc()){
-				//Mark as an overloaded func
-				FuncSTO overloaded =  new FuncSTO(id);
-				FunctionPointerType type = new FunctionPointerType("funcptr", 4);
-				type.setReturnType(returnType);
-				overloaded.setType(type);
-				((FuncSTO)tmp).setOverloaded(true);
-				overloaded.setOverloaded(true);
-				//((FuncSTO)tmp).addOverloadFunc(overloaded);	
-				m_symtab.openScope ();
-				m_symtab.setFunc (overloaded);
-				m_symtab.getFunc().setReturnType(returnType);
-				return;
-			}
-			else{
-				m_nNumErrors++;
-				m_errors.print (Formatter.toString(ErrorMsg.redeclared_id, id));
-			}
-			//FuncSTO overloaded = (FuncSTO) m_symtab.accessLocal(id);
-		}
-	
-		FuncSTO sto = new FuncSTO (id);//initialize here so that we can insert parameter into the FuncSTO
-		sto.setBase("%g0");
-		sto.setOffset(id);
-		//FunctSTO are always FunctionPointerType
-		FunctionPointerType type = new FunctionPointerType("funcptr", 4);
-	   
-		//Set its return type
-		type.setReturnType(returnType);
-		sto.setType(type);
-		m_symtab.insert (sto);//inserted into current scope
-		m_symtab.openScope ();
-		m_symtab.setFunc (sto);
-		m_symtab.getFunc().setReturnType(returnType);
-		//Write out assembly code
-		myAsWriter.writeFunc(sto, this.globalCounter);
-		globalCounter++;
-	}
-	
 	void
 	DoExternFuncDecl_1 (Type returnType, String id)
 	{
@@ -1125,6 +1070,70 @@ class MyParser extends parser
 		}
 		m_symtab.getFunc().getType().setName(((FunctionPointerType)(m_symtab.getFunc().getType())).getErrorName());
 	}
+	
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	void
+	DoFuncDecl_1 (Type returnType, String id)
+	{
+		if(returnType.isError())
+			return;
+		//Check if the function is already in the symbol table
+		if (m_symtab.accessLocal (id) != null)
+		{
+			//Check if it's a valid overload
+			STO tmp = m_symtab.accessLocal(id);
+			
+			//Check if the id is a valid function
+			if(tmp.isFunc()){
+				//Mark as an overloaded func
+				FuncSTO overloaded =  new FuncSTO(id);
+				FunctionPointerType type = new FunctionPointerType("funcptr", 4);
+				type.setReturnType(returnType);
+				overloaded.setType(type);
+				((FuncSTO)tmp).setOverloaded(true);
+				//Set name mangling for the base function to be the same as its name
+				((FuncSTO)tmp).setNameMangling();
+				//Set name mangling for this overloaded function
+				overloaded.setNameMangling(this.globalCounter);
+				this.globalCounter++;
+				overloaded.setOverloaded(true);
+
+				m_symtab.openScope ();
+				m_symtab.setFunc (overloaded);
+				m_symtab.getFunc().setReturnType(returnType);
+				//Write out assembly code
+				myAsWriter.writeFunc(overloaded, this.globalCounter);
+				globalCounter++;
+				return;
+			}
+			else{
+				m_nNumErrors++;
+				m_errors.print (Formatter.toString(ErrorMsg.redeclared_id, id));
+			}
+			//FuncSTO overloaded = (FuncSTO) m_symtab.accessLocal(id);
+		}
+	
+		FuncSTO sto = new FuncSTO (id);//initialize here so that we can insert parameter into the FuncSTO
+		sto.setBase("%g0");
+		sto.setOffset(id);
+		//FunctSTO are always FunctionPointerType
+		FunctionPointerType type = new FunctionPointerType("funcptr", 4);
+	   
+		//Set its return type
+		type.setReturnType(returnType);
+		sto.setType(type);
+		m_symtab.insert (sto);//inserted into current scope
+		m_symtab.openScope ();
+		m_symtab.setFunc (sto);
+		m_symtab.getFunc().setReturnType(returnType);
+		//Write out assembly code
+		myAsWriter.writeFunc(sto, this.globalCounter);
+		globalCounter++;
+	}
+	
+	
 
 	//----------------------------------------------------------------
 	//
@@ -1172,16 +1181,31 @@ class MyParser extends parser
 			}
 		}
 		//after the for loop we get the FuncSTO that has the same number of parameter
-		if(potential.size() == 0){			
-			for(STO s : params)
-			{
+		if(potential.size() == 0){	
+
+			int offset = 68;
+			//Add all the param to the symbal table and FuncSTO
+			for(int i = 0; i < params.size(); i++){
+				STO s = params.elementAt(i);
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
 				s.setIsModifiable(true);
+				s.setBase("%fp");
+				s.setOffset("" + offset);
 				((FunctionPointerType)(m_symtab.getFunc().getType())).addParameter(s);
+				//if(params.get(i).getType().isArray())
+					//s.getType().setReference(true);
 				m_symtab.getFunc().addParameter(s);
 				m_symtab.insert(s);
+				//If it's greater than the first sixth argument, it's been put on the stack
+				if(i > 5){
+				}	
+				else{
+					myAsWriter.writeFormalParam(s, i);
+				}
+				offset = offset + s.getType().getSize();
 			}
+			
 			//we know the function is successfully overloaded and we can add to list
 			original.addOverloadFunc(needToBeCheckedFunc);
 			return;
@@ -1216,15 +1240,30 @@ class MyParser extends parser
 				return;
 			}
 		}
-		for(STO s : params)
-		{
+	
+		int offset = 68;
+		//Add all the param to the symbal table and FuncSTO
+		for(int i = 0; i < params.size(); i++){
+			STO s = params.elementAt(i);
 			//Check #19, all formal param are variables, which are mod l-val
 			s.setIsAddressable(true);
 			s.setIsModifiable(true);
+			s.setBase("%fp");
+			s.setOffset("" + offset);
 			((FunctionPointerType)(m_symtab.getFunc().getType())).addParameter(s);
+			//if(params.get(i).getType().isArray())
+				//s.getType().setReference(true);
 			m_symtab.getFunc().addParameter(s);
 			m_symtab.insert(s);
+			//If it's greater than the first sixth argument, it's been put on the stack
+			if(i > 5){
+			}	
+			else{
+				myAsWriter.writeFormalParam(s, i);
+			}
+			offset = offset + s.getType().getSize();
 		}
+		
 		//Enter here if it's valid
 		original.addOverloadFunc(needToBeCheckedFunc);
 	}
@@ -1939,13 +1978,17 @@ class MyParser extends parser
 					}
 					//Check if a exact match
 					if(count == arguments.size()){
-						if(tmp.getReturnType().isReference()){
-							ExprSTO ret = new ExprSTO("FuncCall", tmp.getReturnType());
+						ExprSTO ret = new ExprSTO("FuncCall", s.getReturnType());
+						if(tmp.getReturnType().isReference()){					
 							ret.setIsAddressable(true);
 							ret.setIsModifiable(true);
-							return ret;
 						}
-					    return new ExprSTO("FuncCall", tmp.getReturnType());
+						m_symtab.addBytes(tmp.getReturnType().getSize());
+						myAsWriter.writeMakeFuncCall(arguments, s, m_symtab.getBytes(), this.globalCounter, params);
+						globalCounter++;
+						ret.setOffset("-" + m_symtab.getBytes());
+						ret.setBase("%fp");
+					    return ret;
 					}
 				}//End of if statement check argument size and parameter size
 				//No good candidates

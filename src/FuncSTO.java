@@ -21,6 +21,7 @@ class FuncSTO extends STO
 		this.overloadedFuncList = new Vector<FuncSTO>();
 		this.overloaded = false;
 		this.defineError = false;
+		this.name_mangling = "";
 	}
 
 
@@ -88,7 +89,15 @@ class FuncSTO extends STO
 	public void setDefineError(boolean b ){
 		this.defineError = b;
 	}
-	
+	public void setNameMangling(){
+		this.name_mangling = this.getName();
+	}
+	public void setNameMangling(int globalCounter){
+		this.name_mangling = this.getName() + ".overloaded_" + globalCounter;
+	}
+	public String getNameMangling(){
+		return this.name_mangling;
+	}
 //----------------------------------------------------------------
 //	Instance variables.
 //----------------------------------------------------------------
@@ -101,5 +110,7 @@ class FuncSTO extends STO
 	private Vector<FuncSTO> overloadedFuncList;
 	
 	private boolean defineError;
+	
+	private String name_mangling;
 	
 }
