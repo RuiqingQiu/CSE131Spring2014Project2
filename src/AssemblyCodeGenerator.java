@@ -972,14 +972,18 @@ public class AssemblyCodeGenerator {
     	if(a.getType().isInt()){
     		if(a.isConst()){
     			setConst("", (ConstSTO)a, 0);
-    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+    	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    	   	  	template += indentString() + "st\t%l0, [%l2]\n";
+    			template += indentString() + "ld\t[%l2], %f0\n";
     			template += indentString() + "fitos\t%f0, %f1\n";
     		}
     		else{
     			writeDoDesID(a);
-    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+    	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    	   	  	template += indentString() + "st\t%l0, [%l2]\n";
+    			template += indentString() + "ld\t[%l2], %f0\n";
     			template += indentString() + "fitos\t%f0, %f1\n";
     		}
     	}else{
@@ -1000,14 +1004,18 @@ public class AssemblyCodeGenerator {
     	if(b.getType().isInt()){
     		if(b.isConst()){
     			setConst("", (ConstSTO)b, 0);
-    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+    	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    	   	  	template += indentString() + "st\t%l0, [%l2]\n";
+    			template += indentString() + "ld\t[%l2], %f0\n";
     			template += indentString() + "fitos\t%f0, %f2\n";
     		}
     		else{
     			writeDoDesID(b);
-    			template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+    	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    	   	  	template += indentString() + "st\t%l0, [%l2]\n";
+    			template += indentString() + "ld\t[%l2], %f0\n";
     			template += indentString() + "fitos\t%f0, %f2\n";
     		}
     	}else{
@@ -1046,7 +1054,9 @@ public class AssemblyCodeGenerator {
 	      flush(template);
 	      //Do the addop part
 	      template = indentString() + "add\t%l1, %l2, %l0\n";
-	      template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+	   	  template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  template += indentString() + "st\t%l0, [%l2]\n";
 	      flush(template);
       }
       //If one of the operand is float
@@ -1056,7 +1066,9 @@ public class AssemblyCodeGenerator {
   		getValueIntof2(b, globalCounter, position_to_store_tmp);
   		String template = "! adding %f1 & %f2 to %f0\n";
   		template += indentString() + "fadds\t%f1, %f2, %f0\n";
-  		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+  		template += indentString() + "st\t%f0, [%l2]\n";
 	    flush(template);
       }
       //Float add float
@@ -1065,7 +1077,9 @@ public class AssemblyCodeGenerator {
   		getValueIntof2(b, globalCounter, offset);
   		String template = "! adding %f1 & %f2 to %f0\n";
   		template += indentString() + "fadds\t%f1, %f2, %f0\n";
-  		template += indentString() + "st\t%f0, [%fp" + "-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+   	  	template += indentString() + "st\t%f0, [%l2]\n";
 	    flush(template);
       }
     }
@@ -1483,14 +1497,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! lessThanOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label + "_done\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! lessThanOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
     	}
@@ -2044,7 +2062,9 @@ public class AssemblyCodeGenerator {
 	    	template += indentString() + "mov\t%l0, %l1\n\n";
 	   	  	template += indentString() + "inc\t%l1\n\n";
 	   	  	template += "! Store the pre inc value into local tmp\n";
-	   	  	template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
+	   	  	template += indentString() + "set\t" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l1, [%l2]\n";
 	   	  	flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -2054,7 +2074,9 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fadds\t%f0, %f1, %f0\n";
     		template += "! Store the pre inc value into local tmp\n";
-	   	  	template += indentString() + "st\t%f0, [%fp" + offset + "]\n";
+    		template += indentString() + "set\t" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%f0, [%l2]\n";
     		flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -2067,7 +2089,9 @@ public class AssemblyCodeGenerator {
     		int size = ((PointerType)a.getType()).getElementType().getSize();
     		template += indentString() + "set\t" + size + ", %l0\n";
     		template += indentString() + "add\t%l1, %l0, %l1\n";
-    		template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
+    		template += indentString() + "set\t" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l1, [%l2]\n";
     		flush(template);
     		storeValueBack(a);
     	}
@@ -2080,7 +2104,9 @@ public class AssemblyCodeGenerator {
 	    	template += indentString() + "mov\t%l0, %l1\n\n";
 	   	  	template += indentString() + "dec\t%l1\n\n";
 	   	  	template += "! Store the pre dec value into local tmp\n";
-	   	  	template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
+	   	 template += indentString() + "set\t" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l1, [%l2]\n";
 	   	  	flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -2090,7 +2116,9 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%l0], %f1\n";
     		template += indentString() + "fsubs\t%f0, %f1, %f0\n";
     		template += "! Store the pre inc value into local tmp\n";
-	   	  	template += indentString() + "st\t%f0, [%fp" + offset + "]\n";
+    		template += indentString() + "set\t" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%f0, [%l2]\n";
     		flush(template);
 	   	  	storeValueBack(a);
     	}
@@ -2103,7 +2131,9 @@ public class AssemblyCodeGenerator {
     		int size = ((PointerType)a.getType()).getElementType().getSize();
     		template += indentString() + "set\t" + size + ", %l0\n";
     		template += indentString() + "sub\t%l1, %l0, %l1\n";
-    		template += indentString() + "st\t%l1, [%fp" + offset + "]\n";
+    		template += indentString() + "set\t" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l1, [%l2]\n";
     		flush(template);
     		storeValueBack(a);
     	}
@@ -2482,7 +2512,9 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "add\t%l0, %o0, %l0\n";
     	
     	template += "! Store the address into a tmp\n";
-        template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+   	  	template += indentString() + "st\t%l0, [%l2]\n";
     	
     	template += "! done with do array des\n";
     	flush(template);
@@ -2523,7 +2555,9 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
     	template += "! Store the address onto tmp\n";
-    	template += indentString() + "st\t" + "%l0, [%fp-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+   	  	template += indentString() + "st\t%l0, [%l2]\n";
     	flush(template);
     }
     
@@ -2625,7 +2659,9 @@ public class AssemblyCodeGenerator {
     	}
 
     	template += "! Store the address of the dereferenced value into tmp\n";
-    	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+   	  	template += indentString() + "st\t%l0, [%l2]\n";
     	template += "! End of DoDereference\n";
     	flush(template);
     }
