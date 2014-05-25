@@ -223,13 +223,13 @@ public class AssemblyCodeGenerator {
     public void writeStringFormat(){
       String template = "";
       template += indentString() + ".section \".rodata\"\n";
-      template += "_endl:\t\t.asciz \"\\n\"\n";
-      template += "_intFmt:\t.asciz \"%d\"\n";
-      template += "_strFmt:\t.asciz \"%s\"\n";
-      template += "_boolT:\t\t.asciz \"true\"\n";
-      template += "_boolF:\t\t.asciz \"false\"\n";
-      template += "_indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n";
-      template += "_nullPtrDereferenceMsg:\t.asciz \"Attempt to dereference NULL pointer.\\n\"\n";
+      template += ".endl:\t\t.asciz \"\\n\"\n";
+      template += ".intFmt:\t.asciz \"%d\"\n";
+      template += ".strFmt:\t.asciz \"%s\"\n";
+      template += ".boolT:\t\t.asciz \"true\"\n";
+      template += ".boolF:\t\t.asciz \"false\"\n";
+      template += ".indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n";
+      template += ".nullPtrDereferenceMsg:\t.asciz \"Attempt to dereference NULL pointer.\\n\"\n";
       template += ".deallocatedStackMsg:\t.asciz \"Attempt to dereference a pointer into deallocated stack space.\\n\"\n\n";
       flush(template);
       template = indentString() + ".section \".data\"\n";
@@ -576,7 +576,7 @@ public class AssemblyCodeGenerator {
      * This method is for cout << a << endl; where a is an int, it will load the value from %l0
      */
     public void writeCoutInt(){
-      String template = indentString() + "set\t_intFmt, %o0\n";
+      String template = indentString() + "set\t.intFmt, %o0\n";
       template += indentString() + "mov\t%l0, %o1\n";
       template += indentString() + "call\tprintf\n";
       template += indentString() + "nop\n";
@@ -594,14 +594,14 @@ public class AssemblyCodeGenerator {
       String template = indentString() + "cmp\t%l0, 0\n";
       template += indentString() + "be\tsetFalse"+globalCounter + "\n";
       template += indentString() + "nop\n";
-      template += indentString() + "set\t_boolT, %o0\n";
+      template += indentString() + "set\t.boolT, %o0\n";
       template += indentString() + "call\tprintf\n";
       template += indentString() + "nop\n";
       template += indentString() + "ba\tdone" + globalCounter + "\n";
       template += indentString() + "nop\n";
       
       template += "setFalse"+globalCounter+":\n";
-      template += indentString() + "set\t_boolF, %o0\n";
+      template += indentString() + "set\t.boolF, %o0\n";
       template += indentString() + "call\tprintf\n";
       template += indentString() + "nop\n";
       template += "done" + globalCounter + ":\n";
@@ -1052,7 +1052,7 @@ public class AssemblyCodeGenerator {
     
     public void writeCout(String funcName, int x, String str){
       String template = "";
-      template += indentString() + "set\t_strFmt, %o0\n";
+      template += indentString() + "set\t.strFmt, %o0\n";
       String label = "._str_fmt_" + funcName + (x-1);
       //x represent the number of string it is in the list, which we will put in
       //the .rodata later
@@ -1072,7 +1072,7 @@ public class AssemblyCodeGenerator {
     
     public void writeEndl(){
       String template = "";
-      template += indentString() + "set\t_endl, %o0\n";
+      template += indentString() + "set\t.endl, %o0\n";
       template += indentString() + "call\tprintf\n";
       template += indentString() + "nop\n\n";
       flush(template);
@@ -2628,7 +2628,12 @@ public class AssemblyCodeGenerator {
     	writeDoDesID(indexExpr);
     	String template = "! Move the value to %l1\n";
     	template += indentString() + "mov\t%l0, %l1\n";
-    	template += indentString() + "cmp\t%l1, " + ((ArrayType)arrayName.getType()).getArraySize() + "\n";
+    	if(((ArrayType)arrayName.getType()).getArraySize() > 4095 || 
+    			((ArrayType)arrayName.getType()).getArraySize() < -4096){
+    		template += indentString() + "set\t" + ((ArrayType)arrayName.getType()).getArraySize() + ", %l2\n";
+    		template += indentString() + "cmp\t%l1, %l2\n";
+    	}else
+    		template += indentString() + "cmp\t%l1, " + ((ArrayType)arrayName.getType()).getArraySize() + "\n";
     	String label = ".array_bound_check_" + globalCounter;
     	String label_end = label + "_end";
     	template += indentString() + "bge\t" + label + "\n";
@@ -2643,7 +2648,7 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "nop\n\n";
     	template += "! Index Out Of Bound\n";
     	template += label + ": \n";
-    	template += indentString() + "set\t_indexOutOfBoundMsg, %o0\n";
+    	template += indentString() + "set\t.indexOutOfBoundMsg, %o0\n";
     	template += indentString() + "mov\t%l1, %o1\n";
     	template += indentString() + "set\t" + ((ArrayType)arrayName.getType()).getArraySize() + ", %o2\n";
     	template += indentString() + "call\tprintf\n";
@@ -2760,7 +2765,7 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "nop\n";
     	template += "! dereferenced result if nullptr \n";
     	template += label + ": \n";
-    	template += indentString() + "set\t_nullPtrDereferenceMsg,%o0\n";
+    	template += indentString() + "set\t.nullPtrDereferenceMsg,%o0\n";
     	template += indentString() + "call\tprintf\n";
     	template += indentString() + "nop\n";
     	template += indentString() + "set\t1,%o0\n";
