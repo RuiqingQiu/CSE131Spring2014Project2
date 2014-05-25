@@ -380,6 +380,43 @@ public class AssemblyCodeGenerator {
 	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
 	 	        flush(template);
 	    	}
+	    	else if(sto.getType().isStruct() && init.getType().isStruct()){
+	    		
+	    		STO right = init;
+	    		STO left = sto;
+	    		template += "! getting the address of the right side struct\n";
+	    		template += indentString() + "set\t" + right.getOffset() + ", " + "%l0\n";
+	    		template += indentString() + "add\t" + right.getBase() + ", %l0, %l0\n";
+	    		if(right.getType().isReference() || (right.isExpr() && ((ExprSTO)right).getHoldAddress())){
+	    			template += "! struct assignment, right hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}else if(right.isVar() &&  ((VarSTO)right).getPassByValueHoldAddress()){
+	    			template += "! struct assignment, right hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}
+	    		template += indentString() + "mov\t%l0, %o1\n";
+	    		
+	    		template += "! getting the address of the left side struct\n";
+	    		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
+	    		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
+	    		
+	    		if(left.getType().isReference() || (left.isExpr() && ((ExprSTO)left).getHoldAddress())){
+	    			template += "! struct assignment, left hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}else if(left.isVar() &&  ((VarSTO)left).getPassByValueHoldAddress()){
+	    			template += "! struct assignment, left hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}
+	    		
+	    		template += indentString() + "mov\t%l0, %o0\n";
+	    		template += indentString() + "set\t" + left.getType().getSize() + ", %o2\n";
+	    		template += "! making memmove function call\n";
+	    		template += indentString() + "call\tmemmove\n";
+	    		template += indentString() + "nop\n";
+	    		flush(template);
+	    		return;
+	    		
+	    	}
 	    	else{
 	    		writeDoDesID(init);
 	    	}

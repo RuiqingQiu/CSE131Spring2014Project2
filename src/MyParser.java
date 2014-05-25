@@ -1057,8 +1057,6 @@ class MyParser extends parser
 		else{
 			//Add all the param to the symbal table and FuncSTO
 			for(int i = 0; i < params.size(); i++){
-				if(params.elementAt(i).getType().isArray())
-					params.elementAt(i).getType().setReference(true);
 				STO s = params.elementAt(i);		
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
@@ -1298,6 +1296,10 @@ class MyParser extends parser
 			//Add all the param to the symbal table and FuncSTO
 			for(int i = 0; i < params.size(); i++){
 				STO s = params.elementAt(i);
+				if(params.elementAt(i).getType().isStruct() && !params.elementAt(i).getType().isReference()){
+					//Treat this param as pass by reference
+					((VarSTO)s).setPassByValueHoldAddress(true);
+				}
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
 				s.setIsModifiable(true);
@@ -1791,7 +1793,7 @@ class MyParser extends parser
 			}
 			
 		}
-		else{
+		else if(leftHandSide.getType().isStruct() && rightHandSide.getType().isStruct()){
 			m_symtab.addBytes(rightHandSide.getType().getSize());
 			
 			boolean previous_reference = rightHandSide.getType().isReference();
@@ -1803,6 +1805,17 @@ class MyParser extends parser
 			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
 
 			rightHandSide.getType().setReference(previous_reference);
+			
+			result.setBase(leftHandSide.getBase());
+			result.setOffset(leftHandSide.getOffset());
+			if((leftHandSide.isExpr() &&  ((ExprSTO)leftHandSide).getHoldAddress())){
+				result.setHoldAddress(true);
+			}
+		}
+		else{
+			m_symtab.addBytes(rightHandSide.getType().getSize());
+
+			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
 			
 			result.setBase(leftHandSide.getBase());
 			result.setOffset(leftHandSide.getOffset());

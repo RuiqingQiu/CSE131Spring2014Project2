@@ -17,6 +17,7 @@ class VarSTO extends STO
 		this.isStatic = false;
 		
 		this.isNegative = false;
+		this.passByValueHoldAddress = false;
 	}
 
 	public 
@@ -27,6 +28,8 @@ class VarSTO extends STO
 		// fields as necessary
 		this.isStatic = false;
 		this.isNegative = false;
+		this.passByValueHoldAddress = false;
+
 	}
 
 	//----------------------------------------------------------------
@@ -56,9 +59,17 @@ class VarSTO extends STO
 	public void setNegative(boolean b){
 		this.isNegative = b;
 	}
+	public void setPassByValueHoldAddress(boolean b){
+		this.passByValueHoldAddress = b;
+	}
+	public boolean getPassByValueHoldAddress(){
+		return this.passByValueHoldAddress;
+	}
 
 	private STO init;
 	private boolean isStatic;
 	
 	private boolean isNegative;
+	
+	private boolean passByValueHoldAddress;
 }
