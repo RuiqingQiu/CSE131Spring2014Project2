@@ -730,13 +730,16 @@ public class AssemblyCodeGenerator {
     		  template += indentString() + "ld\t[%l0], %l0\n";
     	  }
     	  flush(template);
-      }/*
+      }
       else if(returnType.isStruct()){
     	  template = "\n! Return struct by value, memmove to the %fp+64\n";
     	  template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
     	  template += indentString() + "add\t" + s.getBase() + " ,%l0, %l0\n";
-    	  if( (s.isExpr() && ((ExprSTO)s).getHoldAddress()) || s.getType().isReference()){
+    	  if((s.isExpr() && ((ExprSTO)s).getHoldAddress()) || s.getType().isReference()){
     		  template += "! return by reference, target holds address, load\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }else if(s.isVar() && ((VarSTO)s).getPassByValueHoldAddress()){
+    		  template += "! pass by value struct, target holds address, load\n";
     		  template += indentString() + "ld\t[%l0], %l0\n";
     	  }
 
@@ -747,7 +750,7 @@ public class AssemblyCodeGenerator {
   		  template += indentString() + "call\tmemmove\n";
   		  template += indentString() + "nop\n";
   		  flush(template); 
-      }*/
+      }
       else{
 	      if(s.getType().isVoid()){
 	    	  return;
@@ -926,6 +929,15 @@ public class AssemblyCodeGenerator {
 	  	  		flush(template);
     	  }
 	  }
+      
+      if(function.getReturnType().isStruct() && !function.getReturnType().isReference()){
+    	  String template = "! Return struct by value allocate space on tmp and store the address to %sp+64\n";
+    	  template += indentString() + "set\t-" + offset + ", %l0\n";
+    	  template += indentString() + "add\t%fp, %l0, %l0\n";
+    	  template += indentString() + "st\t%l0, [%sp+64]\n";
+    	  flush(template);
+      }
+      
       
       String template = "\n\n! making function call :" + function_name + "\n";
       if(arguments.size() == 0){
@@ -2427,6 +2439,10 @@ public class AssemblyCodeGenerator {
     			template += "! struct assignment, right hold address, one more load\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
+    		else if(right.isVar() && ((VarSTO)right).getPassByValueHoldAddress()){
+    			template += "! struct assignment, right hold address, one more load\n";
+    			template += indentString() + "ld\t[%l0], %l0\n";
+    		}
     		template += indentString() + "mov\t%l0, %o1\n";
     		
     		template += "! getting the address of the left side struct\n";
@@ -2434,6 +2450,10 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
     		
     		if(left.getType().isReference() || (left.isExpr() && ((ExprSTO)left).getHoldAddress())){
+    			template += "! struct assignment, left hold address, one more load\n";
+    			template += indentString() + "ld\t[%l0], %l0\n";
+    		}
+    		else if(left.isVar() && ((VarSTO)left).getPassByValueHoldAddress()){
     			template += "! struct assignment, left hold address, one more load\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
