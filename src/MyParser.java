@@ -1203,7 +1203,11 @@ class MyParser extends parser
 				else{
 					myAsWriter.writeFormalParam(s, i);
 				}
-				offset = offset + s.getType().getSize();
+				if(s.getType().isStruct()){
+					offset = offset + 4;
+				}
+				else
+					offset = offset + s.getType().getSize();
 			}
 			
 			//we know the function is successfully overloaded and we can add to list
@@ -1300,8 +1304,6 @@ class MyParser extends parser
 				s.setBase("%fp");
 				s.setOffset("" + offset);
 				((FunctionPointerType)(m_symtab.getFunc().getType())).addParameter(s);
-				//if(params.get(i).getType().isArray())
-					//s.getType().setReference(true);
 				m_symtab.getFunc().addParameter(s);
 				m_symtab.insert(s);
 				//If it's greater than the first sixth argument, it's been put on the stack
@@ -1310,7 +1312,11 @@ class MyParser extends parser
 				else{
 					myAsWriter.writeFormalParam(s, i);
 				}
-				offset = offset + s.getType().getSize();
+				if(s.getType().isStruct()){
+					offset = offset + 4;
+				}
+				else
+					offset = offset + s.getType().getSize();
 			}
 		}
 		m_symtab.getFunc().getType().setName(((FunctionPointerType)(m_symtab.getFunc().getType())).getErrorName());
@@ -1787,7 +1793,17 @@ class MyParser extends parser
 		}
 		else{
 			m_symtab.addBytes(rightHandSide.getType().getSize());
+			
+			boolean previous_reference = rightHandSide.getType().isReference();
+			for (STO s : m_symtab.getFunc().getParameterSTO()){
+				if(s.getName().equals(rightHandSide.getName())){
+					rightHandSide.getType().setReference(true);
+				}
+			}
 			myAsWriter.writeAssignment(leftHandSide, rightHandSide, this.globalCounter, m_symtab.getBytes());
+
+			rightHandSide.getType().setReference(previous_reference);
+			
 			result.setBase(leftHandSide.getBase());
 			result.setOffset(leftHandSide.getOffset());
 			if((leftHandSide.isExpr() &&  ((ExprSTO)leftHandSide).getHoldAddress())){
@@ -1983,8 +1999,14 @@ class MyParser extends parser
 							ret.setIsAddressable(true);
 							ret.setIsModifiable(true);
 						}
+						int originalOffset = m_symtab.getBytes();
+						for (STO param : params){
+							if(param.getType().isStruct() && !param.getType().isReference()){
+								m_symtab.addBytes(param.getType().getSize());
+							}
+						}
 						m_symtab.addBytes(tmp.getReturnType().getSize());
-						myAsWriter.writeMakeFuncCall(arguments, s, m_symtab.getBytes(), this.globalCounter, params);
+						myAsWriter.writeMakeFuncCall(arguments, s, m_symtab.getBytes(), this.globalCounter, params, originalOffset);
 						globalCounter++;
 						ret.setOffset("-" + m_symtab.getBytes());
 						ret.setBase("%fp");
@@ -2058,18 +2080,34 @@ class MyParser extends parser
 			    //The function evaluates to return type
 				//Project 2, generate code for making function call
 				ExprSTO ret = new ExprSTO("FuncCall", tmp.getReturnType());
-				m_symtab.addBytes(tmp.getReturnType().getSize());
 				
-				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes(), this.globalCounter, params);
-				globalCounter++;
-				ret.setOffset("-" + m_symtab.getBytes());
-				ret.setBase("%fp");
+				int originalOffset = m_symtab.getBytes();
+				for (STO param : params){
+					if(param.getType().isStruct() && !param.getType().isReference()){
+						m_symtab.addBytes(param.getType().getSize());
+					}
+				}
+				
+				m_symtab.addBytes(tmp.getReturnType().getSize());
+				if(tmp.getReturnType().isStruct() && !tmp.getReturnType().isReference()){
+					ret.setOffset("64");
+					ret.setBase("%sp");
+				}
+				else{
+					ret.setOffset("-" + m_symtab.getBytes());
+					ret.setBase("%fp");
+				}
+				myAsWriter.writeMakeFuncCall(arguments, tmp, m_symtab.getBytes(), this.globalCounter, params, originalOffset);
+				globalCounter++;				
 				//Return by reference, return a mod l-val
 				if(tmp.getReturnType().isReference()){
 					ret.setHoldAddress(true);
 					ret.setIsAddressable(true);
 					ret.setIsModifiable(true);
 					return ret;
+				}
+				else if(tmp.getReturnType().isStruct()){
+					ret.setHoldAddress(true);
 				}
 			    return ret;
 			}
@@ -2196,7 +2234,15 @@ class MyParser extends parser
 		}
 		//To write the field of the struct and pass in the struct sto and fieldoffset
 		m_symtab.addBytes(4);
+		boolean previous_reference = sto.getType().isReference();
+		for (STO s : m_symtab.getFunc().getParameterSTO()){
+			if(s.getName().equals(sto.getName())){
+				sto.getType().setReference(true);
+			}
+		}
 		myAsWriter.writeStructField(sto,fieldOffset, m_symtab.getBytes());
+
+		sto.getType().setReference(previous_reference);
 		//no error occur, return the StructSTO
 		ExprSTO ret = new ExprSTO("dodes_dot", target.getType());
 		ret.setIsModifiable(true);

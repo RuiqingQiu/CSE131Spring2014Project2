@@ -394,10 +394,36 @@ public class AssemblyCodeGenerator {
 	      STO init = sto.getInit();
 	      flush(template);
 	      writeDoDesID(init);
-	      template = indentString() + "mov\t%l0, %l1\n";
-		  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
-		  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
-		  template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      if(sto.getInit().getType().isStruct()){
+	    	    template = "! getting the address of the right side struct\n";
+	    		template += indentString() + "set\t" + sto.getInit().getOffset() + ", " + "%l0\n";
+	    		template += indentString() + "add\t" + sto.getInit().getBase() + ", %l0, %l0\n";
+	    		
+	    		template += indentString() + "ld\t[%l0], %l0\n";
+	    		
+	    		template += indentString() + "mov\t%l0, %o1\n";
+	    		
+	    		
+	    		template += "! getting the address of the left side struct\n";
+	    		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+	    		template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+	    		
+	    		if(sto.getType().isReference()){
+	    			template += "! struct assignment, left hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}
+	    		
+	    		template += indentString() + "mov\t%l0, %o0\n";
+	    		template += indentString() + "set\t" + sto.getType().getSize() + ", %o2\n";
+	    		template += "! making memmove function call\n";
+	    		template += indentString() + "call\tmemmove\n";
+	    		template += indentString() + "nop\n";
+	      }else{
+	    	  template = indentString() + "mov\t%l0, %l1\n";
+		  	  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+		  	  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+		  	  template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      }
 	    }
 	    //FuncPtr init
 	    else if(sto.getInit().isFunc()){
@@ -455,7 +481,8 @@ public class AssemblyCodeGenerator {
   		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
   		    template += indentString() + "ld\t" + "[%l0], %f0\n";
   		    template += indentString() + "ld\t" + "[%l0], %l0\n\n";
-    	  }else{
+    	  }
+    	  else{
     	    template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
 		    template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
 		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
@@ -666,7 +693,24 @@ public class AssemblyCodeGenerator {
     		  template += indentString() + "ld\t[%l0], %l0\n";
     	  }
     	  flush(template);
-      }
+      }/*
+      else if(returnType.isStruct()){
+    	  template = "\n! Return struct by value, memmove to the %fp+64\n";
+    	  template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
+    	  template += indentString() + "add\t" + s.getBase() + " ,%l0, %l0\n";
+    	  if( (s.isExpr() && ((ExprSTO)s).getHoldAddress()) || s.getType().isReference()){
+    		  template += "! return by reference, target holds address, load\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }
+
+  		  template += indentString() + "mov\t%l0, %o1\n\n";
+  		  template += indentString() + "add\t%fp, 64, %l0\n";
+  		  template += indentString() + "ld\t[%l0], %o0\n";
+  		  template += indentString() + "set\t" + returnType.getSize() + ", %o2\n";
+  		  template += indentString() + "call\tmemmove\n";
+  		  template += indentString() + "nop\n";
+  		  flush(template); 
+      }*/
       else{
 	      if(s.getType().isVoid()){
 	    	  return;
@@ -805,7 +849,7 @@ public class AssemblyCodeGenerator {
     	flush(template);
     }
     
-    public void writeMakeFuncCall(Vector<STO> arguments, FuncSTO function, int offset, int globalCounter, Vector<STO> params){
+    public void writeMakeFuncCall(Vector<STO> arguments,  FuncSTO function, int offset, int globalCounter, Vector<STO> params, int originalOffset){
       //No argument function call
       String function_name = "";
       if(function.isOverloaded()){
@@ -813,6 +857,39 @@ public class AssemblyCodeGenerator {
       }else{
     	  function_name = function.getName();
       }
+	  int offset_used = originalOffset;	
+	  Vector<STO> argument_copy = new Vector<STO>();
+	  for (STO a : arguments){
+		  STO s = new VarSTO("tmp");
+		  s.setBase(a.getBase());
+		  s.setOffset(a.getOffset());
+		  argument_copy.addElement(s);
+	  }
+      for (int i = 0; i < params.size(); i++){
+	  //If parameter is a struct
+    	  if(!params.elementAt(i).getType().isReference() && params.elementAt(i).getType().isStruct()){
+		  		String template = "! argument struct pass by value, make copy\n";
+				template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
+	  	  		template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
+	  	  		if(arguments.elementAt(i).getType().isReference() || (arguments.elementAt(i).isExpr() && ((ExprSTO)arguments.elementAt(i)).getHoldAddress())){
+	  	  			template += "! argument is also reference, need one more load \n";
+	  	  			template += indentString() + "ld\t[%l0], %l0\n";
+	  	  		}
+	  	  		template += indentString() + "mov\t%l0, %o1\n\n";
+	  	  		offset_used += params.elementAt(i).getType().getSize();
+	  	  		template += indentString() + "set\t-" + offset_used + ", %l0\n";
+	  	  		template += indentString() + "add\t%fp, %l0, %o0\n";
+	  	  		template += indentString() + "set\t" + params.elementAt(i).getType().getSize() + ", %o2\n";
+	  	  		template += indentString() + "call\tmemmove\n";
+	  	  		template += indentString() + "nop\n";
+	  	  		template += indentString() + "set\t-" + offset_used + ", %l0\n";
+	  	  		template += indentString() + "add\t%fp, %l0, %l0\n";
+	  	  		arguments.elementAt(i).setBase("%fp");
+	  	  		arguments.elementAt(i).setOffset("-" + offset_used);
+	  	  		flush(template);
+    	  }
+	  }
+      
       String template = "\n\n! making function call :" + function_name + "\n";
       if(arguments.size() == 0){
     	template += indentString() + "call\t" + function_name + "\n";
@@ -825,6 +902,7 @@ public class AssemblyCodeGenerator {
 		  int stack_space = 92;//Positive offset for greater than sixth arguments
 		  String extraArguments = ".SAVE_" + function_name + "_extra_argument_" + globalCounter;
 		  flush(indentString() + "add\t%sp, -(" + extraArguments + ") & -8, %sp\n");
+		  
     	  for(int i = 0; i < arguments.size(); i++){
     		  if(arguments.elementAt(i).isConst()){
     			  setConst("MakingFuncCall", (ConstSTO)arguments.elementAt(i), globalCounter);
@@ -861,9 +939,16 @@ public class AssemblyCodeGenerator {
     			  	  		template += indentString() + "ld\t[%l0], %l0\n";
     			  	  	}
     			  	  	flush(template);
-        			  }
-    			  else
+        		  }
+    			  else if(params.elementAt(i).getType().isStruct() && arguments.get(i).getType().isStruct()){
+    				  	template = "! argument struct pass by value\n";
+      					template += indentString() + "set\t" + arguments.elementAt(i).getOffset() + ", " + "%l0\n";
+  			  	  		template += indentString() + "add\t" + arguments.elementAt(i).getBase() + ", %l0, %l0\n";
+  			  	  		flush(template);
+    			  }
+    			  else{
     				  writeDoDesID(arguments.elementAt(i));
+    			  }
     		  }
     		  template = "! " + i + "th argument of this function\n";
     		  if(arguments.elementAt(i).getType().isInt() && params.elementAt(i).getType().isFloat()){
@@ -897,7 +982,16 @@ public class AssemblyCodeGenerator {
     	  template += indentString() + "sub\t%sp, -(" + (stack_space-92)  + ")& -8, %sp\n"; 
       }
       template += "! Store return to a local tmp\n";
-      template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
+      if(function.getReturnType().isStruct() && !function.getReturnType().isReference()){
+    	  template += "! Return struct by value do nothing\n";
+      }
+      else
+    	  template += indentString() + "st\t%o0, [%fp-" + offset + "]\n\n";
+      
+      for(int i = 0; i < argument_copy.size(); i++){
+    	  arguments.elementAt(i).setBase(argument_copy.elementAt(i).getBase());
+    	  arguments.elementAt(i).setOffset(argument_copy.elementAt(i).getOffset());
+      }
       flush(template);
       
     }
@@ -2298,17 +2392,6 @@ public class AssemblyCodeGenerator {
     		}
     		template += indentString() + "mov\t%l0, %o1\n";
     		
-    		/*
-    		template += "! Store the elements in the struct to a tmp\n";
-    		template += indentString() + "mov\t%l0, %o1\n";
-    		template += indentString() + "add\t%fp, -" + offset + ", %o0\n";
-    		template += indentString() + "set\t" + right.getType().getSize() + ", %o2\n";
-    		template += indentString() + "call\tmemcpy\n";
-    		template += indentString() + "nop\n";
-    		
-    		template += "! Using the tmp as our copy source\n";
-    		template += indentString() + "add\t%fp, -" + offset + ", %o1\n";
-    		*/
     		template += "! getting the address of the left side struct\n";
     		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
