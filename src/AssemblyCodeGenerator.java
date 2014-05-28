@@ -382,7 +382,7 @@ public class AssemblyCodeGenerator {
 	    	}
 	    	//Promption from int to float
 	    	else if(init.getType().isInt() && sto.getType().isFloat()){
-	    		template = "! need do int to float promption\n";
+	    		template = "! write local need do int to float promption\n";
 	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
 	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
 	 	        template += indentString() + "ld\t[%l0], %l0\n";
@@ -474,7 +474,30 @@ public class AssemblyCodeGenerator {
 	    		template += "! making memmove function call\n";
 	    		template += indentString() + "call\tmemmove\n";
 	    		template += indentString() + "nop\n";
-	      }else{
+	      }
+	      //Promption from int to float
+	      else if(init.getType().isInt() && sto.getType().isFloat()){
+	    		template = "! write local expr need do int to float promption\n";
+	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
+	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
+	 	        template += indentString() + "ld\t[%l0], %l0\n";
+	 	        if(init.getType().isReference() || (init.isExpr() &&  ((ExprSTO)init).getHoldAddress())){
+	 	        	template += indentString() + "ld\t[%l0], %l0\n";
+	 	        }
+	      	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	      	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	      	  	template += indentString() + "st\t%l0, [%l2]\n";
+	      	  	template += indentString() + "ld\t[%l2], %f0\n";
+	      	  	template += "! prompt int to float & store back\n";
+	      	  	template += indentString() + "fitos\t%f0, %f0\n";
+	      	  	template += indentString() + "st\t%f0, [%l2]\n";
+	      	  	template += indentString() + "ld\t[%l2], %l0\n";
+	      	    template += indentString() + "mov\t%l0, %l1\n";
+		  	    template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+		  	    template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+		  	    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      }
+	      else{
 	    	  template = indentString() + "mov\t%l0, %l1\n";
 		  	  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 		  	  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
