@@ -333,7 +333,7 @@ public class AssemblyCodeGenerator {
     		
     	flush(template);
     }
-    public void writeLocal(String functionName, int globalCounter, VarSTO sto){
+    public void writeLocal(String functionName, int globalCounter, VarSTO sto, int offset){
       String template = "";
       if(sto.getInit() == null){
 	    template += "! local variable:   " + sto.getName() + "    without init, just add offset\n";
@@ -378,6 +378,25 @@ public class AssemblyCodeGenerator {
 	    		template ="! Array name assign to pointer\n";
 	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
 	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
+	 	        flush(template);
+	    	}
+	    	//Promption from int to float
+	    	else if(init.getType().isInt() && sto.getType().isFloat()){
+	    		template = "! need do int to float promption\n";
+	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
+	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
+	 	        template += indentString() + "ld\t[%l0], %l0\n";
+	 	        if(init.getType().isReference() || (init.isExpr() &&  ((ExprSTO)init).getHoldAddress())){
+	 	        	template += indentString() + "ld\t[%l0], %l0\n";
+	 	        }
+	      	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	      	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	      	  	template += indentString() + "st\t%l0, [%l2]\n";
+	      	  	template += indentString() + "ld\t[%l2], %f0\n";
+	      	  	template += "! prompt int to float & store back\n";
+	      	  	template += indentString() + "fitos\t%f0, %f0\n";
+	      	  	template += indentString() + "st\t%f0, [%l2]\n";
+	      	  	template += indentString() + "ld\t[%l2], %l0\n";
 	 	        flush(template);
 	    	}
 	    	else if(sto.getType().isStruct() && init.getType().isStruct()){
@@ -526,12 +545,11 @@ public class AssemblyCodeGenerator {
     	  }
     	  //Check if it's reference, if so, need to do another load
     	  if(sto.getType().isReference() && sto.getType().isFloat()){	  
-    		  template += "! " + sto.getName() + " reference float variable, need to load one more time\n";
-    		  template += indentString() + "ld\t" + "[%l0], %f0\n";
+    		  template += "! " + sto.getName() + " reference variable, need to load one more time\n";
+    		  template += indentString() + "ld\t[%l0], %f0\n";
     		  template += indentString() + "ld\t[%l0], %l0\n";
-    		  
     	  }
-    	  else{
+    	  else if(sto.getType().isReference()){
     		  template += "! " + sto.getName() + " reference variable, need to load one more time\n";
     		  template += indentString() + "ld\t[%l0], %l0\n";
     	  }

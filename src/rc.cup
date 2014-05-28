@@ -668,11 +668,15 @@ ParamDecl ::=       Type:_1 OptRef:_3 T_ID:_2
 					  //Check #5 parameter type check, return the type's name
 					  //if OptRef is a reference
 					  if(_3.equals("&")){
-					    _1.setReference(true);
-					    RESULT = new VarSTO(_2, _1);
+					    Type t = _1.clone();
+					    t.setReference(true);
+					    RESULT = new VarSTO(_2, t);
 					  }
-					  else
-					    RESULT = new VarSTO(_2, _1);
+					  else{
+					    Type t = _1.clone();
+					    t.setReference(false);
+					    RESULT = new VarSTO(_2, t);
+					  }
 					  
 					:}
     ;

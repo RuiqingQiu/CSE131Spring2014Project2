@@ -226,7 +226,9 @@ class MyParser extends parser
 			  //Local variables negative offsets
 			  v.setOffset("-" + m_symtab.getBytes());
 			  v.setBase("%fp");
-			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, v);
+			  m_symtab.addBytes(v.getType().getSize());
+
+			  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, v, m_symtab.getBytes());
 			  globalCounter++;
 		  }
 		}
@@ -616,7 +618,8 @@ class MyParser extends parser
 				  //Local variables negative offsets
 				  sto.setOffset("-" + m_symtab.getBytes());
 				  sto.setBase("%fp");
-				  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, sto);
+				  m_symtab.addBytes(sto.getType().getSize());
+				  myAsWriter.writeLocal(m_symtab.getFunc().getName(), this.globalCounter, sto, m_symtab.getBytes());
 				  globalCounter++;
 			  }
 			}
@@ -1778,7 +1781,7 @@ class MyParser extends parser
 			m_errors.print (result.getName());
 			return result;
 		}
-		ExprSTO result = new ExprSTO(leftHandSide.getName() + " = " + rightHandSide.getName());
+		ExprSTO result = new ExprSTO(leftHandSide.getName() + "=" + rightHandSide.getName());
 		Type left_type = leftHandSide.getType().clone();
 		left_type.setReference(leftHandSide.getType().isReference());
 		result.setType(left_type);
