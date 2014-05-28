@@ -943,7 +943,7 @@ class MyParser extends parser
 				if(s.isError())
 					return s;
 				t = s.getType();
-				ExprSTO ret = new ExprSTO("pointer to struct arrow", t);
+				ExprSTO ret = new ExprSTO("pointer_to_struct_arrow", t);
 				ret.setIsAddressable(true);
 				ret.setIsModifiable(true);
 				ret.setBase(s.getBase());
@@ -1387,7 +1387,9 @@ class MyParser extends parser
 				}
 			}
 		}
-		myAsWriter.writeReturnStmt(m_symtab.getFunc().getName(), s, this.globalCounter, m_symtab.getFunc().getReturnType());
+		m_symtab.addBytes(4);
+		
+		myAsWriter.writeReturnStmt(m_symtab.getBytes(), m_symtab.getFunc().getName(), s, this.globalCounter, m_symtab.getFunc().getReturnType());
 		myAsWriter.writeRetRestore();
 		this.globalCounter++;
 		return;

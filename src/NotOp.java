@@ -13,7 +13,7 @@ public class NotOp extends UnaryOp{
 					c.setValue(0.0);
 				return c;
 			}
-			return new ExprSTO("NotOp", aType);
+			return new ExprSTO("NotOp", new BoolType("bool", 4));
 		}
 		//Return an error
 		else{

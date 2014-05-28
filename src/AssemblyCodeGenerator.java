@@ -525,7 +525,13 @@ public class AssemblyCodeGenerator {
 		    template += indentString() + "ld\t" + "[%l0], %l0" + "\n\n";
     	  }
     	  //Check if it's reference, if so, need to do another load
-    	  if(sto.getType().isReference()){	  
+    	  if(sto.getType().isReference() && sto.getType().isFloat()){	  
+    		  template += "! " + sto.getName() + " reference float variable, need to load one more time\n";
+    		  template += indentString() + "ld\t" + "[%l0], %f0\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    		  
+    	  }
+    	  else{
     		  template += "! " + sto.getName() + " reference variable, need to load one more time\n";
     		  template += indentString() + "ld\t[%l0], %l0\n";
     	  }
@@ -719,7 +725,7 @@ public class AssemblyCodeGenerator {
      * @param s
      * @param globalCounter
      */
-    public void writeReturnStmt(String funcName, STO s, int globalCounter, Type returnType){
+    public void writeReturnStmt(int offset, String funcName, STO s, int globalCounter, Type returnType){
       String template ="";
       if(returnType.isReference()){
     	  template = "\n! Return by reference need to return address\n";
@@ -762,8 +768,21 @@ public class AssemblyCodeGenerator {
 	    	writeDoDesID(s);
 	      }
       }
-      flush("! return stmt\n");
-      template = indentString() + "mov\t%l0, %i0\n";
+      template = "";
+      //Check if return value need promption
+      if(s.getType().isInt() && returnType.isFloat()){
+    	  template = "! need do int to float promption\n";
+    	  template += indentString() + "set\t-" + offset + ", %l2\n";
+    	  template += indentString() + "add\t%fp, %l2, %l2\n";
+    	  template += indentString() + "st\t%l0, [%l2]\n";
+    	  template += indentString() + "ld\t[%l2], %f0\n";
+    	  template += "! prompt int to float & store back\n";
+		  template += indentString() + "fitos\t%f0, %f0\n";
+		  template += indentString() + "st\t%f0, [%l2]\n";
+		  template += indentString() + "ld\t[%l2], %l0\n";
+      }
+      template += "! return stmt\n";
+      template += indentString() + "mov\t%l0, %i0\n";
       flush(template);
     }
     

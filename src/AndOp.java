@@ -15,7 +15,7 @@ public class AndOp extends BooleanOp {
 					c.setValue(0.0);
 				return c;
 			}
-			return new ExprSTO("AndOp", aType);
+			return new ExprSTO("AndOp", new BoolType("bool", 4));
 		}
 		else {
 			// error
