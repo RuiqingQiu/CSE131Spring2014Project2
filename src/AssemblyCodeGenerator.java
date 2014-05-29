@@ -237,6 +237,12 @@ public class AssemblyCodeGenerator {
       template += ".value_one:\t.single 0r1.0\n";
       template += ".value_zero:\t.single 0r0.0\n";
       template += ".lowest_stack_pointer:\t.word 0xFFFFFFFF\n";
+      //A global variable to indicate the head of the linkedlist which we use to keep track new & delete
+      template += ".heap_check_list_head:\t.word 0\n";
+      //A global variable for storing the current node
+      template += ".heap_check_list_current:\t.word 0\n";
+      //For convinence, store the size of the list as well
+      template += ".heap_check_list_size:\t.word 0\n";
       flush(template);
     }
 
@@ -340,7 +346,8 @@ public class AssemblyCodeGenerator {
       }
       else{
     	flush("! init variable: " + sto.getName() + "\n");
-	    if(sto.getInit().isConst()){
+	    if(sto.getInit().isConst())
+	    {
 	      if(sto.getType().isInt()){
 	        template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
 	        template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
@@ -370,7 +377,8 @@ public class AssemblyCodeGenerator {
 	      }
 	    }//Check if init is const
 	    //Enter here if init is not const
-	    else if(sto.getInit().isVar()){
+	    else if(sto.getInit().isVar())
+	    {
 	    	STO init = sto.getInit();
 	    	flush(template);
 	    	//Case where pointer to array name
@@ -498,6 +506,8 @@ public class AssemblyCodeGenerator {
 		  	    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	      }
 	      else{
+
+	    	  System.out.println("here");
 	    	  template = indentString() + "mov\t%l0, %l1\n";
 		  	  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 		  	  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
@@ -2783,9 +2793,9 @@ public class AssemblyCodeGenerator {
      	template += indentString() + "set\t" + fieldOffset + ", %l1\n";
     	template += indentString() + "add\t%l0, %l1, %l0\n";
     	template += "! put the address of the field into a tmp\n";
-    	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    	//template += "! load the value of the field and put into %l0\n";
-    	//template += indentString() + "ld\t[%l0], %l0\n";
+    	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    	template += indentString() + "st\t%l0, [%l2]\n";
     	flush(template);
     }
     
@@ -2920,7 +2930,58 @@ public class AssemblyCodeGenerator {
      * calloc(number of elements need to allocate , size of the element)
      */
     public void writeNewStmt(STO sto){
+    	
     	String template  = "! doing new statement \n";
+    	template += "! Add the address into the heap lookup list\n";
+    	template += "! Allocate space for nodes to store the current new\n";
+    	template += indentString() + "set\t1, %o0\n";
+    	template += indentString() + "set\t12, %o1\n";
+    	template += indentString() + "call\tcalloc\n";
+    	template += indentString() + "nop\n";
+    	
+    	/**
+    	 * Layout for the node:
+    	 * structdef NODE{
+    	 *   int address;
+    	 *   bool deleted;
+    	 *   NODE* next;
+    	 * };
+    	 */
+        /* template += ".heap_check_list_head:\t.word 0\n";
+        //A global variable for storing the current node
+        template += ".heap_check_list_current:\t.word 0\n";
+        //For convinence, store the size of the list as well
+        template += ".heap_check_list_size:\t.word 0\n";*/
+    	template += indentString() + "mov\t%o0, %l1\n";
+    	if(heap_list_size == 0){
+    		template += "! Update the curret node address for create the list\n";
+    		
+        	template += indentString() + "set\t.heap_check_list_current, %l0\n";
+        	template += indentString() + "st\t%l1, [%l0]\n";
+        	template += indentString() + "set\t.heap_check_list_head, %l0\n";
+        	template += indentString() + "st\t%l1, [%l0]\n";
+        	//Load the pointer to the heap address we allocated for this node
+        	template += indentString() + "ld\t[%l0], %l0\n";
+        	template += indentString() + "!init deleted field to be false\n";
+        	template += indentString() + "set\t0, %l1\n";
+        	template += indentString() + "add\t%l0, 4, %l0\n";
+        	template += indentString() + "st\t%l1, [%l0]\n";
+    	}else{
+        	template += indentString() + "set\t.heap_check_list_current, %l0\n";
+        	template += indentString() + "!add the address to previous node's address field\n";
+        	template += indentString() + "ld\t[%l0], %l0\n";
+        	template += indentString() + "add\t%l0, 8, %l0\n";
+        	//Store the node to the next field of the previous node
+        	template += indentString() + "st[%l1], %l0\t";
+        	template += indentString() + "!init deleted field to be false\n";
+        	template += indentString() + "set\t0, %l1\n";
+        	template += indentString() + "add\t%l0, 4, %l0\n";
+        	template += indentString() + "st\t%l1, [%l0]\n";
+    	}
+    	
+    	
+    	
+    	
     	template += indentString() + "set\t1,%o0\n";
     	template += indentString() + "set\t" + ((PointerType)(sto.getType())).getElementType().getSize() + ", %o1\n";
     	template += indentString () + "call\tcalloc\n";
@@ -3105,5 +3166,7 @@ public class AssemblyCodeGenerator {
         myAsWriter.dispose();
     }
     */
+    
+    private static int heap_list_size = 0;
 }
 
