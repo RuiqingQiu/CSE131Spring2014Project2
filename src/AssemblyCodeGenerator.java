@@ -3055,7 +3055,16 @@ public class AssemblyCodeGenerator {
     	}
     	template += "! End of type cast\n\n";
     	
-    	flush(template);
+    	flush(template);    	
+    }
+    
+    /**
+     * This part of the code is for extra credit 2. Generate codes in assembly to 
+     * stimulate linkedlist behavior for checking double delete and memory leak upon delete
+     * called or program end
+     * Possible exit: return in main, end of main, exit statement
+     */
+    public void writeLinkedListForDeallocatedHeap(){
     	
     }
     
