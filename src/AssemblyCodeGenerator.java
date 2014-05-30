@@ -345,6 +345,7 @@ public class AssemblyCodeGenerator {
       String template = "";
       if(sto.getInit() == null){
 	    template += "! local variable:   " + sto.getName() + "    without init, just add offset\n";
+	    template += "! Local variable, offset: " + sto.getOffset() + " base: " + sto.getBase() + "\n";
       }
       else{
     	flush("! init variable: " + sto.getName() + "\n");
@@ -694,6 +695,47 @@ public class AssemblyCodeGenerator {
       template += "set\t" + "SAVE." + function_name + ", " + "%g1\n";
       template += indentString();
       template += "save\t" + "%sp, " + "%g1, " + "%sp\n";
+      
+      /* Extra credit 2 */
+      if(function_name.equals("main")){
+	    template += "! Allocate heap space for head of the linkedlist\n";
+	  	template += indentString() + "set\t1, %o0\n";
+	  	template += indentString() + "set\t12, %o1\n";
+	  	template += indentString() + "call\tcalloc\n";
+	  	template += indentString() + "nop\n";
+	    template += "! Add the address into the heap lookup list\n";
+	  	
+	  	
+	  	/**
+	  	 * Layout for the node:
+	  	 * structdef NODE{
+	  	 *   int address; //the address that is allocated on the heap
+	  	 *   bool deleted;
+	  	 *   NODE* next;
+	  	 * };
+	  	 */
+	    heap_list_size++;
+	  	template += indentString() + "mov\t%o0, %l1\n";
+	  	template += "! Update the current node address for create the list\n";
+	  		
+	    template += indentString() + "set\t.heap_check_list_current, %l0\n";
+	    template += indentString() + "st\t%l1, [%l0]\n";
+	    template += indentString() + "set\t.heap_check_list_head, %l0\n";
+	    template += indentString() + "st\t%l1, [%l0]\n";
+	    //Load the pointer to the heap address we allocated for this node
+	    template += indentString() + "ld\t[%l0], %l0\n";
+	    template += indentString() + "!init deleted field to be false\n";
+	    template += indentString() + "set\t0, %l1\n";
+	    template += indentString() + "add\t%l0, 4, %l0\n";
+	    template += indentString() + "st\t%l1, [%l0]\n";
+	      	
+	    template += indentString() + "set\t" + heap_list_size + ", %l1\n";
+	    template += indentString() + "set\t.heap_check_list_size, %l0\n";
+	    template += indentString() + "st\t%l1, [%l0]\n";
+      
+	  }
+      
+      
       template += "! Store that stack pointer to the global variable if it's lowest\n";
       template += indentString() + "set\t.lowest_stack_pointer, %l0\n";
       template += indentString() + "add\t%g0, %l0, %l0\n";
@@ -2931,68 +2973,7 @@ public class AssemblyCodeGenerator {
      */
     public void writeNewStmt(STO sto){
     	
-    	String template =""; 
-    	template += "! Add the address into the heap lookup list\n";
-    	template += "! Allocate space for nodes to store the current new\n";
-    	template += indentString() + "set\t1, %o0\n";
-    	template += indentString() + "set\t12, %o1\n";
-    	template += indentString() + "call\tcalloc\n";
-    	template += indentString() + "nop\n";
-    	
-    	/**
-    	 * Layout for the node:
-    	 * structdef NODE{
-    	 *   int address; //the address that is allocated on the heap
-    	 *   bool deleted;
-    	 *   NODE* next;
-    	 * };
-    	 */
-        /* template += ".heap_check_list_head:\t.word 0\n";
-        //A global variable for storing the current node
-        template += ".heap_check_list_current:\t.word 0\n";
-        //For convinence, store the size of the list as well
-        template += ".heap_check_list_size:\t.word 0\n";*/
-    	template += indentString() + "mov\t%o0, %l1\n";
-    	if(heap_list_size == 0){
-    		heap_list_size++;
-    		template += "! Update the current node address for create the list\n";
-    		
-        	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-        	template += indentString() + "st\t%l1, [%l0]\n";
-        	template += indentString() + "set\t.heap_check_list_head, %l0\n";
-        	template += indentString() + "st\t%l1, [%l0]\n";
-        	//Load the pointer to the heap address we allocated for this node
-        	template += indentString() + "ld\t[%l0], %l0\n";
-        	template += indentString() + "!init deleted field to be false\n";
-        	template += indentString() + "set\t0, %l1\n";
-        	template += indentString() + "add\t%l0, 4, %l0\n";
-        	template += indentString() + "st\t%l1, [%l0]\n";
-        	
-        	template += indentString() + "set\t" + heap_list_size + ", %l1\n";
-        	template += indentString() + "set\t.heap_check_list_size, %l0\n";
-        	template += indentString() + "st\t%l1, [%l0]\n";
-    	}else{
-    		heap_list_size++;
-        	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-        	template += indentString() + "!add the address to previous node's address field\n";
-        	template += indentString() + "ld\t[%l0], %l0\n";
-        	template += indentString() + "add\t%l0, 8, %l0\n";
-        	//Store the node to the next field of the previous node
-        	template += indentString() + "st\t%l1, [%l0]\n";
-        	template += "! Update the current node\n";
-        	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-        	template += indentString() + "st\t%l1, [%l0]\n";
-        	template += "! init deleted field to be false\n";
-        	template += indentString() + "set\t0, %l0\n";
-        	template += indentString() + "add\t%l1, 4, %l1\n";
-        	template += indentString() + "st\t%l0, [%l1]\n";
-        	template += indentString() + "set\t" + heap_list_size + ", %l1\n";
-        	template += indentString() + "set\t.heap_check_list_size, %l0\n";
-        	template += indentString() + "st\t%l1, [%l0]\n";
-        	
-    	}
-    	flush(template);
-    	
+    	String template = ""; 
     	
     	template = "! doing new statement \n";
     	
@@ -3018,6 +2999,49 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "set\t.heap_check_list_current, %l0\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
     	template += indentString() + "st\t%o0, [%l0]\n";
+    	flush(template);
+    	
+    	template = "! Create the next node\n";
+    	template += "! Allocate space for nodes to store the current new\n";
+    	template += indentString() + "set\t1, %o0\n";
+    	template += indentString() + "set\t12, %o1\n";
+    	template += indentString() + "call\tcalloc\n";
+    	template += indentString() + "nop\n";
+    	
+    	/**
+    	 * Layout for the node:
+    	 * structdef NODE{
+    	 *   int address; //the address that is allocated on the heap
+    	 *   bool deleted;
+    	 *   NODE* next;
+    	 * };
+    	 */
+        /* template += ".heap_check_list_head:\t.word 0\n";
+        //A global variable for storing the current node
+        template += ".heap_check_list_current:\t.word 0\n";
+        //For convinence, store the size of the list as well
+        template += ".heap_check_list_size:\t.word 0\n";*/
+    	template += indentString() + "mov\t%o0, %l1\n";
+    	
+        template += indentString() + "set\t.heap_check_list_current, %l0\n";
+        template += indentString() + "!add the address to previous node's address field\n";
+        template += indentString() + "ld\t[%l0], %l0\n";
+        template += indentString() + "add\t%l0, 8, %l0\n";
+        //Store the node to the next field of the previous node
+        template += indentString() + "st\t%l1, [%l0]\n";
+        template += "! Update the current node\n";
+        template += indentString() + "set\t.heap_check_list_current, %l0\n";
+        template += indentString() + "st\t%l1, [%l0]\n";
+        template += "! init deleted field to be false\n";
+        template += indentString() + "set\t0, %l0\n";
+        template += indentString() + "add\t%l1, 4, %l1\n";
+        template += indentString() + "st\t%l0, [%l1]\n";
+        	
+        template += indentString() + "set\t.heap_check_list_size, %l0\n";
+        template += indentString() + "ld\t[%l0], %l1\n";
+        template += indentString() + "inc\t%l1\n";
+        template += indentString() + "st\t%l1, [%l0]\n";
+
     	flush(template);
     }
     
