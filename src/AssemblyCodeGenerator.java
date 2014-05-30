@@ -508,8 +508,6 @@ public class AssemblyCodeGenerator {
 		  	    template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	      }
 	      else{
-
-	    	  System.out.println("here");
 	    	  template = indentString() + "mov\t%l0, %l1\n";
 		  	  template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
 		  	  template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
@@ -2957,7 +2955,7 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "mov\t%o0, %l1\n";
     	if(heap_list_size == 0){
     		heap_list_size++;
-    		template += "! Update the curret node address for create the list\n";
+    		template += "! Update the current node address for create the list\n";
     		
         	template += indentString() + "set\t.heap_check_list_current, %l0\n";
         	template += indentString() + "st\t%l1, [%l0]\n";
@@ -2981,10 +2979,13 @@ public class AssemblyCodeGenerator {
         	template += indentString() + "add\t%l0, 8, %l0\n";
         	//Store the node to the next field of the previous node
         	template += indentString() + "st\t%l1, [%l0]\n";
-        	template += indentString() + "!init deleted field to be false\n";
-        	template += indentString() + "set\t0, %l1\n";
-        	template += indentString() + "add\t%l0, 4, %l0\n";
+        	template += "! Update the current node\n";
+        	template += indentString() + "set\t.heap_check_list_current, %l0\n";
         	template += indentString() + "st\t%l1, [%l0]\n";
+        	template += "! init deleted field to be false\n";
+        	template += indentString() + "set\t0, %l0\n";
+        	template += indentString() + "add\t%l1, 4, %l1\n";
+        	template += indentString() + "st\t%l0, [%l1]\n";
         	template += indentString() + "set\t" + heap_list_size + ", %l1\n";
         	template += indentString() + "set\t.heap_check_list_size, %l0\n";
         	template += indentString() + "st\t%l1, [%l0]\n";
