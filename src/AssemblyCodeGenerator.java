@@ -3059,11 +3059,10 @@ public class AssemblyCodeGenerator {
     	
     	template += indentString() + "set\t.heap_check_list_head, %l0\n";
     	String label = ".double_delete_check_" + globalCounter;
-
+    	template += indentString() + "ld\t[%l0], %l0\n";
     	//Begin of linkedlist iteration
     	String start = label + "_start";
     	template += start + ": \n";
-    	template += indentString() + "ld\t[%l0], %l0\n";
     	template += indentString() + "ld\t[%l0], %l2\n";
     	template += "! Compare the address of current deleted address with the head\n";
     	template += indentString() + "cmp\t%l1, %l2\n";
