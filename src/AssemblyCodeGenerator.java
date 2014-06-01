@@ -2258,6 +2258,10 @@ public class AssemblyCodeGenerator {
     	String template = "! Doing CIN Int statement\n";
     	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	if(s.getType().isReference() || (s.isExpr() && ((ExprSTO)s).getHoldAddress())){
+	        template += "! " + s.getName() + " is a reference, one more load\n";
+	        template += indentString() + "ld\t[%l0], %l0\n";
+	    }
     	template += indentString() + "call\tinputInt\n";
     	template += indentString() + "nop\n";
     	template += indentString() + "st\t%o0, [%l0]\n";
@@ -2268,6 +2272,10 @@ public class AssemblyCodeGenerator {
     	String template = "! Doing CIN Float statement\n";
     	template += indentString() + "set\t" + s.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + s.getBase() + ", %l0, %l0\n";
+    	if(s.getType().isReference() || (s.isExpr() && ((ExprSTO)s).getHoldAddress())){
+	        template += "! " + s.getName() + " is a reference, one more load\n";
+	        template += indentString() + "ld\t[%l0], %l0\n";
+	    }
     	template += indentString() + "call\tinputFloat\n";
     	template += indentString() + "nop\n";
     	template += indentString() + "st\t%f0, [%l0]\n";
@@ -2990,108 +2998,106 @@ public class AssemblyCodeGenerator {
     		template += indentString() + "ld\t[%l0], %l0\n";
     	}
     	template += indentString() + "st\t%o0, [%l0]\n";  
-    	
-    	flush(template);
-
-    	/**
-    	 * Extra credit
-    	 */
-    	template = "! Set address to the node field\n";
-    	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-    	template += indentString() + "st\t%o0, [%l0]\n";
     	flush(template);
     	
     	/**
-    	 * Layout for the node:
-    	 * structdef NODE{
-    	 *   int address; //the address that is allocated on the heap
-    	 *   bool deleted;
-    	 *   NODE* next;
-    	 * };
+    	 * Extra credit 2
     	 */
-        /* template += ".heap_check_list_head:\t.word 0\n";
-        //A global variable for storing the current node
-        template += ".heap_check_list_current:\t.word 0\n";
-        //For convinence, store the size of the list as well
-        template += ".heap_check_list_size:\t.word 0\n";*/
-    	template = indentString() + "mov\t%o0, %l1\n";
-    	
-    	//%l1 = address of the new node
-    	template += indentString() + "set\t.heap_check_list_head, %l0\n";
+    	//Loop through the whole linked list to check whether there's node with the same address field
     	String label = ".set_new_node_" + globalCounter;
-    	template += indentString() + "ld\t[%l0], %l0\n";
-    	//Begin of linkedlist iteration
     	String start = label + "_start";
-    	template += start + ": \n";
-    	template += indentString() + "ld\t[%l0], %l2\n";
-    	template += "! Compare the address of current node to new node\n";
-    	template += indentString() + "cmp\t%l1, %l2\n";
     	String label_end = label + "_end";
+
+    	template = "";
+    	template += "! Store the value of the address we allocated\n";
+    	template += indentString() + "mov\t%o0, %l1\n";
+    	
+    	
+    	template += indentString() + "set\t.heap_check_list_head, %l0\n";
+    	//Get the first node
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	//The begining of the loop
+     	template += start + ": \n";
+    	//Load the address field
+     	/*template += indentString() + "mov\t%l0, %o1\n"; 
+        template += indentString() + "set\t.intFmt, %o0\n"; 
+        template += indentString() + "call\tprintf\n";
+        template += indentString() + "nop\n"; 
+        template += indentString() + "set\t.endl, %o0\n";
+        template += indentString() + "call\tprintf\n";
+        template += indentString() + "nop\n"; 
+        */
+    	template += indentString() + "ld\t[%l0], %l2\n";
+    	
+    	/***** DEBUG ***/
+    	/*template += indentString() + "mov\t%l2, %o1\n"; 
+        template += indentString() + "set\t.intFmt, %o0\n"; 
+        template += indentString() + "call\tprintf\n";
+        template += indentString() + "nop\n"; 
+        template += indentString() + "set\t.boolF, %o1\n";
+        template += indentString() + "set\t.strFmt, %o0\n"; 
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n"; 
+         template += indentString() + "mov\t%l1, %o1\n"; 
+         template += indentString() + "set\t.intFmt, %o0\n"; 
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n"; 
+         template += indentString() + "set\t.endl, %o0\n";
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n"; 
+		*/
+    	/*** END ***/
+    	template += "! Compare the current node address field to new address\n";
+    	template += indentString() + "cmp\t%l1, %l2\n";
+    	//If equal, no need to create new node, else, create new node to the list
     	template += indentString() + "be\t" + label + "\n";
     	template += indentString() + "nop\n";
     	
-    	/**** Not same, go to next node or if next is zero, attach new node ***/
-    	//Here, need to go to next node
+    	//Before create new node, need to find the tail of the list (+8 field is 0)
+    	//Check the next field
     	template += indentString() + "add\t%l0, 8, %l0\n";
     	template += indentString() + "ld\t[%l0], %l2\n";
-    	//Set node to the next node
+    	//Compare this node with %g0
+    	template += "! Check if there's no next\n";
     	template += indentString() + "cmp\t%l2, %g0\n";
-    	/**** There's no next node **/
     	String label_allocate = label + "_allocate";
+    	//If it's zero, then we need to allocate new node
     	template += indentString() + "be\t" + label_allocate + "\n";
     	template += indentString() + "nop\n";
-    	//Here if there is next node, update the node to %l0
-    	template += indentString() + "ld\t[%l0], %l0\n";
-        template += indentString() + "set\t.heap_check_list_current, %l1\n";
-        template += indentString() + "st\t%l0, [%l1]\n";
-    	//Loop through the list
+    	
+    	//Here if there's next node, update to that and go back
+    	template += indentString() + "mov\t%l2, %l0\n";
+    	//Go back to beginning
     	template += indentString() + "ba\t" + start + "\n";
     	template += indentString() + "nop\n";
     	
-    	
+    	//Enter this part if it need to allocate new node
     	template += label_allocate + ":\n";
-    	
-    	template += "! Create the next node\n";
-    	template += "! Allocate space for nodes to store the current new\n";
+    	template += "! Allocate new node\n";
     	template += indentString() + "set\t1, %o0\n";
     	template += indentString() + "set\t12, %o1\n";
     	template += indentString() + "call\tcalloc\n";
     	template += indentString() + "nop\n";
-    	template += indentString() + "mov\t%o0, %l1\n";
-    	//Need to add another node
-    	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-    	template += indentString() + "ld\t[%l0], %l0\n";
-        template += indentString() + "add\t%l0, 8, %l0\n";
-        //Store the node to the next field of the previous node
-        template += indentString() + "st\t%l1, [%l0]\n";
-        template += "! Update the current node\n";
-        template += indentString() + "set\t.heap_check_list_current, %l0\n";
-        template += indentString() + "st\t%l1, [%l0]\n";
-        template += "! init deleted field to be false\n";
-        template += indentString() + "set\t0, %l0\n";
-        template += indentString() + "add\t%l1, 4, %l1\n";
-        template += indentString() + "st\t%l0, [%l1]\n";
-        	
-        template += indentString() + "set\t.heap_check_list_size, %l0\n";
-        template += indentString() + "ld\t[%l0], %l1\n";
-        template += indentString() + "inc\t%l1\n";
-        template += indentString() + "st\t%l1, [%l0]\n";
+    	//Store to the zero next field before.
+    	template += indentString() + "st\t%o0, [%l0]\n";
+    	template += indentString() + "ld[%l0], %l0\n";
+    	template += indentString() + "st\t%l1, [%l0]\n";
+    	template += indentString() + "set\t0, %l1\n";
 
+    	template += indentString() + "st\t%l1, [%l0+4]\n";
+    	template += indentString() + "st\t%l1, [%l0+8]\n";
+    	//Finish
     	template += indentString() + "ba\t" + label_end + "\n";
     	template += indentString() + "nop\n";
-    	
-    	/****** Start of label, set the field to be false *********/
+    	//No need to create new node, need to set field to false
     	template += label + ": \n";
     	//Need to set delete field to be false again
     	template += indentString() + "add\t%l0, 4, %l0\n";
     	template += indentString() + "set\t0, %l1\n";
     	template += indentString() + "st\t%l1, [%l0]\n";
-    	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-        template += indentString() + "st\t%l1, [%l0]\n";
     	template += label_end + ": \n";
-    	
-    	
     	flush(template);
+
     }
     
     public void writeDeleteStmt(STO sto,int globalCounter){
@@ -3108,19 +3114,11 @@ public class AssemblyCodeGenerator {
     	//call writeNullPtrDereferenceCheck
     	flush(template);
     	writeDerefenceNullPtrCheck(globalCounter);
-    	
-    	
-    	
+
     	/**
     	 * Extra credit 2
-    	 *
-    	 * Layout for the node:
-    	 * structdef NODE{
-    	 *   int address; //the address that is allocated on the heap
-    	 *   bool deleted;
-    	 *   NODE* next;
-    	 * };
     	 */
+    	//Get the address of the deleted address to %l0
     	template = "! Doing double delete check\n";
     	template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
@@ -3130,33 +3128,49 @@ public class AssemblyCodeGenerator {
     	}
     	template += indentString() + "ld\t[%l0], %l0\n";
     	template += indentString() + "mov\t%l0, %l1\n";
-    	
-    	template += indentString() + "set\t.heap_check_list_head, %l0\n";
     	String label = ".double_delete_check_" + globalCounter;
-    	template += indentString() + "ld\t[%l0], %l0\n";
-    	//Begin of linkedlist iteration
     	String start = label + "_start";
+    	String label_end = label + "_end";
+    	template += indentString() + "set\t.heap_check_list_head, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
     	template += start + ": \n";
     	template += indentString() + "ld\t[%l0], %l2\n";
-    	template += "! Compare the address of current deleted address with the head\n";
+    	/***** DEBUG ***/
+    	/*template += indentString() + "mov\t%l2, %o1\n"; 
+        template += indentString() + "set\t.intFmt, %o0\n"; 
+        template += indentString() + "call\tprintf\n";
+        template += indentString() + "nop\n"; 
+        template += indentString() + "set\t.boolT, %o1\n";
+        template += indentString() + "set\t.strFmt, %o0\n"; 
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n"; 
+         template += indentString() + "mov\t%l1, %o1\n"; 
+         template += indentString() + "set\t.intFmt, %o0\n"; 
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n"; 
+         template += indentString() + "set\t.endl, %o0\n";
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n"; 
+		*/
+    	/*** END ***/
+    	//Compare the deleted address with the current node's address
     	template += indentString() + "cmp\t%l1, %l2\n";
-    	String label_end = label + "_end";
+    	//If it's equal, check deleted field
     	template += indentString() + "be\t" + label + "\n";
     	template += indentString() + "nop\n";
     	
-    	//Here, need to go to next node
+    	//If not equal, go to next node and check if it's end
     	template += indentString() + "add\t%l0, 8, %l0\n";
     	template += indentString() + "ld\t[%l0], %l0\n";
-    	//Set node to the next node
     	template += indentString() + "cmp\t%l0, %g0\n";
+    	//No more node, go to end
     	template += indentString() + "be\t" + label_end + "\n";
     	template += indentString() + "nop\n";
+    	
     	//Reach here if there exists next node
     	template += indentString() + "ba\t" + start + "\n";
     	template += indentString() + "nop\n";
-    	
-    	//It reach the end of the linkedlist
-    	
+    	    	
     	template += label + ": \n";
     	String delete_check_true  = label + "_true";
     	//Need to check delete field
@@ -3182,7 +3196,10 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "st\t%l1, [%l0]\n";
     	template += label_end +": \n";
     	flush(template);
-    	
+
+    	/**
+    	 * This part is the delete part without extra credit
+    	 */
     	template = indentString() + "set\t" + sto.getOffset() + ", %l0\n";
     	template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
     	if(sto.getType().isReference() || (sto.isExpr() && ((ExprSTO)sto).getHoldAddress())){
