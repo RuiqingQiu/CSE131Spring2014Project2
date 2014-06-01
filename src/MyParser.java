@@ -1303,6 +1303,9 @@ class MyParser extends parser
 				if(params.elementAt(i).getType().isStruct() && !params.elementAt(i).getType().isReference()){
 					//Treat this param as pass by reference
 					((VarSTO)s).setPassByValueHoldAddress(true);
+				}else if(params.elementAt(i).getType().isArray() && !params.elementAt(i).getType().isReference()){
+					//Treat this param as pass by reference
+					((VarSTO)s).setPassByValueHoldAddress(true);
 				}
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);

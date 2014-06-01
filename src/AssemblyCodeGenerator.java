@@ -391,7 +391,9 @@ public class AssemblyCodeGenerator {
 	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
 	 	        if(init.getType().isReference() || (init.isExpr() &&  ((ExprSTO)init).getHoldAddress())){
 	 	        	template += indentString() + "ld\t[%l0], %l0\n";
-	 	        }	 	        
+	 	        }else if(init.isVar() && ((VarSTO)init).getPassByValueHoldAddress()){
+	 	        	template += indentString() + "ld\t[%l0], %l0\n";
+	 	        }
 	 	        flush(template);
 	    	}
 	    	//Promption from int to float
