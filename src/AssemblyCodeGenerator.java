@@ -389,6 +389,9 @@ public class AssemblyCodeGenerator {
 	    		template ="! Array name assign to pointer\n";
 	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
 	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
+	 	        if(init.getType().isReference() || (init.isExpr() &&  ((ExprSTO)init).getHoldAddress())){
+	 	        	template += indentString() + "ld\t[%l0], %l0\n";
+	 	        }	 	        
 	 	        flush(template);
 	    	}
 	    	//Promption from int to float
@@ -461,7 +464,18 @@ public class AssemblyCodeGenerator {
 	      STO init = sto.getInit();
 	      flush(template);
 	      writeDoDesID(init);
-	      if(sto.getInit().getType().isStruct()){
+	    //Case where pointer to array name
+	      if(sto.getType().isPointer() && init.getType().isArray()){
+	    		template ="! Array name assign to pointer\n";
+	    		template += indentString() + "set\t" + init.getOffset() + ", %l0\n";
+	 	        template += indentString() + "add\t" + init.getBase() + ",%l0, %l0\n";
+	 	        template += indentString() + "ld\t[%l0], %l0\n";
+	 	        template += indentString() + "mov\t%l0, %l1\n";
+			  	template += indentString() + "set\t" + sto.getOffset() + ", %l0\n";
+			  	template += indentString() + "add\t" + sto.getBase() + ",%l0, %l0\n";
+			  	template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+	      }
+	      else if(sto.getInit().getType().isStruct()){
 	    	    template = "! getting the address of the right side struct\n";
 	    		template += indentString() + "set\t" + sto.getInit().getOffset() + ", " + "%l0\n";
 	    		template += indentString() + "add\t" + sto.getInit().getBase() + ", %l0, %l0\n";
@@ -2629,6 +2643,22 @@ public class AssemblyCodeGenerator {
     		flush(template);
     		return;
     	}
+    	else if(left.getType().isPointer() && right.getType().isArray()){
+    		template ="! Array name assign to pointer\n";
+    		template += indentString() + "set\t" + right.getOffset() + ", %l0\n";
+ 	        template += indentString() + "add\t" + right.getBase() + ",%l0, %l0\n";
+ 	        template += indentString() + "ld\t[%l0], %l0\n";
+ 	        template += indentString() + "mov\t%l0, %l1\n";
+		  	template += indentString() + "set\t" + left.getOffset() + ", %l0\n";
+		  	template += indentString() + "add\t" + left.getBase() + ",%l0, %l0\n";
+		  	if(left.getType().isReference() || (left.isExpr() && ((ExprSTO)left).getHoldAddress())){
+    			template += "! left side is exprSTO & hold address\n";
+    			template += indentString() + "ld\t[%l0], %l0\n";
+    		}
+		  	template += indentString() + "st\t" + "%l1, [%l0]\n\n";
+		  	flush(template);
+		  	return;
+    	}
     	//Function pointer assignment
     	else if(right.getType().isFuncPointer() && left.getType().isFuncPointer()){
     		template += "! Write Function pointer assignment\n";
@@ -2813,7 +2843,7 @@ public class AssemblyCodeGenerator {
 			template += "! pointer type array dereference\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}
-		if((arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
+		else if((arrayName.getType().isReference()) ||(arrayName.isExpr() && (((ExprSTO)arrayName).getHoldAddress()))){
 			template += "! array des, expr hold address\n";
 			template += indentString() + "ld\t[%l0], %l0\n";
 		}
