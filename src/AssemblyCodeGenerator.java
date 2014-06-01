@@ -2971,7 +2971,7 @@ public class AssemblyCodeGenerator {
      * Use memcopy to allocate a new space in the heap
      * calloc(number of elements need to allocate , size of the element)
      */
-    public void writeNewStmt(STO sto){
+    public void writeNewStmt(STO sto, int globalCounter){
     	
     	String template = ""; 
     	
@@ -2992,21 +2992,14 @@ public class AssemblyCodeGenerator {
     	template += indentString() + "st\t%o0, [%l0]\n";  
     	
     	flush(template);
+
     	/**
     	 * Extra credit
     	 */
     	template = "! Set address to the node field\n";
     	template += indentString() + "set\t.heap_check_list_current, %l0\n";
-    	template += indentString() + "ld\t[%l0], %l0\n";
     	template += indentString() + "st\t%o0, [%l0]\n";
     	flush(template);
-    	
-    	template = "! Create the next node\n";
-    	template += "! Allocate space for nodes to store the current new\n";
-    	template += indentString() + "set\t1, %o0\n";
-    	template += indentString() + "set\t12, %o1\n";
-    	template += indentString() + "call\tcalloc\n";
-    	template += indentString() + "nop\n";
     	
     	/**
     	 * Layout for the node:
@@ -3021,11 +3014,53 @@ public class AssemblyCodeGenerator {
         template += ".heap_check_list_current:\t.word 0\n";
         //For convinence, store the size of the list as well
         template += ".heap_check_list_size:\t.word 0\n";*/
-    	template += indentString() + "mov\t%o0, %l1\n";
+    	template = indentString() + "mov\t%o0, %l1\n";
     	
-        template += indentString() + "set\t.heap_check_list_current, %l0\n";
-        template += indentString() + "!add the address to previous node's address field\n";
-        template += indentString() + "ld\t[%l0], %l0\n";
+    	//%l1 = address of the new node
+    	template += indentString() + "set\t.heap_check_list_head, %l0\n";
+    	String label = ".set_new_node_" + globalCounter;
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	//Begin of linkedlist iteration
+    	String start = label + "_start";
+    	template += start + ": \n";
+    	template += indentString() + "ld\t[%l0], %l2\n";
+    	template += "! Compare the address of current node to new node\n";
+    	template += indentString() + "cmp\t%l1, %l2\n";
+    	String label_end = label + "_end";
+    	template += indentString() + "be\t" + label + "\n";
+    	template += indentString() + "nop\n";
+    	
+    	/**** Not same, go to next node or if next is zero, attach new node ***/
+    	//Here, need to go to next node
+    	template += indentString() + "add\t%l0, 8, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l2\n";
+    	//Set node to the next node
+    	template += indentString() + "cmp\t%l2, %g0\n";
+    	/**** There's no next node **/
+    	String label_allocate = label + "_allocate";
+    	template += indentString() + "be\t" + label_allocate + "\n";
+    	template += indentString() + "nop\n";
+    	//Here if there is next node, update the node to %l0
+    	template += indentString() + "ld\t[%l0], %l0\n";
+        template += indentString() + "set\t.heap_check_list_current, %l1\n";
+        template += indentString() + "st\t%l0, [%l1]\n";
+    	//Loop through the list
+    	template += indentString() + "ba\t" + start + "\n";
+    	template += indentString() + "nop\n";
+    	
+    	
+    	template += label_allocate + ":\n";
+    	
+    	template += "! Create the next node\n";
+    	template += "! Allocate space for nodes to store the current new\n";
+    	template += indentString() + "set\t1, %o0\n";
+    	template += indentString() + "set\t12, %o1\n";
+    	template += indentString() + "call\tcalloc\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "mov\t%o0, %l1\n";
+    	//Need to add another node
+    	template += indentString() + "set\t.heap_check_list_current, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
         template += indentString() + "add\t%l0, 8, %l0\n";
         //Store the node to the next field of the previous node
         template += indentString() + "st\t%l1, [%l0]\n";
@@ -3042,6 +3077,20 @@ public class AssemblyCodeGenerator {
         template += indentString() + "inc\t%l1\n";
         template += indentString() + "st\t%l1, [%l0]\n";
 
+    	template += indentString() + "ba\t" + label_end + "\n";
+    	template += indentString() + "nop\n";
+    	
+    	/****** Start of label, set the field to be false *********/
+    	template += label + ": \n";
+    	//Need to set delete field to be false again
+    	template += indentString() + "add\t%l0, 4, %l0\n";
+    	template += indentString() + "set\t0, %l1\n";
+    	template += indentString() + "st\t%l1, [%l0]\n";
+    	template += indentString() + "set\t.heap_check_list_current, %l0\n";
+        template += indentString() + "st\t%l1, [%l0]\n";
+    	template += label_end + ": \n";
+    	
+    	
     	flush(template);
     }
     

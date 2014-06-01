@@ -290,7 +290,8 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error16_New,sto.getType().getName()));
 		}
-		myAsWriter.writeNewStmt(sto);
+		myAsWriter.writeNewStmt(sto, this.globalCounter);
+		globalCounter++;
 	}
 	
 	void
