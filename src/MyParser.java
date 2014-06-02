@@ -1155,7 +1155,8 @@ class MyParser extends parser
 	    m_nNumErrors++;
 	    m_errors.print (ErrorMsg.error6c_Return_missing);
 	  }
-	  myAsWriter.writeRetRestore();
+	  myAsWriter.writeRetRestore(m_symtab.getFunc().getName(), this.globalCounter);
+	  globalCounter++;
 	  myAsWriter.writeSaveSpace(m_symtab.getFunc(), m_symtab.getBytes());
 	  m_symtab.clearBytes();
 	  //myAsWriter.writeStrings(m_symtab.getFunc().getName(), this.coutStrings);
@@ -2366,12 +2367,14 @@ class MyParser extends parser
 		globalCounter++;
 		e.setOffset("-" + m_symtab.getBytes());
 		e.setBase("%fp");
-		if(((CompositeType)nameSto.getType()).getElementType().isPointer()){
+		/*if(((CompositeType)nameSto.getType()).getElementType().isPointer()){
 			e.setHoldAddress(false);
 		}
 		else{
 			e.setHoldAddress(true);
-		}
+		}*/
+		e.setHoldAddress(true);
+		//System.out.println("hello" + e.getHoldAddress());
 		//Correct usage of array, dereference the array and get its element type
 		return e;
 	}

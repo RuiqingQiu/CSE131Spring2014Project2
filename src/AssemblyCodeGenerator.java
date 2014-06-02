@@ -796,6 +796,15 @@ public class AssemblyCodeGenerator {
     }
     
     public void writeRetRestore(){
+    	String template = indentString() + "ret\n";
+        template += indentString() + "restore\n\n";
+        flush(template);
+    }
+    
+    public void writeRetRestore(String function_name, int globalCounter){
+      if(function_name.equals("main")){
+      	writeCheckMemoryLeak(globalCounter);
+      }
       String template = indentString() + "ret\n";
       template += indentString() + "restore\n\n";
       flush(template);
@@ -874,6 +883,9 @@ public class AssemblyCodeGenerator {
       }
       else{
 	      if(s.getType().isVoid()){
+	    	  if(funcName.equals("main")){
+	        	  writeCheckMemoryLeak(globalCounter);
+	          }
 	    	  return;
 	      }
 	      if(s.isConst()){
@@ -2602,6 +2614,7 @@ public class AssemblyCodeGenerator {
      * 1.3 Exit statement
      */
     public void writeExit(STO expr, int globalCounter){
+    	writeCheckMemoryLeak(globalCounter);
     	flush("\n! set exit statement number to %o0\n");
     	if(expr.isConst())
     		setConst("exitStmtNumber", (ConstSTO)expr, globalCounter);
