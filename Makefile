@@ -19,7 +19,7 @@ SOURCES = \
 	MyParser.java \
 	RC.java \
 	RCdbg.java
-CC = cc
+CC=cc
 
 new:
 	make clean
@@ -41,6 +41,18 @@ rcdbg: $(SOURCES) parser.java sym.java
 
 parser.java: rc.cup
 	javacup < rc.cup
+
+compile:
+	$(CC) rc.s input.c output.s $(LINKOBJ)
+
+test: test.rc
+	make new
+	./RC test.rc
+	make run
+
+run: rc.s output.s input.c
+	gcc -o a.out rc.s output.s input.c 
+	./a.out
 
 clean:
 	rm -f *.class RC parser.java sym.java a.out core rc.s
