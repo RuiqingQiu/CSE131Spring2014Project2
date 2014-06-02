@@ -231,6 +231,7 @@ public class AssemblyCodeGenerator {
       template += ".indexOutOfBoundMsg:\t.asciz \"Index value of %d is outside legal range [0,%d).\\n\"\n";
       template += ".nullPtrDereferenceMsg:\t.asciz \"Attempt to dereference NULL pointer.\\n\"\n";
       template += ".doubleDeleteErrorMsg:\t.asciz \"Double delete detected. Memory region has already been released in heap space.\\n\"\n";
+      template += ".memoryLeakErrorMsg:\t.asciz \"%d memory leak(s) detected in heap space.\\n\"\n";
       template += ".deallocatedStackMsg:\t.asciz \"Attempt to dereference a pointer into deallocated stack space.\\n\"\n\n";
       
       flush(template);
@@ -245,6 +246,8 @@ public class AssemblyCodeGenerator {
       template += ".heap_check_list_current:\t.word 0\n";
       //For convinence, store the size of the list as well
       template += ".heap_check_list_size:\t.word 0\n";
+      template += ".total_memory_leak:\t.word 0\n";
+
       flush(template);
     }
 
@@ -825,6 +828,9 @@ public class AssemblyCodeGenerator {
   	    	template += indentString() + "ld\t[%l0], %f0\n";
   	    	template += indentString() + "ld\t[%l0], %l0\n";
     	}
+    	else if(s.getType().isNullPointer()){
+    		template += indentString() + "set\t" + s.getIntValue() + ", " + "%l0\n";
+    	}
     	flush(template);
     }
     
@@ -892,7 +898,12 @@ public class AssemblyCodeGenerator {
       }
       template += "! return stmt\n";
       template += indentString() + "mov\t%l0, %i0\n";
+      
+     
       flush(template);
+      if(funcName.equals("main")){
+    	  writeCheckMemoryLeak(globalCounter);
+      }
     }
     
     /**
@@ -3348,6 +3359,91 @@ public class AssemblyCodeGenerator {
     	
     }
     
+    public void writeCheckMemoryLeak(int globalCounter){
+    	//Loop through the whole stored linkedlist and check how many are memory leak
+    	String template = "";
+    	String label = ".check_memory_leak_" + globalCounter;
+    	String start = label + "_start";
+    	String label_end = label + "_end";
+    	String label_end_no_memory_leak = label + "_no_memory_leak";
+    	template += indentString() + "set\t.heap_check_list_head, %l0\n";
+    	template += indentString() + "set\t.total_memory_leak, %l1\n";
+    	template += indentString() + "ld\t[%l1], %l1\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	template += start + ": \n";
+    	template += indentString() + "ld\t[%l0+4], %l2\n";
+    	/*** DEBUG ***/
+    	/*template += indentString() + "mov\t%l2, %o1\n";
+    	template += indentString() + "set\t.intFmt, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "set\t.boolF, %o1\n";
+    	template += indentString() + "set\t.strFmt, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "set\t.endl, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	*/
+    	//Compare the deleted address with the current node's address
+    	template += indentString() + "cmp\t%l2, %g0\n";
+    	//If it's equal, the field is not deleted, increment memory leak count
+    	template += indentString() + "be\t" + label + "\n";
+    	template += indentString() + "nop\n";
+    	
+    	//If not equal, go to next node and check if it's end
+    	template += indentString() + "add\t%l0, 8, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	/**DEBUG
+    	template += indentString() + "mov\t%l0, %o1\n";
+    	template += indentString() + "set\t.intFmt, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "set\t.boolT, %o1\n";
+    	template += indentString() + "set\t.strFmt, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += indentString() + "set\t.endl, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	**/
+    	
+    	template += indentString() + "cmp\t%l0, %g0\n";
+    	//No more node, go to end
+    	template += indentString() + "be\t" + label_end + "\n";
+    	template += indentString() + "nop\n";
+    	
+    	template += indentString() + "ba\t" + start + "\n";
+    	template += indentString() + "nop\n";
+    	
+    	template += label + ": \n";
+    	template += indentString() + "inc\t%l1\n";
+       	template += indentString() + "add\t%l0, 8, %l0\n";
+    	template += indentString() + "ld\t[%l0], %l0\n";
+    	template += indentString() + "cmp\t%l0, %g0\n";
+    	//No more node, go to end
+    	template += indentString() + "be\t" + label_end + "\n";
+    	template += indentString() + "nop\n";
+    	//Reach here if there exists next node
+    	template += indentString() + "ba\t" + start + "\n";
+    	template += indentString() + "nop\n";
+    	    	
+    	
+    	template += label_end +": \n";
+    	template += indentString() + "sub\t%l1, 1, %l1\n";
+    	template += indentString() + "cmp\t%l1, %g0\n";
+    	template += indentString() + "be\t" + label_end_no_memory_leak + "\n";
+    	template += indentString() + "nop\n";
+
+    	template += indentString() + "mov\t%l1, %o1\n";
+    	template += indentString() + "set\t.memoryLeakErrorMsg, %o0\n";
+    	template += indentString() + "call\tprintf\n";
+    	template += indentString() + "nop\n";
+    	template += label_end_no_memory_leak + ": \n";
+    	flush(template);
+    	
+    }
+    
     // 9
     public void writeAssembly(String template, String ... params) {
         StringBuilder asStmt = new StringBuilder();
@@ -3367,24 +3463,6 @@ public class AssemblyCodeGenerator {
             e.printStackTrace();
         }
     }
-    
-    // 12
-    /*
-    public static void main(String args[]) {
-        AssemblyCodeGenerator myAsWriter = new AssemblyCodeGenerator("output.s");
-
-        myAsWriter.increaseIndent();
-        myAsWriter.writeAssembly(TWO_PARAM, SET_OP, String.valueOf(4095), "%l1");
-        myAsWriter.increaseIndent();
-        myAsWriter.writeAssembly(TWO_PARAM, SET_OP, String.valueOf(1024), "%l1");
-        myAsWriter.decreaseIndent();
-        
-        myAsWriter.writeAssembly(TWO_PARAM, SET_OP, String.valueOf(512), "%l2");
-        
-        myAsWriter.decreaseIndent();
-        myAsWriter.dispose();
-    }
-    */
     
     private static int heap_list_size = 0;
 }
