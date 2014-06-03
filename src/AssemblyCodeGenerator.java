@@ -381,6 +381,12 @@ public class AssemblyCodeGenerator {
 	    	template += indentString() + "ld\t" + "[%l1], %l1\n";
 	    	template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	      }
+	      else if(sto.getType().isPointer() || sto.getType().isFuncPointer()){
+	    	  template += indentString() + "set\t" + ((ConstSTO)sto.getInit()).getIntValue() + ", " + "%l1\n";
+			  template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
+			  template += indentString() + "add\t" + sto.getBase() + ", %l0, %l0\n";
+			  template += indentString() + "st\t" + "%l1, " + "[%l0]\n\n";	
+	      }
 	    }//Check if init is const
 	    //Enter here if init is not const
 	    else if(sto.getInit().isVar())

@@ -1888,7 +1888,12 @@ class MyParser extends parser
 	
 	void DoWhileStmt(STO s){
 		this.m_symtab.inWhileLoop(true);
-		myAsWriter.writeDoDesID(s);
+		if(s.isConst()){
+			myAsWriter.setConst("While_Stmt", (ConstSTO)s, this.globalCounter);
+			this.globalCounter++;
+		}
+		else 
+			myAsWriter.writeDoDesID(s);
 		myAsWriter.writeWhileCheckCondition(this.WhileStmtEndLabels.peek());
 	}
 	void
