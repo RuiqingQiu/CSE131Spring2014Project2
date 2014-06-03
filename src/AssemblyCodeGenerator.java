@@ -590,6 +590,10 @@ public class AssemblyCodeGenerator {
     }
     public void writeDoDesID(STO sto){
       String template = "! indodesID : " + sto.getName() + "\n";
+      if(sto.getName() == null || sto.getBase() == null){
+    	  flush(template);
+    	  return;
+      }
       if(sto.isVar()){
     	  if(sto.getType().isFloat()){
     		template += indentString() + "set\t" + sto.getOffset() + ", " + "%l0\n";
@@ -1012,8 +1016,10 @@ public class AssemblyCodeGenerator {
       		  template = "! " + i + "th argument of this function\n";
       		  if(arguments.elementAt(i).getType().isInt() && params.elementAt(i).getType().isFloat()){
       			  template += "! need do int to float promption\n";
-      			  template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-      			  template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+      			  template += indentString() + "set\t-" + offset + ", %l2\n";
+    	   	  	  template += indentString() + "add\t%fp, %l2, %l2\n";
+      			  template += indentString() + "st\t%l0, [%l2]\n";
+      			  template += indentString() + "ld\t[%l2], %f0\n";
       			  template += "! prompt int to float & store back\n";
       			  template += indentString() + "fitos\t%f0, %f0\n";
       			  template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
@@ -1257,16 +1263,20 @@ public class AssemblyCodeGenerator {
 	        template += indentString() + "set\t-1, %o1\n";
 	        template += indentString() + "call\t.mul\n";
 	        template += indentString() + "nop\n";
-	        template += indentString() + "st\t%o0, [%fp-" + offset + "]\n";
-	        template += indentString() + "ld\t[%fp-" + offset +"], %l0\n\n";
+	        template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	        template += indentString() + "st\t%o0, [%l2]\n";
+	        template += indentString() + "ld\t[%l2], %l0\n\n";
 	        flush(template);
         }
         //If it's float
         else{
         	String template = indentString() + "fnegs\t%f0, %f0\n";
-	        template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
-	        template += indentString() + "ld\t[%fp-" + offset + "], %l0\n\n";
-	        template += indentString() + "ld\t[%fp-" + offset + "], %f0\n\n";
+        	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	        template += indentString() + "st\t%f0, [%l2]\n";
+	        template += indentString() + "ld\t[%l2], %l0\n\n";
+	        template += indentString() + "ld\t[%l2], %f0\n\n";
 	        flush(template);
         }
       }
@@ -1412,7 +1422,9 @@ public class AssemblyCodeGenerator {
 	        flush(template);
 	        //Do the subop part
 	        template = indentString() + "sub\t%l1, %l2, %l0\n";
-	        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+	        template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	        template += indentString() + "st\t%l0, [%l2]\n";
 	        flush(template);
     	}
     	//If one of the operand is float
@@ -1466,7 +1478,9 @@ public class AssemblyCodeGenerator {
 	        //Do the addop part
 	        template += indentString() + "call\t.mul\n";
 	        template += indentString() + "nop\n";
-	        template += indentString() + "st\t%o0, [%fp" + "-" + offset + "]\n";
+	        template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	        template += indentString() + "st\t%o0, [%l2]\n";
 	        flush(template);
     	}
     	//If one of the operand is float
@@ -1601,7 +1615,9 @@ public class AssemblyCodeGenerator {
     	
    	  	//Do the BwAndOp part
         template = indentString() + "and\t%l1, %l2, %l0\n";
-        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+        template += indentString() + "st\t%l0, [%l2]\n";
         flush(template);
     }
     public void writeBwOrOp(int offset, STO a, STO b){
@@ -1626,7 +1642,9 @@ public class AssemblyCodeGenerator {
     	
    	  	//Do the BwAndOp part
         template = indentString() + "or\t%l1, %l2, %l0\n";
-        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+        template += indentString() + "st\t%l0, [%l2]\n";
         flush(template);
     }
     public void writeBwXorOp(int offset, STO a, STO b){
@@ -1651,7 +1669,9 @@ public class AssemblyCodeGenerator {
     	
    	  	//Do the BwXorOp part
         template = indentString() + "xor\t%l1, %l2, %l0\n";
-        template += indentString() + "st\t%l0, [%fp" + "-" + offset + "]\n";
+        template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+        template += indentString() + "st\t%l0, [%l2]\n";
         flush(template);
     }
     
@@ -1682,14 +1702,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! greatThanOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label + "_done\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! greatThanOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
     	}
@@ -1708,14 +1732,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! greatThanOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label + "_done\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! greatThanOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
@@ -1865,7 +1893,9 @@ public class AssemblyCodeGenerator {
 	   	  	template += label + ":\t\n";
 	   	  	template += "! lessThanOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
@@ -2008,14 +2038,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! equalOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label + "_done\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! equalOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
@@ -2050,14 +2084,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! equalOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label_end + "\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! equalOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label_end + ":\n\n";
 	   	  	flush(template);
     	}
@@ -2098,14 +2136,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! notEqualOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label_end + "\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! notEqualOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label_end + ":\n\n";
 	   	  	flush(template);
     	}
@@ -2124,14 +2166,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! notEqualOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label + "_done\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! notEqualOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label+"_done:\n\n";
 	   	  	flush(template);
         }
@@ -2166,14 +2212,18 @@ public class AssemblyCodeGenerator {
 	   	  	//If not greater than, than store false value to the tmp
 	   	  	template += "! equalOp set false\n";
 	   	  	template += indentString() + "set\t0, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += indentString() + "ba\t" + label_end + "\n";
 	   	  	template += indentString() + "nop\n\n";
 	   	  	//If greater than store true value to the tmp
 	   	  	template += label + ":\t\n";
 	   	  	template += "! equalOp set true\n";
 	   	  	template += indentString() + "set\t1, %l0\n";
-	   	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	   	  	template += indentString() + "st\t%l0, [%l2]\n";
 	   	  	template += label_end + ":\n\n";
 	   	  	flush(template);
     	}
@@ -2195,11 +2245,7 @@ public class AssemblyCodeGenerator {
             setConst("AndConstEval", (ConstSTO)b, globalCounter);
     	else
     	    writeDoDesID(b);
-    	template = "! AndOp second operand:" + a.getName() + " to %l1\n";
-    	template += indentString() + "mov\t%l1, %l2\n\n";
-    	flush(template);
-    	
-    	template = "! Comparing %l2 with %g0\n";
+    	template = "! Comparing %l0 with %g0\n";
    	  	template += indentString() + "cmp\t%l0, %g0\n";
    	  	//If it's false, go to end
    	  	template += indentString() + "be\t" + label + "\n";
@@ -2209,14 +2255,18 @@ public class AssemblyCodeGenerator {
    	  	template = "! it enter here if both side are true\n";
    	  	//Set to true
    	  	template += indentString() + "set\t1, %l0\n";
-	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	  	template += indentString() + "st\t%l0, [%l2]\n";
 	  	template += indentString() + "ba\tAddOp_End" + globalCounter + "\n";
 	  	template += indentString() + "nop\n";
 	  	
 	  	//Set false label
 	  	template += label + ": \n";
 	  	template += indentString() + "set\t0, %l0\n";
-	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	  	template += indentString() + "st\t%l0, [%l2]\n";
 	  	template += "AddOp_End" + globalCounter + ": \n";
 	  	flush(template);
     }
@@ -2251,14 +2301,18 @@ public class AssemblyCodeGenerator {
    	  	template = "! it enter here if both side are false\n";
    	  	//Set to true
    	  	template += indentString() + "set\t0, %l0\n";
-	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+   	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	  	template += indentString() + "st\t%l0, [%l2]\n";
 	  	template += indentString() + "ba\tOrOp_End" + globalCounter + "\n";
 	  	template += indentString() + "nop\n";
 	  	
 	  	//Set false label
 	  	template += label + ": \n";
 	  	template += indentString() + "set\t1, %l0\n";
-	  	template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
+	  	template += indentString() + "set\t-" + offset + ", %l2\n";
+   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+	  	template += indentString() + "st\t%l0, [%l2]\n";
 	  	template += "OrOp_End" + globalCounter + ": \n";
 	  	flush(template);
     }
@@ -2700,7 +2754,9 @@ public class AssemblyCodeGenerator {
     			template += "! right is function pointer type, load one more time\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
-    		template += indentString() + "st\t%l0, [%fp-" + offset +"]\n";
+    		template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l0, [%l2]\n";
     		template += indentString() + "mov\t%l0, %l1\n";
     		template += indentString() + "set\t" + left.getOffset() + ", " + "%l0\n";
     		template += indentString() + "add\t" + left.getBase() + ", %l0, %l0\n";
@@ -2721,8 +2777,10 @@ public class AssemblyCodeGenerator {
     	//Check if need promption
     	if(left.getType().isFloat() && right.getType().isInt()){
     		template += "! prompt int to float\n";
-    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    		template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l0, [%l2]\n";
+    		template += indentString() + "ld\t[%l2], %f0\n";
     		//Prompt an int to float
     		template += indentString() + "fitos\t %f0, %f0\n";
 
@@ -3289,23 +3347,29 @@ public class AssemblyCodeGenerator {
     	}else
     		writeDoDesID(sto);
     	if(sto.getType().isInt() && castToType.isFloat()){
-    		template = indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-			template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    		template = indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l0, [%l2]\n";
+			template += indentString() + "ld\t[%l2], %f0\n";
 			template += "! prompt int to float & store back\n";
 			template += indentString() + "fitos\t%f0, %f0\n";
-			template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";
+			template += indentString() + "st\t%f0, [%l2]\n";
     	}
     	else if(sto.getType().isFloat() && castToType.isInt()){
     		template = "! Convert float to int\n";
-    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    		template += indentString() + "ld\t[%fp-" + offset + "], %f0\n";
+    		template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l0, [%l2]\n";
+    		template += indentString() + "ld\t[%l2], %f0\n";
     		template += indentString() + "fstoi\t%f0, %f0\n";
-    		template += indentString() + "st\t%f0, [%fp-" + offset + "]\n";		
+    		template += indentString() + "st\t%f0, [%l2]\n";		
     	}
     	else if(sto.getType().isFloat() && castToType.isBool()){
     		template = "! Convert float to bool\n";
-    		template += indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-    		template += indentString() + "ld\t[%fp-" + offset + "], %f1\n";
+    		template += indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l0, [%l2]\n";
+    		template += indentString() + "ld\t[%l2], %f1\n";
     		template += indentString() + "set\t.value_zero, %l0\n";
     		template += indentString() + "ld\t[%l0], %f0\n";
     		template += indentString() + "fcmps\t%f1, %f0\n";
@@ -3330,8 +3394,10 @@ public class AssemblyCodeGenerator {
     		template += indentString() + label_end + ": \n";
     	}
     	else if(sto.getType().isBool() && castToType.isFloat()){
-    		template = indentString() + "st\t%l0, [%fp-" + offset + "]\n";
-			template += indentString() + "ld\t[%fp-" + offset + "], %l0\n";
+    		template = indentString() + "set\t-" + offset + ", %l2\n";
+	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
+    		template += indentString() + "st\t%l0, [%l2]\n";
+			template += indentString() + "ld\t[%l2], %l0\n";
 			template += indentString() + "cmp\t%l0, %g0\n";
     		String label = ".bool_to_float_" + globalCounter;
 			template += indentString() + "be\t" + label + "\n";
