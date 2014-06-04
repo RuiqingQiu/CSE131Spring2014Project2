@@ -1250,6 +1250,26 @@ public class AssemblyCodeGenerator {
       flush(writeAlignment(4)+"\n");
     }
     
+    public void writeCoutPointer(STO s){
+    	String template = "";
+    	template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
+   	  	template += indentString() + "add\t" + s.getBase() + " ,%l0, %l0\n";
+   	  	if( (s.isExpr() && ((ExprSTO)s).getHoldAddress()) || s.getType().isReference()){
+   		  template += "! return by reference, target holds address, load\n";
+   		  template += indentString() + "ld\t[%l0], %l0\n";
+   	  	}else if(s.isVar() && ((VarSTO)s).getPassByValueHoldAddress()){
+   		  template += "! return by reference, target holds address, load\n";
+   		  template += indentString() + "ld\t[%l0], %l0\n";
+   	  	}
+   	  	template += indentString() + "ld\t[%l0], %l0\n";
+         template += indentString() + "set\t.intFmt, %o0\n";
+         template += indentString() + "mov\t%l0, %o1\n";
+         template += indentString() + "call\tprintf\n";
+         template += indentString() + "nop\n\n";
+         
+         flush(template);
+    }
+    
    
     
     public void writeEndl(){

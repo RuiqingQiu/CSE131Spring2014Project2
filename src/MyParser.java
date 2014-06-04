@@ -1438,6 +1438,10 @@ class MyParser extends parser
 			this.coutStrings.addElement(new ConstSTO(value));
 			myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(), value);	 
 		  }
+		  else if(s.getType() != null && s.getType().isNullPointer()){
+			  myAsWriter.writeConstIntTol0(0);
+			  myAsWriter.writeCoutInt();
+		  }
 		  else{
 		    this.coutStrings.addElement(new ConstSTO(str));
 		    myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	    
@@ -1456,6 +1460,9 @@ class MyParser extends parser
 		else if(s.getType().isFloat()){
 		  myAsWriter.writeCoutFloat();
 		}
+		else if(s.getType() != null && s.getType().isPointer()){
+		  myAsWriter.writeCoutPointer(s);
+		}
 	  }
 	  //If the cout is an expression
 	  else if(s.isExpr()){
@@ -1471,6 +1478,9 @@ class MyParser extends parser
 		}
 		else if(s.getType().isFloat()){
 		  myAsWriter.writeCoutFloat();
+		}
+		else if(s.getType() != null && s.getType().isPointer()){
+		  myAsWriter.writeCoutPointer(s);
 		}
 	  }
 	}
