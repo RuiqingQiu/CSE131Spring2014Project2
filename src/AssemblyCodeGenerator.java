@@ -2733,7 +2733,13 @@ public class AssemblyCodeGenerator {
     		template ="! Array name assign to pointer\n";
     		template += indentString() + "set\t" + right.getOffset() + ", %l0\n";
  	        template += indentString() + "add\t" + right.getBase() + ",%l0, %l0\n";
- 	        template += indentString() + "ld\t[%l0], %l0\n";
+ 	        if(right.isVar() && ((VarSTO)right).getPassByValueHoldAddress()){
+ 	 	        template += indentString() + "ld\t[%l0], %l0\n";
+ 	        }else if(right.isExpr() && ((ExprSTO)right).getHoldAddress()){
+ 	        	template += indentString() + "ld\t[%l0], %l0\n";
+ 	        }else if(right.getType().isReference()){
+ 	        	template += indentString() + "ld\t[%l0], %l0\n";
+ 	        }
  	        template += indentString() + "mov\t%l0, %l1\n";
 		  	template += indentString() + "set\t" + left.getOffset() + ", %l0\n";
 		  	template += indentString() + "add\t" + left.getBase() + ",%l0, %l0\n";
@@ -2743,6 +2749,7 @@ public class AssemblyCodeGenerator {
     		}
 		  	template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 		  	flush(template);
+		 
 		  	return;
     	}
     	//Function pointer assignment
