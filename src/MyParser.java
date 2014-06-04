@@ -1190,6 +1190,13 @@ class MyParser extends parser
 			//Add all the param to the symbal table and FuncSTO
 			for(int i = 0; i < params.size(); i++){
 				STO s = params.elementAt(i);
+				if(params.elementAt(i).getType().isStruct() && !params.elementAt(i).getType().isReference()){
+					//Treat this param as pass by reference
+					((VarSTO)s).setPassByValueHoldAddress(true);
+				}else if(params.elementAt(i).getType().isArray() && !params.elementAt(i).getType().isReference()){
+					//Treat this param as pass by reference
+					((VarSTO)s).setPassByValueHoldAddress(true);
+				}
 				//Check #19, all formal param are variables, which are mod l-val
 				s.setIsAddressable(true);
 				s.setIsModifiable(true);
@@ -1252,6 +1259,13 @@ class MyParser extends parser
 		//Add all the param to the symbal table and FuncSTO
 		for(int i = 0; i < params.size(); i++){
 			STO s = params.elementAt(i);
+			if(params.elementAt(i).getType().isStruct() && !params.elementAt(i).getType().isReference()){
+				//Treat this param as pass by reference
+				((VarSTO)s).setPassByValueHoldAddress(true);
+			}else if(params.elementAt(i).getType().isArray() && !params.elementAt(i).getType().isReference()){
+				//Treat this param as pass by reference
+				((VarSTO)s).setPassByValueHoldAddress(true);
+			}
 			//Check #19, all formal param are variables, which are mod l-val
 			s.setIsAddressable(true);
 			s.setIsModifiable(true);

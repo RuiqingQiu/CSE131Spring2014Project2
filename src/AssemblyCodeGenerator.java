@@ -491,8 +491,14 @@ public class AssemblyCodeGenerator {
 	    		template += indentString() + "set\t" + sto.getInit().getOffset() + ", " + "%l0\n";
 	    		template += indentString() + "add\t" + sto.getInit().getBase() + ", %l0, %l0\n";
 	    		
-	    		template += indentString() + "ld\t[%l0], %l0\n";
-	    		
+	    		STO tmp = sto.getInit();
+	    		if(tmp.getType().isReference() || (tmp.isExpr() && ((ExprSTO)tmp).getHoldAddress())){
+	    			template += "! struct assignment, left hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}else if(tmp.isVar() &&  ((VarSTO)tmp).getPassByValueHoldAddress()){
+	    			template += "! struct assignment, left hold address, one more load\n";
+	    			template += indentString() + "ld\t[%l0], %l0\n";
+	    		}	    		
 	    		template += indentString() + "mov\t%l0, %o1\n";
 	    		
 	    		
