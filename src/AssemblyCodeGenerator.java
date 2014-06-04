@@ -877,6 +877,19 @@ public class AssemblyCodeGenerator {
     	  }
     	  flush(template);
       }
+      else if (returnType.isPointer() && s.getType().isArray()){
+    	  template = "\n! Return by reference need to return address\n";
+    	  template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
+    	  template += indentString() + "add\t" + s.getBase() + " ,%l0, %l0\n";
+    	  if( (s.isExpr() && ((ExprSTO)s).getHoldAddress()) || s.getType().isReference()){
+    		  template += "! return by reference, target holds address, load\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }else if(s.isVar() && ((VarSTO)s).getPassByValueHoldAddress()){
+    		  template += "! return by reference, target holds address, load\n";
+    		  template += indentString() + "ld\t[%l0], %l0\n";
+    	  }
+    	  flush(template);
+      }
       else if(returnType.isStruct()){
     	  template = "\n! Return struct by value, memmove to the %fp+64\n";
     	  template += indentString() + "set\t" + s.getOffset() + ",%l0\n";
