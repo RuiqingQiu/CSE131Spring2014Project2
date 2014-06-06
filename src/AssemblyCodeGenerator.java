@@ -2820,6 +2820,9 @@ public class AssemblyCodeGenerator {
     			template += "! right is function pointer type, load one more time\n";
     			template += indentString() + "ld\t[%l0], %l0\n";
     		}
+    		if((right.isExpr() && ((ExprSTO)right).getHoldAddress())){
+    			template += indentString() + "ld\t[%l0], %l0\n";
+    		}
     		template += indentString() + "set\t-" + offset + ", %l2\n";
 	   	  	template += indentString() + "add\t%fp, %l2, %l2\n";
     		template += indentString() + "st\t%l0, [%l2]\n";
