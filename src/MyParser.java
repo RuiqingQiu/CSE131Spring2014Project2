@@ -1442,6 +1442,9 @@ class MyParser extends parser
 			  myAsWriter.writeConstIntTol0(0);
 			  myAsWriter.writeCoutInt();
 		  }
+		  else if(s.getType() != null && s.getType().isPointer()){
+			  myAsWriter.writeConstCoutPointer((ConstSTO)s);
+		  }
 		  else{
 		    this.coutStrings.addElement(new ConstSTO(str));
 		    myAsWriter.writeCout(m_symtab.getFunc().getName(), coutStrings.size(),str);	    

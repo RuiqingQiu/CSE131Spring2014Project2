@@ -1262,12 +1262,23 @@ public class AssemblyCodeGenerator {
    		  template += indentString() + "ld\t[%l0], %l0\n";
    	  	}
    	  	template += indentString() + "ld\t[%l0], %l0\n";
-         template += indentString() + "set\t.intFmt, %o0\n";
-         template += indentString() + "mov\t%l0, %o1\n";
-         template += indentString() + "call\tprintf\n";
-         template += indentString() + "nop\n\n";
+        template += indentString() + "set\t.intFmt, %o0\n";
+        template += indentString() + "mov\t%l0, %o1\n";
+        template += indentString() + "call\tprintf\n";
+        template += indentString() + "nop\n\n";
          
-         flush(template);
+        flush(template);
+    }
+    
+    public void writeConstCoutPointer(ConstSTO s){
+    	String template = "";
+        template += indentString() + "set\t" + s.getIntValue() + ", %l0\n";
+        template += indentString() + "set\t.intFmt, %o0\n";
+        template += indentString() + "mov\t%l0, %o1\n";
+        template += indentString() + "call\tprintf\n";
+        template += indentString() + "nop\n\n";
+         
+        flush(template);
     }
     
    
