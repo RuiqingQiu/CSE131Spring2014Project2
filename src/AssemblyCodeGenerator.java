@@ -360,7 +360,7 @@ public class AssemblyCodeGenerator {
 	    template += "! Local variable, offset: " + sto.getOffset() + " base: " + sto.getBase() + "\n";
       }
       else{
-    	flush("! init variable: " + sto.getName() + "\n");
+    	flush("! init variable: " + sto.getName() + ", offset: " + sto.getOffset() + "\n");
 	    if(sto.getInit().isConst())
 	    {
 	      if(sto.getType().isInt()){
@@ -479,7 +479,8 @@ public class AssemblyCodeGenerator {
 	        template += indentString() + "st\t" + "%l1, [%l0]\n\n";
 	        
 	    }
-	    else if(sto.getInit().isExpr()){
+	    else if(sto.getInit().isExpr())
+	    {
 	      flush("! init is an expression\n");
 	      STO init = sto.getInit();
 	      flush(template);
