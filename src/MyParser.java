@@ -337,7 +337,7 @@ class MyParser extends parser
 			    //if is a ConstSTO of type bool
 				if(((ConstSTO)target).getBoolValue()){
 				   //if true
-					ConstSTO tmp = new ConstSTO("type cast");
+					ConstSTO tmp = new ConstSTO("type_cast");
 					tmp.setType(castToType.clone());
 					tmp.setIsAddressable(false);
 					tmp.setIsModifiable(false);
@@ -345,7 +345,7 @@ class MyParser extends parser
 					return tmp;
 			    }else{
 			    	//if is false
-			    	ConstSTO tmp = new ConstSTO("type cast");
+			    	ConstSTO tmp = new ConstSTO("type_cast");
 					tmp.setType(castToType.clone());
 					tmp.setValue(0.0);
 					tmp.setIsAddressable(false);
@@ -357,7 +357,7 @@ class MyParser extends parser
 			else if((target.getType().isInt() || target.getType().isFloat() || target.getType().isPointer()) && castToType.isBool()){
 				  if(((ConstSTO)target).getValue() == 0.0){
 				  	//if equals to 0
-				  	ConstSTO tmp = new ConstSTO("type cast");
+				  	ConstSTO tmp = new ConstSTO("type_cast");
 				  	tmp.setType(castToType.clone());
 				  	tmp.setValue(0.0);
 				  	tmp.setIsAddressable(false);
@@ -366,7 +366,7 @@ class MyParser extends parser
 				  }
 				  else{
 				  	//if equals to 1
-				  		ConstSTO tmp = new ConstSTO("type cast");
+				  		ConstSTO tmp = new ConstSTO("type_cast");
 				  		tmp.setType(castToType.clone());
 				  		tmp.setValue(1.0);
 				  		tmp.setIsAddressable(false);
@@ -377,7 +377,7 @@ class MyParser extends parser
 			//else if want to cast a float to int or pointer type
 			//float --> int or pointer
 			else if (target.getType().isFloat() &&(castToType.isInt() || castToType.isPointer())){
-				ConstSTO tmp = new ConstSTO("type cast");
+				ConstSTO tmp = new ConstSTO("type_cast");
 			  	tmp.setType(castToType.clone());
 			  	tmp.setValue(((ConstSTO)target).getIntValue());
 			  	tmp.setIsAddressable(false);
@@ -386,7 +386,7 @@ class MyParser extends parser
 			}
 			//int or pointer --> float
 			else if(castToType.isFloat() &&(target.getType().isInt() || target.getType().isPointer())){
-				ConstSTO tmp = new ConstSTO("type cast");
+				ConstSTO tmp = new ConstSTO("type_cast");
 			  	tmp.setType(castToType.clone());
 			  	tmp.setValue(((ConstSTO)target).getIntValue());
 			  	tmp.setIsAddressable(false);
@@ -400,7 +400,7 @@ class MyParser extends parser
 			}
 			// int <----> pointer
 			else{
-				ConstSTO tmp = new ConstSTO("type cast");
+				ConstSTO tmp = new ConstSTO("type_cast");
 			  	tmp.setType(castToType.clone());
 			  	//No change in value
 			  	tmp.setValue(((ConstSTO)target).getValue());
@@ -416,7 +416,7 @@ class MyParser extends parser
 		}
 		//If not, return ExprSTO with type t
 		else{
-			ExprSTO sto = new ExprSTO("type cast", castToType.clone());
+			ExprSTO sto = new ExprSTO("type_cast", castToType.clone());
 			sto.setIsAddressable(false);
 			sto.setIsModifiable(false);
 			m_symtab.addBytes(4);
@@ -599,8 +599,9 @@ class MyParser extends parser
 				globalCounter++;
 			    myAsWriter.writeStatic(sto, label);
 			  }
-			  else
+			  else{
 		  	    myAsWriter.writeGlobal(sto); 
+			  }
 			}
 			//Local variable
 			else{

@@ -190,7 +190,11 @@ public class AssemblyCodeGenerator {
 	    	  template += ((ConstSTO)tmp.getInit()).getIntValue() + "\n\n"; 
 	      }
 	      else if(tmp.getType().isFuncPointer()){
-	    	  template += tmp.getOffset() + ":" + SEPARATOR + ".word " + tmp.getInit().getName() + "\n\n";
+	    	  if(tmp.getInit().getType().isNullPointer()){
+		    	  template += tmp.getOffset() + ":" + SEPARATOR + ".word 0\n\n";
+	    	  }
+	    	  else
+	    		  template += tmp.getOffset() + ":" + SEPARATOR + ".word " + tmp.getInit().getName() + "\n\n";
 	      }
         }
         //No init
@@ -201,6 +205,7 @@ public class AssemblyCodeGenerator {
       }
       else if(variable.isConst()){
 	    ConstSTO tmp = (ConstSTO)variable;
+	    
 	    template += indentString() + ".section \".data\"\n";
 	    if(tmp.getType().isInt() || tmp.getType().isBool()){
           template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
@@ -214,6 +219,10 @@ public class AssemblyCodeGenerator {
 	      template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
 	      template += tmp.getIntValue() + "\n\n"; 
 	    }
+	    else if(tmp.getType().isPointer()){
+		      template += tmp.getOffset() + ":" + SEPARATOR + ".word ";
+		      template += tmp.getIntValue() + "\n\n"; 
+		}
       }
       template += indentString() + ".section \".text\"\n";
       template += writeAlignment(4);
